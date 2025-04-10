@@ -36,9 +36,10 @@ const (
 )
 
 type Token struct {
-	Kind TokenKind
-	Next *Token
-	Val  string
+	Kind      TokenKind
+	ChildKind TokenKind // NOTE: use a different Kind Struct?
+	Next      *Token
+	Val       string
 }
 
 func (tok *Token) IsKindAndVal(kind string, val string) bool {

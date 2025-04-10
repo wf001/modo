@@ -101,6 +101,11 @@ func accurateNilType(head *mTypes.Token) {
 	}
 
 }
+func setSubKind(head *mTypes.Token) {
+	for t := head.Next; t.Next != nil; t = t.Next {
+	}
+
+}
 
 func splitString(expr string) []string {
 	re := regexp.MustCompile(mTypes.STRING_REG_EXP)
@@ -124,6 +129,17 @@ func doLexicalAnalyse(splittedString []string) *mTypes.Token {
 	for _, p := range splittedString {
 		if tokenType, matched := tokenMap.matchTokenType(p); matched {
 			prev = newToken(tokenType, prev, p)
+			// when token is vector, set element type of the vector
+			if prev.IsKind(mTypes.TK_TYPE_VECTOR) {
+				re := regexp.MustCompile(`\[(\w+)\]`)
+				matches := re.FindAllStringSubmatch(prev.Val, -1)
+
+				for _, match := range matches {
+					if tokenType, matched := tokenMap.matchTokenType(match[1]); matched {
+						prev.ChildKind = tokenType
+					}
+				}
+			}
 		} else {
 			log.Debug("regard '%+v' as variable declaration or reference symbol", p)
 			prev = newToken(mTypes.TK_IDENT, prev, p)
@@ -131,6 +147,7 @@ func doLexicalAnalyse(splittedString []string) *mTypes.Token {
 	}
 	trimQuote(head)
 	accurateNilType(head)
+	setSubKind(head)
 
 	head = head.Next
 	head.DebugTokens()

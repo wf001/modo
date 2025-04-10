@@ -1,8 +1,13 @@
 # modo
 
-**modo**(call /ˈmoʊ.doʊ/, same as mode) is a statically typed, functional programming language inspired by **Clojure** and **Haskell**, designed with simplicity and clarity in mind. It uses LLVM as a backend, allowing high-performance native code generation.
+**modo** (pronounced the same as "mode") is a statically typed, functional programming language inspired by Clojure and Haskell. 
 
----
+Designed with simplicity and clarity in mind, it embraces the principles that,
+- Explicit is better than implicit 
+- there should be one — and preferably only one — obvious way to do it. 
+
+modo uses LLVM as its backend, enabling high-performance native code generation.
+
 
 ## ✨ Features
 - **Functional-first** language design
@@ -10,7 +15,6 @@
 - **Minimal, clean syntax** inspired by Clojure
 - **LLVM backend** for native code generation
 
----
 
 ## 📦 Example: FizzBuzz in modo
 
@@ -41,7 +45,7 @@ To install modo, follow these steps:
 (TBD)
 
 ## 📚 Documentation
-For detailed documentation, visit here.
+(TBD)
 
 ## 🚧 TODO
  - [ ] Support for Float type

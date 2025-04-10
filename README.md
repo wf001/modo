@@ -1,27 +1,55 @@
 # modo
 
-**modo** is a simple and easy-to-understand functional programming language named after the Latin word for "method." It is designed to be intuitive for developers, drawing inspiration from Clojure's syntax. modo utilizes LLVM to achieve high performance and efficient compilation.
+**modo**(call /ˈmoʊ.doʊ/, same as mode) is a statically typed, functional programming language inspired by **Clojure** and **Haskell**, designed with simplicity and clarity in mind. It uses LLVM as a backend, allowing high-performance native code generation.
 
-## Features
+---
 
-- **Concise Syntax**: modo provides a readable and succinct syntax. Influenced by Clojure, developers can quickly get started with minimal learning curve.
-  
-- **Functional Programming**: modo centers around the functional programming paradigm, supporting immutability and higher-order functions.
+## ✨ Features
+- **Functional-first** language design
+- **Static type system** inspired by Haskell
+- **Minimal, clean syntax** inspired by Clojure
+- **LLVM backend** for native code generation
 
-- **LLVM Support**: By leveraging LLVM, modo enables efficient code generation and optimization, resulting in fast execution speeds and cross-platform compatibility.
+---
 
-## Installation
+## 📦 Example: FizzBuzz in modo
+
+``` clojure
+(def fizzbuzz :: int => int => nil
+  (fn [n max] 
+    (let [fizz ::int 3
+          buzz ::int 5]
+      (if (= n max)
+        nil
+        (if (= 0 (mod n (* fizz buzz)))
+          (prn "FizzBuzz")
+          (if (= 0 (mod n fizz))
+            (prn "Fizz")
+            (if (= 0 (mod n buzz))
+              (prn "Buzz")
+              (prn n))))))
+      (fizzbuzz (+ 1 n) max))))
+
+(def main :: int
+  (fn []
+    (fizzbuzz 1 20)))
+
+```
+
+## 🛠️ Installation
 To install modo, follow these steps:
 (TBD)
 
-## Basic Usage
-Here’s an example of modo's basic syntax:
-
-## Documentation
+## 📚 Documentation
 For detailed documentation, visit here.
 
-## Contributing
-Contributions to modo are welcome! Feel free to report bugs, suggest features, or submit pull requests.
+## 🚧 TODO
+ - [ ] Support for Float type
+ - [ ] Support for Vectors (flexible-length arrays)
+ - [ ] Support for Structs (custom compound types)
+ 
+## 🤝 Contributing
+(TBD)
 
-## License
+## 📄 License
 modo is provided under the MIT License.

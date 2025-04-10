@@ -173,6 +173,7 @@ func (ctx *context) genVarReference(node *mTypes.Node) value.Value {
 
 			} else if scope.Child.IsType(mTypes.TY_VECTOR) {
 				node.Type = mTypes.TY_VECTOR
+				node.Len = scope.Child.Len
 				return scope.VarPtr
 
 			} else {
@@ -411,6 +412,8 @@ func (ctx *context) gen(node *mTypes.Node) value.Value {
 			vec = ctx.block.NewInsertElement(vec, e.IRValue, constant.NewInt(types.I32, vecIdx))
 			vecIdx++
 		}
+		// cannot get the number of LLVM's scalable vectors (<vscale x N x T> directly, thus, count vector size manually
+		node.Len = uint64(vecIdx)
 		node.IRValue = vec
 		return vec
 

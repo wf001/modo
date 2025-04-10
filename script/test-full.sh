@@ -157,6 +157,10 @@ testexec(){
   # loop
   echo "== loop ==="
   assertexec '(def f ::int => nil (fn [a] (prn a) (if (= 3 a) nil (f (+ a 1))))) (def main ::int (fn [] (f 1))))' "1\\\n2\\\n3\\\n"
+
+  # vector
+  echo "== vector ==="
+  assertexec '(def main :: int (fn [] (let [vec :: [int] [41, 28, 239]] (prn vec))))'  "[41, 28, 239]\\\n"
 }
 
 build-compiler

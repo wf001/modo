@@ -71,13 +71,16 @@ type BuiltinProp struct {
 
 // HACK: should remove llir/ir reference from this namespace
 type BuiltinGlobalVarsProp struct {
-	FormatDigit *ir.Global
-	FormatStr   *ir.Global
-	FormatSpace *ir.Global
-	FormatCR    *ir.Global
-	TrueValue   *ir.Global
-	FalseValue  *ir.Global
-	NilValue    *ir.Global
+	FormatDigit        *ir.Global
+	FormatStr          *ir.Global
+	FormatSpace        *ir.Global
+	FormatCR           *ir.Global
+	TrueValue          *ir.Global
+	FalseValue         *ir.Global
+	NilValue           *ir.Global
+	FormatBracketOpen  *ir.Global
+	FormatBracketClose *ir.Global
+	FormatComma        *ir.Global
 }
 
 type Node struct {

@@ -10,36 +10,65 @@ import (
 	mTypes "github.com/wf001/modo/pkg/types"
 )
 
+func PrnSchalar(
+	formatStr *ir.Global,
+	libs *mTypes.BuiltinLibProp,
+	block *ir.Block,
+	n *mTypes.Node,
+) {
+	value := n.IRValue
+	ty := n.IRValue.Type()
+	if ty.Equal(types.I32) {
+		formatStr = libs.GlobalVar.FormatDigit
+
+	} else if ty.Equal(types.I1) {
+		formatStr = libs.GlobalVar.FormatStr
+		value = block.NewSelect(n.IRValue, libs.GlobalVar.TrueValue, libs.GlobalVar.FalseValue)
+
+	} else if ty.Equal(types.I8Ptr) {
+		formatStr = libs.GlobalVar.FormatStr
+
+	} else if ty.Equal(types.Void) {
+		formatStr = libs.GlobalVar.FormatStr
+		value = libs.GlobalVar.NilValue
+	}
+	block.NewCall(libs.Printf.FuncPtr, formatStr, value)
+}
+
+func PrnVector(libs *mTypes.BuiltinLibProp, block *ir.Block, n *mTypes.Node, t types.Type) {
+	value := n.IRValue
+	formatStr := libs.GlobalVar.FormatDigit
+
+	block.NewCall(libs.Printf.FuncPtr, libs.GlobalVar.FormatBracketOpen)
+	for i := uint64(0); i < uint64(n.Len); i++ {
+		v := block.NewExtractElement(value, constant.NewInt(types.I32, int64(i)))
+		block.NewCall(libs.Printf.FuncPtr, formatStr, v)
+		if i < uint64(n.Len-1) {
+			block.NewCall(libs.Printf.FuncPtr, libs.GlobalVar.FormatComma)
+			block.NewCall(libs.Printf.FuncPtr, libs.GlobalVar.FormatSpace)
+		}
+	}
+	block.NewCall(libs.Printf.FuncPtr, libs.GlobalVar.FormatBracketClose)
+}
+
 func InvokePrn(block *ir.Block, libs *mTypes.BuiltinLibProp, node *mTypes.Node) value.Value {
 	var formatStr *ir.Global
 
 	for n := node; n != nil; n = n.Next {
-		value := n.IRValue
 		ty := n.IRValue.Type()
 
-		if ty.Equal(types.I32) {
-			formatStr = libs.GlobalVar.FormatDigit
+		if ty.Equal(types.I32) ||
+			ty.Equal(types.I1) ||
+			ty.Equal(types.I8Ptr) ||
+			ty.Equal(types.Void) {
+			PrnSchalar(formatStr, libs, block, n)
 
-		} else if ty.Equal(types.I1) {
-			formatStr = libs.GlobalVar.FormatStr
-			value = block.NewSelect(n.IRValue, libs.GlobalVar.TrueValue, libs.GlobalVar.FalseValue)
-
-		} else if ty.Equal(types.I8Ptr) {
-			formatStr = libs.GlobalVar.FormatStr
-
-		} else if _, ok := ty.(*types.VectorType); ok {
-			formatStr = libs.GlobalVar.FormatDigit
-			elem := block.NewExtractElement(value, constant.NewInt(types.I32, int64(1)))
-			value = block.NewAdd(constant.NewInt(types.I32, 0), elem)
-
-		} else if ty.Equal(types.Void) {
-			formatStr = libs.GlobalVar.FormatStr
-			value = libs.GlobalVar.NilValue
+		} else if t, ok := ty.(*types.VectorType); ok {
+			PrnVector(libs, block, n, t)
 
 		} else {
 			log.Panic("unresolved type: have %+v", n)
 		}
-		block.NewCall(libs.Printf.FuncPtr, formatStr, value)
 
 		if n.Next == nil {
 			block.NewCall(libs.Printf.FuncPtr, libs.GlobalVar.FormatCR)

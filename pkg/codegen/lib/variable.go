@@ -38,6 +38,18 @@ func declareVariable(ir *ir.Module, libs *mTypes.BuiltinLibProp) {
 		"value.nil",
 		constant.NewCharArrayFromString("nil\x00"),
 	)
+	globalVars.FormatBracketOpen = ir.NewGlobalDef(
+		"format.bracket.open",
+		constant.NewCharArrayFromString("[\x00"),
+	)
+	globalVars.FormatBracketClose = ir.NewGlobalDef(
+		"format.bracket.close",
+		constant.NewCharArrayFromString("]\x00"),
+	)
+	globalVars.FormatComma = ir.NewGlobalDef(
+		"format.comma",
+		constant.NewCharArrayFromString(",\x00"),
+	)
 
 	libs.GlobalVar = globalVars
 

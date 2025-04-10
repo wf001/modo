@@ -2,6 +2,7 @@ package core
 
 import (
 	"github.com/llir/llvm/ir"
+	"github.com/llir/llvm/ir/constant"
 	"github.com/llir/llvm/ir/types"
 	"github.com/llir/llvm/ir/value"
 
@@ -25,6 +26,11 @@ func InvokePrn(block *ir.Block, libs *mTypes.BuiltinLibProp, node *mTypes.Node) 
 
 		} else if ty.Equal(types.I8Ptr) {
 			formatStr = libs.GlobalVar.FormatStr
+
+		} else if _, ok := ty.(*types.VectorType); ok {
+			formatStr = libs.GlobalVar.FormatDigit
+			elem := block.NewExtractElement(value, constant.NewInt(types.I32, int64(1)))
+			value = block.NewAdd(constant.NewInt(types.I32, 0), elem)
 
 		} else if ty.Equal(types.Void) {
 			formatStr = libs.GlobalVar.FormatStr

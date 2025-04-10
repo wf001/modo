@@ -411,6 +411,8 @@ func (ctx *context) gen(node *mTypes.Node) value.Value {
 			vec = ctx.block.NewInsertElement(vec, e.IRValue, constant.NewInt(types.I32, vecIdx))
 			vecIdx++
 		}
+		node.IRValue = vec
+		return vec
 
 	} else {
 		log.Panic("unresolved Nodekind: have %+v", node)

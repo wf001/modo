@@ -55,15 +55,17 @@ func (tok *Token) IsKindType() bool {
 		tok.IsKind(TK_TYPE_INT) ||
 		tok.IsKind(TK_TYPE_STR) ||
 		tok.IsKind(TK_TYPE_NIL) ||
-		tok.IsKind(TK_TYPE_BOOL)
+		tok.IsKind(TK_TYPE_BOOL) ||
+		tok.IsKind(TK_TYPE_VECTOR)
 }
 
 func (tok Token) MatchedType() (ModoType, bool) {
 	var typeMap = map[string]ModoType{
-		TK_TYPE_INT:  TY_INT32,
-		TK_TYPE_STR:  TY_STR,
-		TK_TYPE_NIL:  TY_NIL,
-		TK_TYPE_BOOL: TY_BOOL,
+		TK_TYPE_INT:    TY_INT32,
+		TK_TYPE_STR:    TY_STR,
+		TK_TYPE_NIL:    TY_NIL,
+		TK_TYPE_BOOL:   TY_BOOL,
+		TK_TYPE_VECTOR: TY_VECTOR,
 	}
 
 	if kind, exists := typeMap[tok.Kind]; exists {

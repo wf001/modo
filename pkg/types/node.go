@@ -34,11 +34,13 @@ const (
 
 type ModoType string
 
+// Note: what for?
 const (
-	TY_INT32 = ModoType("TY_INT32")
-	TY_STR   = ModoType("TY_STR")
-	TY_NIL   = ModoType("TY_NIL")
-	TY_BOOL  = ModoType("TY_BOOL")
+	TY_INT32  = ModoType("TY_INT32")
+	TY_STR    = ModoType("TY_STR")
+	TY_NIL    = ModoType("TY_NIL")
+	TY_BOOL   = ModoType("TY_BOOL")
+	TY_VECTOR = ModoType("TY_VECTOR")
 )
 
 // NOTE: must improve

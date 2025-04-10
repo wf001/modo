@@ -23,6 +23,15 @@ func newNodeScalar(ty mTypes.ModoType, val string) *mTypes.Node {
 	}
 }
 
+// func newNodeVector(element mTypes.Token) (*mTypes.Token, *mTypes.Node) {
+// 	rootNode := &mTypes.Node{
+// 		Kind: mTypes.ND_COLLECTION,
+// 		Type: mTypes.TY_VECTOR,
+// 	}
+// 	tok := element
+// 	return tok, rootNode
+// }
+
 func parseExprs(
 	rootToken *mTypes.Token,
 	exprKind mTypes.NodeKind,
@@ -243,6 +252,9 @@ func parseDeclare(tok *mTypes.Token, parentKind mTypes.NodeKind) (*mTypes.Token,
 		strNode := newNodeScalar(mTypes.TY_STR, tok.Val)
 		strNode.Len = uint64(len(tok.Val))
 		return tok.Next, strNode
+
+	} else if tok.IsKind(mTypes.TK_PAREN) {
+		return parseBody(tok, mTypes.ND_COLLECTION, "vector")
 
 	} else {
 		log.Panic("unresolved token :have %+v", tok)

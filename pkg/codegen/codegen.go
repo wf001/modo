@@ -171,6 +171,10 @@ func (ctx *context) genVarReference(node *mTypes.Node) value.Value {
 				node.Type = mTypes.TY_BOOL
 				return scope.VarPtr
 
+			} else if scope.Child.IsType(mTypes.TY_VECTOR) {
+				node.Type = mTypes.TY_VECTOR
+				return scope.VarPtr
+
 			} else {
 				log.Panic("unresolved NodeType: have %+v", node)
 			}
@@ -330,6 +334,9 @@ func (ctx *context) gen(node *mTypes.Node) value.Value {
 			} else if bind.IsType(mTypes.TY_BOOL) {
 				bind.VarPtr = child
 
+			} else if bind.IsType(mTypes.TY_VECTOR) {
+				bind.VarPtr = child
+
 			} else {
 				log.Panic("unresolved NodeType: have %+v", node)
 			}
@@ -390,6 +397,19 @@ func (ctx *context) gen(node *mTypes.Node) value.Value {
 
 		} else {
 			log.Panic("unresolved Scalar: have %+v", node)
+		}
+	} else if node.IsKind(mTypes.ND_COLLECTION) {
+		ty := node.Child.GetLLVMType()
+		scalableVecType := types.NewVector(1, ty)
+		scalableVecType.Scalable = true
+		var vec value.Value = ctx.block.NewBitCast(constant.NewZeroInitializer(scalableVecType), scalableVecType)
+		// NOTE: true?
+		var vecIdx int64 = 0
+
+		for e := node.Child; e != nil; e = e.Next {
+			e.IRValue = ctx.gen(e)
+			vec = ctx.block.NewInsertElement(vec, e.IRValue, constant.NewInt(types.I32, vecIdx))
+			vecIdx++
 		}
 
 	} else {

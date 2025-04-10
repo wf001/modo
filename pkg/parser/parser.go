@@ -253,8 +253,15 @@ func parseDeclare(tok *mTypes.Token, parentKind mTypes.NodeKind) (*mTypes.Token,
 		strNode.Len = uint64(len(tok.Val))
 		return tok.Next, strNode
 
-	} else if tok.IsKind(mTypes.TK_PAREN) {
-		return parseBody(tok, mTypes.ND_COLLECTION, "vector")
+		// means vector value
+	} else if tok.IsKindAndVal(mTypes.TK_PAREN, mTypes.BRACKET_OPEN) {
+		tok, rootNode := parseBody(tok, mTypes.ND_COLLECTION, "")
+		if !tok.IsKindAndVal(mTypes.TK_PAREN, mTypes.BRACKET_CLOSE) {
+			log.Panic("vector must be closed with bracket :have %+v", tok)
+		}
+		tok = tok.Next
+		rootNode.Type = mTypes.TY_VECTOR
+		return tok, rootNode
 
 	} else {
 		log.Panic("unresolved token :have %+v", tok)

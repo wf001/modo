@@ -12,6 +12,7 @@ var LibInsts = map[string]func(*ir.Block, *mTypes.BuiltinLibProp, *mTypes.Node) 
 	mTypes.LIB_CORE_GET:   InvokeGet,
 	mTypes.LIB_CORE_CONJ:  InvokeConj,
 	mTypes.LIB_CORE_ASSOC: InvokeAssoc,
+	mTypes.LIB_CORE_POP:   InvokePop,
 	// nary
 	mTypes.OPERATOR_ADD: InvokeAdd,
 	mTypes.OPERATOR_SUB: InvokeSub,

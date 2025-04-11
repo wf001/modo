@@ -10,32 +10,41 @@ import (
 	mTypes "github.com/wf001/modo/pkg/types"
 )
 
+func getPrintFormat(ty types.Type, libs *mTypes.BuiltinLibProp) *ir.Global {
+
+	if ty.Equal(types.I32) {
+		return libs.GlobalVar.FormatDigit
+
+	} else if ty.Equal(types.I1) {
+		return libs.GlobalVar.FormatStr
+
+	} else if ty.Equal(types.I8Ptr) {
+		return libs.GlobalVar.FormatStr
+
+	} else if ty.Equal(types.Void) {
+		return libs.GlobalVar.FormatStr
+	}
+	return nil
+}
+
 func PrnScalar(
-	formatStr *ir.Global,
 	libs *mTypes.BuiltinLibProp,
 	block *ir.Block,
 	n *mTypes.Node,
 ) {
 	value := n.IRValue
 	ty := n.IRValue.Type()
-	if ty.Equal(types.I32) {
-		formatStr = libs.GlobalVar.FormatDigit
+	formatStr := getPrintFormat(ty, libs)
 
-	} else if ty.Equal(types.I1) {
-		formatStr = libs.GlobalVar.FormatStr
+	if ty.Equal(types.I1) {
 		value = block.NewSelect(n.IRValue, libs.GlobalVar.TrueValue, libs.GlobalVar.FalseValue)
-
-	} else if ty.Equal(types.I8Ptr) {
-		formatStr = libs.GlobalVar.FormatStr
-
 	} else if ty.Equal(types.Void) {
-		formatStr = libs.GlobalVar.FormatStr
 		value = libs.GlobalVar.NilValue
 	}
 	block.NewCall(libs.Printf.FuncPtr, formatStr, value)
 }
 
-func PrnVector(libs *mTypes.BuiltinLibProp, block *ir.Block, n *mTypes.Node, t types.Type) {
+func PrnVector(libs *mTypes.BuiltinLibProp, block *ir.Block, n *mTypes.Node) {
 	value, ok := n.IRValue.(*ir.InstAlloca)
 	if !ok {
 		log.Panic("Array elements must be ir.InstAlloca: have %+v", value)
@@ -62,8 +71,6 @@ func PrnVector(libs *mTypes.BuiltinLibProp, block *ir.Block, n *mTypes.Node, t t
 }
 
 func InvokePrn(block *ir.Block, libs *mTypes.BuiltinLibProp, node *mTypes.Node) value.Value {
-	var formatStr *ir.Global
-
 	for n := node; n != nil; n = n.Next {
 		ty := n.IRValue.Type()
 
@@ -71,10 +78,10 @@ func InvokePrn(block *ir.Block, libs *mTypes.BuiltinLibProp, node *mTypes.Node) 
 			ty.Equal(types.I1) ||
 			ty.Equal(types.I8Ptr) ||
 			ty.Equal(types.Void) {
-			PrnScalar(formatStr, libs, block, n)
+			PrnScalar(libs, block, n)
 
-		} else if t, ok := ty.(*types.PointerType); ok {
-			PrnVector(libs, block, n, t)
+		} else if _, ok := ty.(*types.PointerType); ok {
+			PrnVector(libs, block, n)
 
 		} else {
 			log.Panic("unresolved type: have %+v", n)

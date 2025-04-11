@@ -10,7 +10,6 @@ import (
 )
 
 func InvokeGet(block *ir.Block, libs *mTypes.BuiltinLibProp, node *mTypes.Node) value.Value {
-	var formatStr *ir.Global
 
 	for n := node; n != nil; n = n.Next {
 		ty := n.IRValue.Type()
@@ -19,10 +18,10 @@ func InvokeGet(block *ir.Block, libs *mTypes.BuiltinLibProp, node *mTypes.Node) 
 			ty.Equal(types.I1) ||
 			ty.Equal(types.I8Ptr) ||
 			ty.Equal(types.Void) {
-			PrnScalar(formatStr, libs, block, n)
+			PrnScalar(libs, block, n)
 
-		} else if t, ok := ty.(*types.VectorType); ok {
-			PrnVector(libs, block, n, t)
+		} else if _, ok := ty.(*types.VectorType); ok {
+			PrnVector(libs, block, n)
 
 		} else {
 			log.Panic("unresolved type: have %+v", n)

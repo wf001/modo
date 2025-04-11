@@ -17,7 +17,7 @@ func prnScalar(
 ) {
 	value := n.IRValue
 	ty := n.IRValue.Type()
-	formatStr := mTypes.GetPrintFormat(ty, libs)
+	formatStr, _ := mTypes.GetPrintFormat(ty, libs)
 
 	if ty.Equal(types.I1) {
 		value = block.NewSelect(n.IRValue, libs.GlobalVar.TrueValue, libs.GlobalVar.FalseValue)
@@ -44,7 +44,7 @@ func prnVector(libs *mTypes.BuiltinLibProp, block *ir.Block, n *mTypes.Node) {
 			constant.NewInt(types.I32, int64(i)),
 		)
 		elem := block.NewLoad(types.I32, elemPtr)
-		formatStr := mTypes.GetPrintFormat(elem.ElemType, libs)
+		formatStr, _ := mTypes.GetPrintFormat(elem.ElemType, libs)
 		// NOTE: format may be changable
 		block.NewCall(libs.Printf.FuncPtr, formatStr, elem)
 

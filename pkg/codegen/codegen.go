@@ -30,13 +30,6 @@ type context struct {
 	argument *mTypes.Node
 }
 
-func isConstant(v value.Value) bool {
-	_, isStr := v.(*ir.InstLoad)
-	isInt := v.Type().Equal(types.I32)
-	isBool := v.Type().Equal(types.I1)
-	return isStr || isInt || isBool
-}
-
 func newBool(s string) *constant.Int {
 	i, err := strconv.ParseInt(s, 2, 2)
 	if err != nil {
@@ -247,7 +240,7 @@ func (ctx *context) genBranch(
 	retType := ctx.function.Sig.RetType
 	isVoid := retType.Equal(types.Void)
 
-	if res != nil && isConstant(res) {
+	if res != nil && mTypes.IsScalar(res) {
 		if retType.Equal(types.Void) {
 			ctx.block.NewRet(nil)
 		} else {

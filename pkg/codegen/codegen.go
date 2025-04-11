@@ -401,21 +401,33 @@ func (ctx *context) gen(node *mTypes.Node) value.Value {
 		}
 	} else if node.IsKind(mTypes.ND_COLLECTION) {
 		ty := node.Child.GetLLVMType()
-		scalableVecType := types.NewVector(1, ty)
-		scalableVecType.Scalable = true
-		var vec value.Value = ctx.block.NewBitCast(constant.NewZeroInitializer(scalableVecType), scalableVecType)
 		// NOTE: true?
-		var vecIdx int64 = 0
+		var arrIdx int64 = 0
+
+		arrContent := []constant.Constant{}
 
 		for e := node.Child; e != nil; e = e.Next {
 			e.IRValue = ctx.gen(e)
-			vec = ctx.block.NewInsertElement(vec, e.IRValue, constant.NewInt(types.I32, vecIdx))
-			vecIdx++
+			c, ok := e.IRValue.(constant.Constant)
+			if !ok {
+				log.Panic("Each array element must be constant.Constant: have %+v", e.IRValue)
+			}
+			arrContent = append(arrContent, c)
+			arrIdx++
 		}
-		// cannot get the number of LLVM's scalable vectors (<vscale x N x T> directly, thus, count vector size manually
-		node.Len = uint64(vecIdx)
-		node.IRValue = vec
-		return vec
+
+		arrType := types.NewArray(uint64(arrIdx), ty)
+		var arr value.Value = ctx.block.NewAlloca(arrType)
+		ctx.block.NewStore(
+			constant.NewArray(
+				arrType,
+				arrContent...,
+			),
+			arr,
+		)
+		node.Len = uint64(arrIdx)
+		node.IRValue = arr
+		return arr
 
 	} else {
 		log.Panic("unresolved Nodekind: have %+v", node)

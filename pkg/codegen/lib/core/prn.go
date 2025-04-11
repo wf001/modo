@@ -36,13 +36,23 @@ func PrnSchalar(
 }
 
 func PrnVector(libs *mTypes.BuiltinLibProp, block *ir.Block, n *mTypes.Node, t types.Type) {
-	value := n.IRValue
-	formatStr := libs.GlobalVar.FormatDigit
+	value, ok := n.IRValue.(*ir.InstAlloca)
+	if !ok {
+		log.Panic("Array elements must be ir.InstAlloca: have %+v", value)
+	}
 
 	block.NewCall(libs.Printf.FuncPtr, libs.GlobalVar.FormatBracketOpen)
 	for i := uint64(0); i < uint64(n.Len); i++ {
-		v := block.NewExtractElement(value, constant.NewInt(types.I32, int64(i)))
-		block.NewCall(libs.Printf.FuncPtr, formatStr, v)
+		elemPtr := block.NewGetElementPtr(
+			value.ElemType,
+			value,
+			constant.NewInt(types.I32, 0),
+			constant.NewInt(types.I32, int64(i)),
+		)
+		elem := block.NewLoad(types.I32, elemPtr)
+		// NOTE: format may be changable
+		block.NewCall(libs.Printf.FuncPtr, libs.GlobalVar.FormatDigit, elem)
+
 		if i < uint64(n.Len-1) {
 			block.NewCall(libs.Printf.FuncPtr, libs.GlobalVar.FormatComma)
 			block.NewCall(libs.Printf.FuncPtr, libs.GlobalVar.FormatSpace)
@@ -63,7 +73,7 @@ func InvokePrn(block *ir.Block, libs *mTypes.BuiltinLibProp, node *mTypes.Node) 
 			ty.Equal(types.Void) {
 			PrnSchalar(formatStr, libs, block, n)
 
-		} else if t, ok := ty.(*types.VectorType); ok {
+		} else if t, ok := ty.(*types.PointerType); ok {
 			PrnVector(libs, block, n, t)
 
 		} else {

@@ -9,6 +9,7 @@ import (
 
 var LibInsts = map[string]func(*ir.Block, *mTypes.BuiltinLibProp, *mTypes.Node) value.Value{
 	mTypes.LIB_CORE_PRN: InvokePrn,
+	mTypes.LIB_CORE_GET: InvokeGet,
 	// nary
 	mTypes.OPERATOR_ADD: InvokeAdd,
 	mTypes.OPERATOR_SUB: InvokeSub,

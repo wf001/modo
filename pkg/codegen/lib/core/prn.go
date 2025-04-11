@@ -43,9 +43,11 @@ func prnVector(libs *mTypes.BuiltinLibProp, block *ir.Block, n *mTypes.Node) {
 			constant.NewInt(types.I32, 0),
 			constant.NewInt(types.I32, int64(i)),
 		)
-		elem := block.NewLoad(types.I32, elemPtr)
+		// Arrayの要素の型取得
+		t := value.ElemType.(*types.ArrayType)
+		elem := block.NewLoad(t.ElemType, elemPtr)
+
 		formatStr, _ := mTypes.GetPrintFormat(elem.ElemType, libs)
-		// NOTE: format may be changable
 		block.NewCall(libs.Printf.FuncPtr, formatStr, elem)
 
 		if i < uint64(n.Len-1) {

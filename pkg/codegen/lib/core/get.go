@@ -1,7 +1,10 @@
 package core
 
 import (
+	"strconv"
+
 	"github.com/llir/llvm/ir"
+	"github.com/llir/llvm/ir/constant"
 	"github.com/llir/llvm/ir/types"
 	"github.com/llir/llvm/ir/value"
 
@@ -10,29 +13,25 @@ import (
 )
 
 func InvokeGet(block *ir.Block, libs *mTypes.BuiltinLibProp, node *mTypes.Node) value.Value {
-
-	for n := node; n != nil; n = n.Next {
-		ty := n.IRValue.Type()
-
-		if ty.Equal(types.I32) ||
-			ty.Equal(types.I1) ||
-			ty.Equal(types.I8Ptr) ||
-			ty.Equal(types.Void) {
-			prnScalar(libs, block, n)
-
-		} else if _, ok := ty.(*types.VectorType); ok {
-			prnVector(libs, block, n)
-
-		} else {
-			log.Panic("unresolved type: have %+v", n)
-		}
-
-		if n.Next == nil {
-			block.NewCall(libs.Printf.FuncPtr, libs.GlobalVar.FormatCR)
-		} else {
-			block.NewCall(libs.Printf.FuncPtr, libs.GlobalVar.FormatSpace)
-		}
-
+	value, ok := node.IRValue.(*ir.InstAlloca)
+	if !ok {
+		log.Panic("Array elements must be ir.InstAlloca: have %+v", value)
 	}
-	return nil
+
+	i, _ := strconv.ParseInt(node.Next.Val, 10, 32)
+	if i >= int64(node.Len) {
+		log.Panic("Array index out of range: have %d but array length %d", i, node.Len)
+	}
+	elemPtr := block.NewGetElementPtr(
+		value.ElemType,
+		value,
+		constant.NewInt(types.I32, 0),
+		constant.NewInt(types.I32, i),
+	)
+	// Arrayの要素の型取得
+	t := value.ElemType.(*types.ArrayType)
+	// NOTE: elem type changable
+	elem := block.NewLoad(t.ElemType, elemPtr)
+
+	return elem
 }

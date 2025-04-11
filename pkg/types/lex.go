@@ -73,7 +73,8 @@ var (
 
 	// Core library
 	LIB_CORE_PRN     = "prn"
-	LIB_CORE_REG_EXP = fmt.Sprintf("\\b(%s)\\b", LIB_CORE_PRN)
+	LIB_CORE_GET     = "get"
+	LIB_CORE_REG_EXP = fmt.Sprintf("\\b(%s|%s)\\b", LIB_CORE_PRN, LIB_CORE_GET)
 
 	// Type signature
 	SYMBOL_TYPE_SIG   = "::"

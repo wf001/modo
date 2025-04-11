@@ -161,6 +161,7 @@ testexec(){
   # vector
   echo "== vector ==="
   assertexec '(def main :: int (fn [] (let [vec :: [int] [41, 28, 239]] (prn vec))))'  "[41, 28, 239]\\\n"
+  assertexec '(def main :: int (fn [] (let [vec :: [int] [41, 28, 239]] (prn (get vec 1)))))'  "28\\\n"
 }
 
 build-compiler

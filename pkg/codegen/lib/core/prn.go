@@ -59,8 +59,9 @@ func PrnVector(libs *mTypes.BuiltinLibProp, block *ir.Block, n *mTypes.Node) {
 			constant.NewInt(types.I32, int64(i)),
 		)
 		elem := block.NewLoad(types.I32, elemPtr)
+		formatStr := getPrintFormat(elem.ElemType, libs)
 		// NOTE: format may be changable
-		block.NewCall(libs.Printf.FuncPtr, libs.GlobalVar.FormatDigit, elem)
+		block.NewCall(libs.Printf.FuncPtr, formatStr, elem)
 
 		if i < uint64(n.Len-1) {
 			block.NewCall(libs.Printf.FuncPtr, libs.GlobalVar.FormatComma)

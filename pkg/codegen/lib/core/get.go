@@ -17,9 +17,10 @@ func InvokeGet(block *ir.Block, libs *mTypes.BuiltinLibProp, node *mTypes.Node) 
 	if !ok {
 		log.Panic("Array elements must be ir.InstAlloca: have %+v", value)
 	}
+	t := value.ElemType.(*types.ArrayType)
 
 	i, _ := strconv.ParseInt(node.Next.Val, 10, 32)
-	if i >= int64(node.Len) {
+	if i >= int64(t.Len) {
 		log.Panic("Array index out of range: have %d but array length %d", i, node.Len)
 	}
 	elemPtr := block.NewGetElementPtr(
@@ -29,7 +30,6 @@ func InvokeGet(block *ir.Block, libs *mTypes.BuiltinLibProp, node *mTypes.Node) 
 		constant.NewInt(types.I32, i),
 	)
 	// Arrayの要素の型取得
-	t := value.ElemType.(*types.ArrayType)
 	// NOTE: elem type changable
 	elem := block.NewLoad(t.ElemType, elemPtr)
 

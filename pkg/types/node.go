@@ -94,7 +94,7 @@ type Node struct {
 	Then     *Node
 	Else     *Node
 	Val      string
-	Len      uint64 // the number of bytes, used with string and array
+	Len      uint64 // the number of bytes, used with string type
 	Bind     *Node
 	Args     *Node
 	VarPtr   value.Value // binded local variable

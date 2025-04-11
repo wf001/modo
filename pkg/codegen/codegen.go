@@ -409,7 +409,6 @@ func (ctx *context) gen(node *mTypes.Node) value.Value {
 			),
 			arr,
 		)
-		node.Len = uint64(arrIdx)
 		node.IRValue = arr
 		return arr
 

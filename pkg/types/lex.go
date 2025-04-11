@@ -75,11 +75,13 @@ var (
 	LIB_CORE_PRN     = "prn"
 	LIB_CORE_GET     = "get"
 	LIB_CORE_CONJ    = "conj"
+	LIB_CORE_ASSOC   = "assoc"
 	LIB_CORE_REG_EXP = fmt.Sprintf(
-		"\\b(%s|%s|%s)\\b",
+		"\\b(%s|%s|%s|%s)\\b",
 		LIB_CORE_PRN,
 		LIB_CORE_GET,
 		LIB_CORE_CONJ,
+		LIB_CORE_ASSOC,
 	)
 
 	// Type signature

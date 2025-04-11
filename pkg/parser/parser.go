@@ -83,6 +83,7 @@ func parseIdent(
 				}
 				ty, _ := tok.MatchedType()
 				typeCur.Type = ty
+				typeCur.ElemType, _ = tok.MatchedElemType()
 				typeCur.Next = &mTypes.Node{}
 				typeCur = typeCur.Next
 
@@ -109,6 +110,8 @@ func parseIdent(
 
 		child := newNodeParent(mTypes.ND_VAR_DECLARE, head, identName)
 		child.Type = typeHead.Type
+		// HACK: seems buggy
+		child.Child.ElemType = typeHead.ElemType
 		return tok, child
 
 	} else {

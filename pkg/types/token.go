@@ -74,6 +74,21 @@ func (tok Token) MatchedType() (ModoType, bool) {
 
 	return "", false
 }
+func (tok Token) MatchedElemType() (ModoType, bool) {
+	var typeMap = map[string]ModoType{
+		TK_TYPE_INT:    TY_INT32,
+		TK_TYPE_STR:    TY_STR,
+		TK_TYPE_NIL:    TY_NIL,
+		TK_TYPE_BOOL:   TY_BOOL,
+		TK_TYPE_VECTOR: TY_VECTOR,
+	}
+
+	if kind, exists := typeMap[tok.ChildKind]; exists {
+		return kind, true
+	}
+
+	return "", false
+}
 
 func (tok *Token) DebugTokens() {
 	log.Debug(log.BLUE("[token]"))

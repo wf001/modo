@@ -18,10 +18,10 @@ func InvokeGet(block *ir.Block, libs *mTypes.BuiltinLibProp, node *mTypes.Node) 
 			ty.Equal(types.I1) ||
 			ty.Equal(types.I8Ptr) ||
 			ty.Equal(types.Void) {
-			PrnScalar(libs, block, n)
+			prnScalar(libs, block, n)
 
 		} else if _, ok := ty.(*types.VectorType); ok {
-			PrnVector(libs, block, n)
+			prnVector(libs, block, n)
 
 		} else {
 			log.Panic("unresolved type: have %+v", n)

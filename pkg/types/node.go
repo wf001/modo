@@ -135,19 +135,19 @@ func (node *Node) GetLastNode() *Node {
 }
 
 // Get LLVM type from corresponding custom type
-func GetLLVMType(ty ModoType) types.Type {
-	var retType types.Type
+func GetLLVMType(ty ModoType) (types.Type, bool) {
 
-	if ty == TY_INT32 {
-		return types.I32
-	} else if ty == TY_BOOL {
-		return types.I1
-	} else if ty == TY_STR {
-		return types.I8Ptr
-	} else if ty == TY_NIL {
-		return types.Void
+	var typeMap = map[ModoType]types.Type{
+		TY_INT32: types.I32,
+		TY_BOOL:  types.I1,
+		TY_STR:   types.I8Ptr,
+		TY_NIL:   types.Void,
 	}
-	return retType
+
+	if t, ok := typeMap[ty]; ok {
+		return t, true
+	}
+	return nil, true
 }
 
 // debug

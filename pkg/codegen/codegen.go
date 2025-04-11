@@ -94,7 +94,7 @@ func (ctx *context) genVarDeclare(node *mTypes.Node) value.Value {
 		// means declaring global variable or function named except main
 
 		// define function return type
-		varType := mTypes.GetLLVMType(node.Type)
+		varType, _ := mTypes.GetLLVMType(node.Type)
 		funcName := node.GetFuncName()
 
 		var arg []value.Value
@@ -102,7 +102,7 @@ func (ctx *context) genVarDeclare(node *mTypes.Node) value.Value {
 
 		// define arguments type of function
 		for a := node.Child.Args; a != nil; a = a.Next {
-			childType := mTypes.GetLLVMType(a.Type)
+			childType, _ := mTypes.GetLLVMType(a.Type)
 
 			arg = append(arg, ir.NewParam(a.Val, childType))
 			argp = append(argp, ir.NewParam(a.Val, childType))
@@ -400,7 +400,7 @@ func (ctx *context) gen(node *mTypes.Node) value.Value {
 			log.Panic("unresolved Scalar: have %+v", node)
 		}
 	} else if node.IsKind(mTypes.ND_COLLECTION) {
-		ty := mTypes.GetLLVMType(node.ElemType)
+		ty, _ := mTypes.GetLLVMType(node.ElemType)
 		// NOTE: true?
 		var arrIdx int64 = 0
 

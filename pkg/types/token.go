@@ -59,7 +59,7 @@ func (tok *Token) IsKindType() bool {
 		tok.IsKind(TK_TYPE_VECTOR)
 }
 
-func (tok Token) MatchedType() (ModoType, bool) {
+func GetModoType(k TokenKind) (ModoType, bool) {
 	var typeMap = map[string]ModoType{
 		TK_TYPE_INT:    TY_INT32,
 		TK_TYPE_STR:    TY_STR,
@@ -68,22 +68,7 @@ func (tok Token) MatchedType() (ModoType, bool) {
 		TK_TYPE_VECTOR: TY_VECTOR,
 	}
 
-	if kind, exists := typeMap[tok.Kind]; exists {
-		return kind, true
-	}
-
-	return "", false
-}
-func (tok Token) MatchedElemType() (ModoType, bool) {
-	var typeMap = map[string]ModoType{
-		TK_TYPE_INT:    TY_INT32,
-		TK_TYPE_STR:    TY_STR,
-		TK_TYPE_NIL:    TY_NIL,
-		TK_TYPE_BOOL:   TY_BOOL,
-		TK_TYPE_VECTOR: TY_VECTOR,
-	}
-
-	if kind, exists := typeMap[tok.ChildKind]; exists {
+	if kind, exists := typeMap[k]; exists {
 		return kind, true
 	}
 

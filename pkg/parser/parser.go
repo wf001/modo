@@ -81,9 +81,9 @@ func parseIdent(
 				if !tok.IsKindType() {
 					break
 				}
-				ty, _ := tok.MatchedType()
+				ty, _ := mTypes.GetModoType(tok.Kind)
 				typeCur.Type = ty
-				typeCur.ElemType, _ = tok.MatchedElemType()
+				typeCur.ElemType, _ = mTypes.GetModoType(tok.ChildKind)
 				typeCur.Next = &mTypes.Node{}
 				typeCur = typeCur.Next
 

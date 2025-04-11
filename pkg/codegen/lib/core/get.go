@@ -19,7 +19,7 @@ func InvokeGet(block *ir.Block, libs *mTypes.BuiltinLibProp, node *mTypes.Node) 
 			ty.Equal(types.I1) ||
 			ty.Equal(types.I8Ptr) ||
 			ty.Equal(types.Void) {
-			PrnSchalar(formatStr, libs, block, n)
+			PrnScalar(formatStr, libs, block, n)
 
 		} else if t, ok := ty.(*types.VectorType); ok {
 			PrnVector(libs, block, n, t)

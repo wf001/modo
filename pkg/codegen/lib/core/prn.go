@@ -10,7 +10,7 @@ import (
 	mTypes "github.com/wf001/modo/pkg/types"
 )
 
-func PrnSchalar(
+func PrnScalar(
 	formatStr *ir.Global,
 	libs *mTypes.BuiltinLibProp,
 	block *ir.Block,
@@ -71,7 +71,7 @@ func InvokePrn(block *ir.Block, libs *mTypes.BuiltinLibProp, node *mTypes.Node) 
 			ty.Equal(types.I1) ||
 			ty.Equal(types.I8Ptr) ||
 			ty.Equal(types.Void) {
-			PrnSchalar(formatStr, libs, block, n)
+			PrnScalar(formatStr, libs, block, n)
 
 		} else if t, ok := ty.(*types.PointerType); ok {
 			PrnVector(libs, block, n, t)

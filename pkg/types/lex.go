@@ -83,21 +83,21 @@ var (
 	SYMBOL_TYPE_NIL   = "nil"
 	SYMBOL_TYPE_BOOL  = "bool"
 
-	SYMBOL_TYPE_SCHALAR = fmt.Sprintf(
+	SYMBOL_TYPE_SCALAR = fmt.Sprintf(
 		"(\\b(%s|%s|%s|%s)\\b)",
 		SYMBOL_TYPE_INT,
 		SYMBOL_TYPE_STR,
 		SYMBOL_TYPE_NIL,
 		SYMBOL_TYPE_BOOL,
 	)
-	SYMBOL_TYPE_VECTOR = fmt.Sprintf(`\[%s\]`, SYMBOL_TYPE_SCHALAR)
+	SYMBOL_TYPE_VECTOR = fmt.Sprintf(`\[%s\]`, SYMBOL_TYPE_SCALAR)
 
 	TYPE_REG_EXP = fmt.Sprintf(
 		"(%s|%s|%s|%s)",
 		SYMBOL_TYPE_SIG,
 		SYMBOL_TYPE_ARROW,
 		SYMBOL_TYPE_VECTOR,
-		SYMBOL_TYPE_SCHALAR,
+		SYMBOL_TYPE_SCALAR,
 	)
 
 	SYMBOL_UNDEFINED_REG_EXP = `\w+`

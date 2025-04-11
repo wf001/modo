@@ -386,7 +386,7 @@ func (ctx *context) gen(node *mTypes.Node) value.Value {
 	} else if node.IsKind(mTypes.ND_COLLECTION) {
 		ty, _ := mTypes.GetLLVMType(node.ElemType)
 		// NOTE: true?
-		var arrIdx int64 = 0
+		var arrIdx uint64 = 0
 
 		arrContent := []constant.Constant{}
 
@@ -400,7 +400,7 @@ func (ctx *context) gen(node *mTypes.Node) value.Value {
 			arrIdx++
 		}
 
-		arrType := types.NewArray(uint64(arrIdx), ty)
+		arrType := types.NewArray(arrIdx, ty)
 		var arr value.Value = ctx.block.NewAlloca(arrType)
 		ctx.block.NewStore(
 			constant.NewArray(

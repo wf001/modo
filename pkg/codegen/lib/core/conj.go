@@ -16,10 +16,10 @@ func InvokeConj(block *ir.Block, libs *mTypes.BuiltinLibProp, node *mTypes.Node)
 		log.Panic("Array elements must be ir.InstAlloca: have %+v", value)
 	}
 	t := value.ElemType.(*types.ArrayType)
-	arrType := types.NewArray(uint64(t.Len+1), t.ElemType)
+	arrType := types.NewArray(t.Len+1, t.ElemType)
 	var newArr = block.NewAlloca(arrType)
 
-	for i := uint64(0); i < uint64(t.Len); i++ {
+	for i := uint64(0); i < t.Len; i++ {
 		oldElemPtr := block.NewGetElementPtr(
 			value.ElemType,
 			value,

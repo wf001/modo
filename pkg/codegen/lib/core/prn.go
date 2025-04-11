@@ -38,7 +38,7 @@ func prnVector(libs *mTypes.BuiltinLibProp, block *ir.Block, n *mTypes.Node) {
 
 	t := value.ElemType.(*types.ArrayType)
 
-	for i := uint64(0); i < uint64(t.Len); i++ {
+	for i := uint64(0); i < t.Len; i++ {
 		elemPtr := block.NewGetElementPtr(
 			value.ElemType,
 			value,

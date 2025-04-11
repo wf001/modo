@@ -36,7 +36,9 @@ func prnVector(libs *mTypes.BuiltinLibProp, block *ir.Block, n *mTypes.Node) {
 
 	block.NewCall(libs.Printf.FuncPtr, libs.GlobalVar.FormatBracketOpen)
 
-	for i := uint64(0); i < uint64(n.Len); i++ {
+	t := value.ElemType.(*types.ArrayType)
+
+	for i := uint64(0); i < uint64(t.Len); i++ {
 		elemPtr := block.NewGetElementPtr(
 			value.ElemType,
 			value,
@@ -44,13 +46,12 @@ func prnVector(libs *mTypes.BuiltinLibProp, block *ir.Block, n *mTypes.Node) {
 			constant.NewInt(types.I32, int64(i)),
 		)
 		// Arrayの要素の型取得
-		t := value.ElemType.(*types.ArrayType)
 		elem := block.NewLoad(t.ElemType, elemPtr)
 
 		formatStr, _ := mTypes.GetPrintFormat(elem.ElemType, libs)
 		block.NewCall(libs.Printf.FuncPtr, formatStr, elem)
 
-		if i < uint64(n.Len-1) {
+		if i < uint64(t.Len-1) {
 			block.NewCall(libs.Printf.FuncPtr, libs.GlobalVar.FormatComma)
 			block.NewCall(libs.Printf.FuncPtr, libs.GlobalVar.FormatSpace)
 		}

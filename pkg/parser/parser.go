@@ -23,15 +23,6 @@ func newNodeScalar(ty mTypes.ModoType, val string) *mTypes.Node {
 	}
 }
 
-// func newNodeVector(element mTypes.Token) (*mTypes.Token, *mTypes.Node) {
-// 	rootNode := &mTypes.Node{
-// 		Kind: mTypes.ND_COLLECTION,
-// 		Type: mTypes.TY_VECTOR,
-// 	}
-// 	tok := element
-// 	return tok, rootNode
-// }
-
 func parseExprs(
 	rootToken *mTypes.Token,
 	exprKind mTypes.NodeKind,

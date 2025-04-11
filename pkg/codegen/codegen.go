@@ -154,7 +154,7 @@ func (ctx *context) genVarReference(node *mTypes.Node) value.Value {
 		if scope.Val == node.Val {
 			if scope.Child.IsType(mTypes.TY_INT32) {
 				node.Type = mTypes.TY_INT32
-				return ctx.block.NewLoad(types.I32, scope.VarPtr)
+				return scope.VarPtr
 
 			} else if scope.Child.IsType(mTypes.TY_STR) {
 				node.Type = mTypes.TY_STR
@@ -319,8 +319,7 @@ func (ctx *context) gen(node *mTypes.Node) value.Value {
 			child := ctx.gen(bind.Child)
 
 			if bind.IsType(mTypes.TY_INT32) {
-				bind.VarPtr = ctx.block.NewAlloca(types.I32)
-				ctx.block.NewStore(child, bind.VarPtr)
+				bind.VarPtr = child
 
 			} else if bind.IsType(mTypes.TY_STR) {
 				bind.VarPtr = child

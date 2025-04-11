@@ -6,21 +6,19 @@ import (
 	"github.com/llir/llvm/ir/value"
 )
 
-func GetPrintFormat(ty types.Type, libs *BuiltinLibProp) *ir.Global {
+func GetPrintFormat(ty types.Type, libs *BuiltinLibProp) (*ir.Global, bool) {
 
-	if ty.Equal(types.I32) {
-		return libs.GlobalVar.FormatDigit
-
-	} else if ty.Equal(types.I1) {
-		return libs.GlobalVar.FormatStr
-
-	} else if ty.Equal(types.I8Ptr) {
-		return libs.GlobalVar.FormatStr
-
-	} else if ty.Equal(types.Void) {
-		return libs.GlobalVar.FormatStr
+	formatMap := map[types.Type]*ir.Global{
+		types.I32:   libs.GlobalVar.FormatDigit,
+		types.I1:    libs.GlobalVar.FormatStr,
+		types.I8Ptr: libs.GlobalVar.FormatStr,
+		types.Void:  libs.GlobalVar.FormatStr,
 	}
-	return nil
+	if f, ok := formatMap[ty]; ok {
+		return f, true
+	}
+
+	return nil, false
 }
 
 // Note: remove either this or codegen.isConstant

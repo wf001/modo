@@ -49,7 +49,12 @@ func prnVector(libs *mTypes.BuiltinLibProp, block *ir.Block, n *mTypes.Node) {
 		elem := block.NewLoad(t.ElemType, elemPtr)
 
 		formatStr, _ := mTypes.GetPrintFormat(elem.ElemType, libs)
-		block.NewCall(libs.Printf.FuncPtr, formatStr, elem)
+		if t.ElemType == types.I1 {
+			v := block.NewSelect(elem, libs.GlobalVar.TrueValue, libs.GlobalVar.FalseValue)
+			block.NewCall(libs.Printf.FuncPtr, formatStr, v)
+		} else {
+			block.NewCall(libs.Printf.FuncPtr, formatStr, elem)
+		}
 
 		if i < uint64(t.Len-1) {
 			block.NewCall(libs.Printf.FuncPtr, libs.GlobalVar.FormatComma)

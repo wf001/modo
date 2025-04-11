@@ -84,21 +84,22 @@ type BuiltinGlobalVarsProp struct {
 }
 
 type Node struct {
-	Kind    NodeKind
-	Next    *Node
-	Type    ModoType
-	Child   *Node
-	Cond    *Node
-	CondRet *ir.InstAlloca
-	Then    *Node
-	Else    *Node
-	Val     string
-	Len     uint64 // the number of bytes, only used with string type
-	Bind    *Node
-	Args    *Node
-	VarPtr  value.Value // binded local variable
-	FuncPtr *ir.Func    // declared function, library function
-	IRValue value.Value //
+	Kind     NodeKind
+	Next     *Node
+	Type     ModoType
+	ElemType ModoType
+	Child    *Node
+	Cond     *Node
+	CondRet  *ir.InstAlloca
+	Then     *Node
+	Else     *Node
+	Val      string
+	Len      uint64 // the number of bytes, used with string and array
+	Bind     *Node
+	Args     *Node
+	VarPtr   value.Value // binded local variable
+	FuncPtr  *ir.Func    // declared function, library function
+	IRValue  value.Value //
 }
 
 // pred kind
@@ -134,16 +135,16 @@ func (node *Node) GetLastNode() *Node {
 }
 
 // Get LLVM type from corresponding custom type
-func (node *Node) GetLLVMType() types.Type {
+func GetLLVMType(ty ModoType) types.Type {
 	var retType types.Type
 
-	if node.IsType(TY_INT32) {
+	if ty == TY_INT32 {
 		return types.I32
-	} else if node.IsType(TY_BOOL) {
+	} else if ty == TY_BOOL {
 		return types.I1
-	} else if node.IsType(TY_STR) {
+	} else if ty == TY_STR {
 		return types.I8Ptr
-	} else if node.IsType(TY_NIL) {
+	} else if ty == TY_NIL {
 		return types.Void
 	}
 	return retType
@@ -169,13 +170,14 @@ func (node *Node) Debug(depth int) {
 	log.Debug(
 		log.BLUE(
 			fmt.Sprintf(
-				"%s %p %#+v %#+v %#+v %d",
+				"%s %p %#+v %#+v %#+v %d %#+v",
 				strings.Repeat("  ", depth),
 				node,
 				node.Kind,
 				node.Type,
 				node.Val,
 				node.Len,
+				node.ElemType,
 			),
 		),
 	)

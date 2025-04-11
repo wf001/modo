@@ -112,6 +112,13 @@ func (node *Node) IsType(ty ModoType) bool {
 	return node.Type == ty
 }
 
+func (node *Node) IsScalar() bool {
+	return node.IsType(TY_INT32) ||
+		node.IsType(TY_BOOL) ||
+		node.IsType(TY_STR) ||
+		node.IsType(TY_NIL)
+}
+
 // naming
 func (node *Node) GetUnnamedFuncName() string {
 	return fmt.Sprintf("fn.%s.%p", "unnamed", node)

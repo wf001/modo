@@ -21,7 +21,6 @@ func GetPrintFormat(ty types.Type, libs *BuiltinLibProp) (*ir.Global, bool) {
 	return nil, false
 }
 
-// Note: remove either this or codegen.isConstant
 func IsScalar(v value.Value) bool {
 	return v.Type().Equal(types.I32) ||
 		v.Type().Equal(types.I1) ||

@@ -384,31 +384,30 @@ func (ctx *context) gen(node *mTypes.Node) value.Value {
 			log.Panic("unresolved Scalar: have %+v", node)
 		}
 	} else if node.IsKind(mTypes.ND_COLLECTION) {
-		ty, _ := mTypes.GetLLVMType(node.ElemType)
-		// NOTE: true?
-		var arrIdx uint64 = 0
+		elemType, _ := mTypes.GetLLVMType(node.ElemType)
+		var arrLength uint64 = 0
+		var arr value.Value
 
-		if ty == types.I8Ptr {
+		if elemType == types.I8Ptr {
 			arrContent := []value.Value{}
 			for e := node.Child; e != nil; e = e.Next {
 				e.IRValue = ctx.gen(e)
 				arrContent = append(arrContent, e.IRValue)
-				arrIdx++
+				arrLength++
 			}
 
-			arrType := types.NewArray(arrIdx, ty)
-			var arr value.Value = ctx.block.NewAlloca(arrType)
+			arrType := types.NewArray(arrLength, elemType)
+			arr = ctx.block.NewAlloca(arrType)
 
-			for i := uint64(0); i < arrIdx; i++ {
-				elemPtr := ctx.block.NewGetElementPtr(arrType, arr,
+			for i := uint64(0); i < arrLength; i++ {
+				elemPtr := ctx.block.NewGetElementPtr(
+					arrType,
+					arr,
 					constant.NewInt(types.I32, 0),
 					constant.NewInt(types.I32, int64(i)),
 				)
 				ctx.block.NewStore(arrContent[i], elemPtr)
 			}
-
-			node.IRValue = arr
-			return arr
 
 		} else {
 			arrContent := []constant.Constant{}
@@ -419,11 +418,11 @@ func (ctx *context) gen(node *mTypes.Node) value.Value {
 					log.Panic("Each array element must be constant.Constant: have %+v", e.IRValue)
 				}
 				arrContent = append(arrContent, c)
-				arrIdx++
+				arrLength++
 			}
 
-			arrType := types.NewArray(arrIdx, ty)
-			var arr value.Value = ctx.block.NewAlloca(arrType)
+			arrType := types.NewArray(arrLength, elemType)
+			arr = ctx.block.NewAlloca(arrType)
 			ctx.block.NewStore(
 				constant.NewArray(
 					arrType,
@@ -431,9 +430,9 @@ func (ctx *context) gen(node *mTypes.Node) value.Value {
 				),
 				arr,
 			)
-			node.IRValue = arr
-			return arr
 		}
+		node.IRValue = arr
+		return arr
 
 	} else {
 		log.Panic("unresolved Nodekind: have %+v", node)

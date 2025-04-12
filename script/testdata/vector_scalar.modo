@@ -1,0 +1,10 @@
+(def main :: int
+  (fn []
+    (let [vec :: [int] [423, 83, 90]]
+      (prn (get 
+             (conj 
+               (pop 
+                 (assoc vec 1 7)) 
+               54)
+             2))
+      (prn vec))))

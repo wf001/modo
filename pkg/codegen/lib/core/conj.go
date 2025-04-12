@@ -22,9 +22,8 @@ func InvokeConj(block *ir.Block, libs *mTypes.BuiltinLibProp, node *mTypes.Node)
 
 	newArr := vector.CopyArray(block, oldArrPtr, oldArr.ElemType, oldArr.Len+1, oldArr.Len)
 
-	newArrType := types.NewArray(oldArr.Len, oldArr.ElemType)
 	newElemPtr := block.NewGetElementPtr(
-		newArrType,
+		newArr.ElemType,
 		newArr,
 		constant.NewInt(types.I32, 0),
 		constant.NewInt(types.I32, int64(oldArr.Len)),

@@ -29,8 +29,6 @@ func InvokeGet(block *ir.Block, libs *mTypes.BuiltinLibProp, node *mTypes.Node) 
 		constant.NewInt(types.I32, 0),
 		constant.NewInt(types.I32, i),
 	)
-	// Arrayの要素の型取得
-	// NOTE: elem type changable
 	elem := block.NewLoad(t.ElemType, elemPtr)
 
 	return elem

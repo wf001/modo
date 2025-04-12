@@ -10,10 +10,10 @@ func CopyArray(
 	block *ir.Block,
 	oldArrPtr *ir.InstAlloca, // Pointer to the allocated memory of the original array
 	arrType types.Type, // The type of elements in the array (e.g., types.I32)
-	arrSize uint64, // The total size of the new array (number of elements to allocate)
+	newArrSize uint64, // The total size of the new array (number of elements to allocate)
 	elemSize uint64, // The number of elements to copy from the old array to the new one
 ) *ir.InstAlloca {
-	newArrType := types.NewArray(arrSize, arrType)
+	newArrType := types.NewArray(newArrSize, arrType)
 
 	var newArr = block.NewAlloca(newArrType)
 	for i := uint64(0); i < elemSize; i++ {

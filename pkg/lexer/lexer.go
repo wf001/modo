@@ -114,6 +114,7 @@ func splitString(expr string) []string {
 	log.Debug(log.YELLOW("preprocessed %#+v"), expr)
 
 	re = regexp.MustCompile(mTypes.ALL_REG_EXP)
+	log.Debug(log.YELLOW("regex to analyse: %#+v"), mTypes.ALL_REG_EXP)
 	res := re.FindAllString(expr, -1)
 	log.Debug(log.YELLOW("splitted program: %#+v"), res)
 	return res

@@ -99,12 +99,6 @@ func accurateNilType(head *mTypes.Token) {
 			t.Next.Kind = mTypes.TK_NIL
 		}
 	}
-
-}
-func setSubKind(head *mTypes.Token) {
-	for t := head.Next; t.Next != nil; t = t.Next {
-	}
-
 }
 
 func splitString(expr string) []string {
@@ -130,10 +124,26 @@ func doLexicalAnalyse(splittedString []string) *mTypes.Token {
 	for _, p := range splittedString {
 		if tokenType, matched := tokenMap.matchTokenType(p); matched {
 			prev = newToken(tokenType, prev, p)
+			// It seems that Go's regexp package does not support lookbehind or lookahead assertions like "(?<!...)", "(?=...)",
+			// so it is difficult to write a regex that excludes numbers that are
+			// immediately preceded by letters (e.g., to avoid matching the "2" in "vec2").
+			//
+			// Instead, previous processing (splittedString) match numbers broadly using patterns like `-?\d+`,
+			// and rely on post-processing logic to correctly classify tokens
+			if prev.IsKind(mTypes.TK_INT) {
+				numRe := regexp.MustCompile(`^-?\d+$`)
+
+				isNumber := numRe.MatchString(p)
+				if !isNumber {
+					log.Debug(log.YELLOW("change token kind to TY_IDENT: %#+v"), prev)
+					prev.Kind = mTypes.TK_IDENT
+				}
+
+			}
 			// when token is vector, set element type of the vector
 			if prev.IsKind(mTypes.TK_TYPE_VECTOR) {
-				re := regexp.MustCompile(`\[(\w+)\]`)
-				matches := re.FindAllStringSubmatch(prev.Val, -1)
+				vecRe := regexp.MustCompile(`\[(\w+)\]`)
+				matches := vecRe.FindAllStringSubmatch(prev.Val, -1)
 
 				for _, match := range matches {
 					if tokenType, matched := tokenMap.matchTokenType(match[1]); matched {
@@ -148,7 +158,6 @@ func doLexicalAnalyse(splittedString []string) *mTypes.Token {
 	}
 	trimQuote(head)
 	accurateNilType(head)
-	setSubKind(head)
 
 	head = head.Next
 	head.DebugTokens()

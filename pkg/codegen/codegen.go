@@ -126,40 +126,43 @@ func newVectorGlobal(ctx *context, n *mTypes.Node) value.Value {
 
 	if elemType == types.I8Ptr {
 
-		arrContent := []*ir.Global{}
+		strGlobals := []*ir.Global{}
 		for i, e := 0, n.Child; e != nil; e, i = e.Next, i+1 {
 			strConst := constant.NewCharArrayFromString(e.Val)
-			global := ctx.mod.NewGlobalDef(fmt.Sprintf(".str.%d", len(ctx.mod.Globals)), strConst)
-			global.Linkage = enum.LinkagePrivate
-			global.UnnamedAddr = enum.UnnamedAddrUnnamedAddr
-			global.Immutable = true
-			global.Align = 1
+			elementStr := ctx.mod.NewGlobalDef(
+				fmt.Sprintf(".str.%d", len(ctx.mod.Globals)),
+				strConst,
+			)
+			elementStr.Linkage = enum.LinkagePrivate
+			elementStr.UnnamedAddr = enum.UnnamedAddrUnnamedAddr
+			elementStr.Immutable = true
+			elementStr.Align = 1
 
-			arrContent = append(arrContent, global)
+			strGlobals = append(strGlobals, elementStr)
 			arrLength++
 		}
 
 		// GEPでi8*を作成
-		var gepPtrs []constant.Constant
-		for _, g := range arrContent {
+		var strGlobalPtrs []constant.Constant
+		for _, g := range strGlobals {
 			gep := constant.NewGetElementPtr(
 				g.ContentType, // = types.NewArray(len(str), types.I8)
 				g,
 				constant.NewInt(types.I32, 0),
 				constant.NewInt(types.I32, 0),
 			)
-			gepPtrs = append(gepPtrs, gep)
+			strGlobalPtrs = append(strGlobalPtrs, gep)
 		}
 
 		// @fruits = global [3 x ptr] [ptr @.str, ptr @.str.1, ptr @.str.2], align 8
-		arrType := types.NewArray(uint64(len(gepPtrs)), types.NewPointer(types.I8))
-		fruitsArray := constant.NewArray(arrType, gepPtrs...)
-		fruitsGlobal := ctx.mod.NewGlobalDef(
+		arrType := types.NewArray(uint64(len(strGlobalPtrs)), types.NewPointer(types.I8))
+		arrConst := constant.NewArray(arrType, strGlobalPtrs...)
+		vecGlobal := ctx.mod.NewGlobalDef(
 			fmt.Sprintf(".vector.%d", len(ctx.mod.Globals)),
-			fruitsArray,
+			arrConst,
 		)
-		fruitsGlobal.Align = 8
-		arr = fruitsGlobal
+		vecGlobal.Align = 8
+		arr = vecGlobal
 
 	} else {
 		arrContent := []constant.Constant{}

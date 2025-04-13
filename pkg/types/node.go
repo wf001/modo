@@ -153,7 +153,7 @@ func GetLLVMType(ty ModoType) (types.Type, bool) {
 		TY_BOOL:   types.I1,
 		TY_STR:    types.I8Ptr,
 		TY_NIL:    types.Void,
-		TY_VECTOR: &types.PointerType{ElemType: &types.ArrayType{ElemType: types.I8Ptr, Len: 2}},
+		TY_VECTOR: &types.PointerType{ElemType: &types.ArrayType{ElemType: types.I32, Len: 2}},
 	}
 
 	if t, ok := typeMap[ty]; ok {

@@ -119,6 +119,69 @@ func newVector(ctx *context, n *mTypes.Node) value.Value {
 	return arr
 }
 
+func newVectorGlobal(ctx *context, n *mTypes.Node) value.Value {
+	elemType, _ := mTypes.GetLLVMType(n.ElemType)
+	var arrLength uint64 = 0
+	var arr value.Value
+
+	if elemType == types.I8Ptr {
+
+		arrContent := []*ir.Global{}
+		for i, e := 0, n.Child; e != nil; e, i = e.Next, i+1 {
+			strConst := constant.NewCharArrayFromString(e.Val)
+			global := ctx.mod.NewGlobalDef(fmt.Sprintf(".str.%d", len(ctx.mod.Globals)), strConst)
+			global.Immutable = true
+			global.Align = 1
+
+			arrContent = append(arrContent, global)
+			arrLength++
+		}
+
+		// GEPでi8*を作成
+		var gepPtrs []constant.Constant
+		for _, g := range arrContent {
+			gep := constant.NewGetElementPtr(
+				g.ContentType, // = types.NewArray(len(str), types.I8)
+				g,
+				constant.NewInt(types.I32, 0),
+				constant.NewInt(types.I32, 0),
+			)
+			gepPtrs = append(gepPtrs, gep)
+		}
+
+		// @fruits = global [3 x ptr] [ptr @.str, ptr @.str.1, ptr @.str.2], align 8
+		arrType := types.NewArray(uint64(len(gepPtrs)), types.NewPointer(types.I8))
+		fruitsArray := constant.NewArray(arrType, gepPtrs...)
+		fruitsGlobal := ctx.mod.NewGlobalDef("fruits", fruitsArray)
+		fruitsGlobal.Align = 8
+		arr = fruitsGlobal
+
+	} else {
+		arrContent := []constant.Constant{}
+		for e := n.Child; e != nil; e = e.Next {
+			e.IRValue = ctx.gen(e)
+			c, ok := e.IRValue.(constant.Constant)
+			if !ok {
+				log.Panic("Each array element must be constant.Constant: have %+v", e.IRValue)
+			}
+			arrContent = append(arrContent, c)
+			arrLength++
+		}
+
+		arrType := types.NewArray(arrLength, elemType)
+		arr = ctx.block.NewAlloca(arrType)
+		ctx.block.NewStore(
+			constant.NewArray(
+				arrType,
+				arrContent...,
+			),
+			arr,
+		)
+	}
+	n.IRValue = arr
+	return arr
+}
+
 func (ctx *context) genVarDeclare(node *mTypes.Node) value.Value {
 	if node.Val == "main" {
 		// means declaring main function regarded as entrypoint
@@ -437,7 +500,7 @@ func (ctx *context) gen(node *mTypes.Node) value.Value {
 		}
 	} else if node.IsKind(mTypes.ND_COLLECTION) {
 
-		return newVector(ctx, node)
+		return newVectorGlobal(ctx, node)
 	} else {
 		log.Panic("unresolved Nodekind: have %+v", node)
 	}

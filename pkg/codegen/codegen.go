@@ -130,6 +130,8 @@ func newVectorGlobal(ctx *context, n *mTypes.Node) value.Value {
 		for i, e := 0, n.Child; e != nil; e, i = e.Next, i+1 {
 			strConst := constant.NewCharArrayFromString(e.Val)
 			global := ctx.mod.NewGlobalDef(fmt.Sprintf(".str.%d", len(ctx.mod.Globals)), strConst)
+			global.Linkage = enum.LinkagePrivate
+			global.UnnamedAddr = enum.UnnamedAddrUnnamedAddr
 			global.Immutable = true
 			global.Align = 1
 
@@ -152,7 +154,10 @@ func newVectorGlobal(ctx *context, n *mTypes.Node) value.Value {
 		// @fruits = global [3 x ptr] [ptr @.str, ptr @.str.1, ptr @.str.2], align 8
 		arrType := types.NewArray(uint64(len(gepPtrs)), types.NewPointer(types.I8))
 		fruitsArray := constant.NewArray(arrType, gepPtrs...)
-		fruitsGlobal := ctx.mod.NewGlobalDef("fruits", fruitsArray)
+		fruitsGlobal := ctx.mod.NewGlobalDef(
+			fmt.Sprintf(".vector.%d", len(ctx.mod.Globals)),
+			fruitsArray,
+		)
 		fruitsGlobal.Align = 8
 		arr = fruitsGlobal
 
@@ -202,6 +207,7 @@ func (ctx *context) genVarDeclare(node *mTypes.Node) value.Value {
 		// means declaring global variable or function named except main
 
 		// define function return type
+		// TODO: in vector need to see Child.ElemType
 		varType, _ := mTypes.GetLLVMType(node.Type)
 		funcName := node.GetFuncName()
 

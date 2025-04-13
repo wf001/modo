@@ -48,8 +48,12 @@ func prnVector(libs *mTypes.BuiltinLibProp, block *ir.Block, n *mTypes.Node) {
 			log.Panic("Expected pointer to array, got: %+v", ptrType.ElemType)
 		}
 
+	case *ir.Global:
+		ptr = v
+		t = &types.ArrayType{ElemType: types.I8Ptr, Len: 2}
+
 	default:
-		log.Panic("Unsupported IRValue type: %+v", n.IRValue)
+		log.Panic("Unsupported IRValue type: %#+v", n.IRValue)
 	}
 
 	block.NewCall(libs.Printf.FuncPtr, libs.GlobalVar.FormatBracketOpen)

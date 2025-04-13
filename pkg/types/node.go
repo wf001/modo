@@ -149,14 +149,38 @@ func (node *Node) GetLastNode() *Node {
 func GetLLVMType(ty ModoType) (types.Type, bool) {
 
 	var typeMap = map[ModoType]types.Type{
-		TY_INT32:  types.I32,
-		TY_BOOL:   types.I1,
-		TY_STR:    types.I8Ptr,
-		TY_NIL:    types.Void,
-		TY_VECTOR: &types.PointerType{ElemType: &types.ArrayType{ElemType: types.I32, Len: 2}},
+		TY_INT32: types.I32,
+		TY_BOOL:  types.I1,
+		TY_STR:   types.I8Ptr,
+		TY_NIL:   types.Void,
 	}
 
 	if t, ok := typeMap[ty]; ok {
+		return t, true
+	}
+	return nil, false
+}
+func GetLLVMTypeForVector(node *Node) (types.Type, bool) {
+
+	elemType, ok := GetLLVMType(node.ElemType)
+	if !ok {
+		return nil, false
+	}
+	var length uint64 = 0
+	for n := node.Child; n != nil; n = n.Next {
+		length++
+	}
+
+	var typeMap = map[ModoType]types.Type{
+		TY_VECTOR: &types.PointerType{
+			ElemType: &types.ArrayType{
+				ElemType: elemType,
+				Len:      length,
+			},
+		},
+	}
+
+	if t, ok := typeMap[node.Type]; ok {
 		return t, true
 	}
 	return nil, true

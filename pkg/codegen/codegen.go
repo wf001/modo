@@ -211,7 +211,12 @@ func (ctx *context) genVarDeclare(node *mTypes.Node) value.Value {
 
 		// define function return type
 		// TODO: in vector need to see Child.ElemType
-		varType, _ := mTypes.GetLLVMType(node.Type)
+		varType, ok := mTypes.GetLLVMType(node.Type)
+
+		if !ok {
+			varType, ok = mTypes.GetLLVMTypeForVector(node.Child)
+		}
+
 		funcName := node.GetFuncName()
 
 		var arg []value.Value

@@ -29,19 +29,35 @@ func prnScalar(
 }
 
 func prnVector(libs *mTypes.BuiltinLibProp, block *ir.Block, n *mTypes.Node) {
-	value, ok := n.IRValue.(*ir.InstAlloca)
-	if !ok {
-		log.Panic("Array elements must be ir.InstAlloca: have %+v", value)
+	var ptr value.Value
+	var t *types.ArrayType
+
+	switch v := n.IRValue.(type) {
+	case *ir.InstAlloca:
+		ptr = v
+		t = v.ElemType.(*types.ArrayType)
+
+	case *ir.InstCall:
+		ptr = v
+		ptrType, ok := v.Type().(*types.PointerType)
+		if !ok {
+			log.Panic("Expected pointer return from call, got: %+v", v.Type())
+		}
+		t, ok = ptrType.ElemType.(*types.ArrayType)
+		if !ok {
+			log.Panic("Expected pointer to array, got: %+v", ptrType.ElemType)
+		}
+
+	default:
+		log.Panic("Unsupported IRValue type: %+v", n.IRValue)
 	}
 
 	block.NewCall(libs.Printf.FuncPtr, libs.GlobalVar.FormatBracketOpen)
 
-	t := value.ElemType.(*types.ArrayType)
-
 	for i := uint64(0); i < t.Len; i++ {
 		elemPtr := block.NewGetElementPtr(
-			value.ElemType,
-			value,
+			t,
+			ptr,
 			constant.NewInt(types.I32, 0),
 			constant.NewInt(types.I32, int64(i)),
 		)

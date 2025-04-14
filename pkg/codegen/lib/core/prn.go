@@ -51,7 +51,15 @@ func prnVector(libs *mTypes.BuiltinLibProp, block *ir.Block, n *mTypes.Node) {
 		if !ok {
 			log.Panic("Unsupported IRValue type: %#+v", ty)
 		}
-		t = ty
+		//t = ty
+		t1 := types.I8Ptr
+		t2 := ty.ElemType
+		if _, ok := t2.(*types.PointerType); ok {
+			t = &types.ArrayType{ElemType: types.I8Ptr, Len: ty.Len}
+		} else {
+			t = ty
+		}
+		log.Info("Unsupported IRValue type: %#+v, %#+v", t1, t2)
 
 	default:
 		log.Panic("Unsupported IRValue type: %#+v", n.IRValue)

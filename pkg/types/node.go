@@ -68,6 +68,7 @@ type BuiltinLibProp struct {
 	Printf    *BuiltinProp
 	Malloc    *BuiltinProp
 	Memcpy    *BuiltinProp
+	Strcmp    *BuiltinProp
 }
 
 // HACK: should remove llir/ir reference from this namespace

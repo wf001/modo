@@ -54,9 +54,25 @@ func declareMemcpy(
 		FuncPtr: memcpyFunc,
 	}
 }
+func declareStrcmp(
+	module *ir.Module,
+	libs *mTypes.BuiltinLibProp,
+) {
+
+	memcpyFunc := module.NewFunc(
+		"strcmp",
+		types.I1,
+		ir.NewParam("", types.I8Ptr),
+		ir.NewParam("", types.I8Ptr),
+	)
+	libs.Strcmp = &mTypes.BuiltinProp{
+		FuncPtr: memcpyFunc,
+	}
+}
 
 func Declare(ir *ir.Module, libs *mTypes.BuiltinLibProp) {
 	declarePrintf(ir, libs)
 	declareMalloc(ir, libs)
 	declareMemcpy(ir, libs)
+	declareStrcmp(ir, libs)
 }

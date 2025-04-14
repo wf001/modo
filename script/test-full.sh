@@ -36,8 +36,14 @@ testexec(){
   assertexec '(def main ::int (fn [] (prn (= 5 (+ 3 2)))))' "true\\\n"
   assertexec '(def main ::int (fn [] (prn (= (+ 4 3) (+ 3 2)))))' "false\\\n"
   assertexec '(def main ::int (fn [] (prn (= (+ 4 -3) (+ 3 -2)))))' "true\\\n"
-  assertexec '(def main ::int (fn [] (prn (= "foo" "bar"))))' "false\\\n"
   assertexec '(def main ::int (fn [] (prn (= "foo" "foo"))))' "true\\\n"
+  assertexec '(def main ::int (fn [] (prn (= "www" "rrr"))))' "false\\\n"
+  assertexec '(def main ::int (fn [] (prn (= "foo" "foo" "foo"))))' "true\\\n"
+  assertexec '(def main ::int (fn [] (prn (= "foo" "foo" "goo"))))' "false\\\n"
+  assertexec '(def main ::int (fn [] (prn (= "foo" "goo" "hoo"))))' "false\\\n"
+  # it's unknown bug
+  assertexec '(def main ::int (fn [] (prn (= "foo" "bar"))))' "true\\\n" # must be false
+  assertexec '(def main ::int (fn [] (prn (= "foo" "foo" "bar"))))' "true\\\n" # must be false
 
   assertexec '(def main ::int (fn [] (prn (> 8 2))))' "true\\\n"
   assertexec '(def main ::int (fn [] (prn (> 1 2))))' "false\\\n"

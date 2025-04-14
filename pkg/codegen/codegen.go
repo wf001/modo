@@ -177,14 +177,15 @@ func newVectorGlobal(ctx *context, n *mTypes.Node) value.Value {
 		}
 
 		arrType := types.NewArray(arrLength, elemType)
-		arr = ctx.block.NewAlloca(arrType)
-		ctx.block.NewStore(
-			constant.NewArray(
-				arrType,
-				arrContent...,
-			),
-			arr,
+
+		arrConst := constant.NewArray(arrType, arrContent...)
+		vecGlobal := ctx.mod.NewGlobalDef(
+			fmt.Sprintf(".vector.%d", len(ctx.mod.Globals)),
+			arrConst,
 		)
+		vecGlobal.Align = 8
+		arr = vecGlobal
+
 	}
 	n.IRValue = arr
 	return arr

@@ -66,6 +66,8 @@ type Program struct {
 type BuiltinLibProp struct {
 	GlobalVar *BuiltinGlobalVarsProp
 	Printf    *BuiltinProp
+	Malloc    *BuiltinProp
+	Memcpy    *BuiltinProp
 }
 
 // HACK: should remove llir/ir reference from this namespace

@@ -67,6 +67,37 @@ func newStr(ctx *context, n *mTypes.Node) *ir.InstLoad {
 	return str
 }
 
+func newStrHeap(ctx *context, n *mTypes.Node) *ir.InstCall {
+	strVal := n.Val + "\x00" // null終端追加
+	strLen := len(strVal)
+
+	mallocSize := constant.NewInt(types.I64, int64(strLen))
+	dest := ctx.block.NewCall(ctx.prog.BuiltinLibs.Malloc.FuncPtr, mallocSize)
+
+	strConst := constant.NewCharArrayFromString(strVal)
+	strConstType := strConst.Typ // => [N x i8]
+
+	srcAlloca := ctx.block.NewAlloca(strConstType)
+
+	ctx.block.NewStore(strConst, srcAlloca)
+
+	srcPtr := ctx.block.NewGetElementPtr(
+		strConstType,
+		srcAlloca,
+		constant.NewInt(types.I64, 0),
+		constant.NewInt(types.I64, 0),
+	)
+
+	ctx.block.NewCall(
+		ctx.prog.BuiltinLibs.Memcpy.FuncPtr,
+		dest,
+		srcPtr,
+		mallocSize,
+		constant.False,
+	)
+	return dest
+}
+
 func newVector(ctx *context, n *mTypes.Node) value.Value {
 	elemType, _ := mTypes.GetLLVMType(n.ElemType)
 	var arrLength uint64 = 0
@@ -498,7 +529,7 @@ func (ctx *context) gen(node *mTypes.Node) value.Value {
 			return newI32(node.Val)
 
 		} else if node.IsType(mTypes.TY_STR) {
-			return newStr(ctx, node)
+			return newStrHeap(ctx, node)
 
 		} else if node.IsType(mTypes.TY_NIL) {
 			return newStr(ctx, node)

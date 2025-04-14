@@ -23,7 +23,40 @@ func declarePrintf(
 	}
 
 }
+func declareMalloc(
+	module *ir.Module,
+	libs *mTypes.BuiltinLibProp,
+) {
+	mallocFunc := module.NewFunc(
+		"malloc",
+		types.I8Ptr,
+	)
+
+	libs.Malloc = &mTypes.BuiltinProp{
+		FuncPtr: mallocFunc,
+	}
+
+}
+func declareMemcpy(
+	module *ir.Module,
+	libs *mTypes.BuiltinLibProp,
+) {
+
+	memcpyFunc := module.NewFunc(
+		"llvm.memcpy.p0i8.p0i8.i64",
+		types.Void,
+		ir.NewParam("", types.I8Ptr),
+		ir.NewParam("", types.I8Ptr),
+		ir.NewParam("", types.I64),
+		ir.NewParam("", types.I1),
+	)
+	libs.Memcpy = &mTypes.BuiltinProp{
+		FuncPtr: memcpyFunc,
+	}
+}
 
 func Declare(ir *ir.Module, libs *mTypes.BuiltinLibProp) {
 	declarePrintf(ir, libs)
+	declareMalloc(ir, libs)
+	declareMemcpy(ir, libs)
 }

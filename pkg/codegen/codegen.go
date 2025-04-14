@@ -273,7 +273,6 @@ func (ctx *context) genVarReference(node *mTypes.Node) value.Value {
 					param = ctx.function.Params[i]
 				}
 			}
-			node.Type = arg.Type
 			return param
 
 		}
@@ -283,12 +282,9 @@ func (ctx *context) genVarReference(node *mTypes.Node) value.Value {
 	for scope := ctx.scope; scope != nil; scope = scope.Next {
 		if scope.Val == node.Val {
 			if scope.Child.IsScalar() {
-				node.Type = scope.Child.Type
 				return scope.VarPtr
 
 			} else if scope.Child.IsType(mTypes.TY_VECTOR) {
-				node.Type = mTypes.TY_VECTOR
-				node.Len = scope.Child.Len
 				return scope.VarPtr
 
 			} else {

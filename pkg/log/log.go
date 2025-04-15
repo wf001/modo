@@ -53,6 +53,17 @@ func DebugMessage(message string) {
 	debug("", YELLOW(message))
 }
 
+func DebugNoLine(format string, value ...interface{}) {
+	debugNoLine(format, value...)
+}
+
+func debugNoLine(format string, value ...interface{}) {
+	defaultFormat := DEFAULT_FORMAT
+	if format == "" {
+		format = defaultFormat
+	}
+	logrus.Debugf(format, value...)
+}
 func Debug(format string, value ...interface{}) {
 	debug(format, value...)
 }
@@ -63,6 +74,11 @@ func debug(format string, value ...interface{}) {
 		format = defaultFormat
 	}
 	logrusWithField().Debugf(format, value...)
+}
+func DebugValueColored(format string, value interface{}) {
+	Debug(
+		fmt.Sprintf(format, GREEN(fmt.Sprintf("%s", value))),
+	)
 }
 
 func Info(format string, value ...interface{}) {

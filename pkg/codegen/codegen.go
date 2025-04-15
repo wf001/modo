@@ -442,7 +442,8 @@ func (ctx *context) genCondition(node *mTypes.Node) {
 }
 
 func (ctx *context) gen(node *mTypes.Node) value.Value {
-	log.Debug(log.GREEN(fmt.Sprintf("%+v \"%+v\"", node.Kind, node.Val)))
+	// Note: no more need?
+	// log.DebugNoLine(log.GREEN(fmt.Sprintf("%+v \"%+v\"", node.Kind, node.Val)))
 	if node.IsKind(mTypes.ND_DECLARE) {
 		return ctx.gen(node.Child)
 

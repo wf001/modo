@@ -42,6 +42,15 @@ type Token struct {
 	Val       string
 }
 
+func (t *Token) String() string {
+	return fmt.Sprintf(
+		"{Val:\"%s\", Kind:\"%s\", ChildKind:\"%s\"}",
+		t.Val,
+		t.Kind,
+		t.ChildKind,
+	)
+}
+
 func (tok *Token) IsKindAndVal(kind string, val string) bool {
 	return tok != nil && tok.IsKind(kind) && tok.Val == val
 }
@@ -78,6 +87,6 @@ func GetModoType(k TokenKind) (ModoType, bool) {
 func (tok *Token) DebugTokens() {
 	log.Debug(log.BLUE("[token]"))
 	for ; tok != nil; tok = tok.Next {
-		log.Debug(log.BLUE(fmt.Sprintf("\t %p %#+v", tok, tok)))
+		log.DebugNoLine(log.BLUE(fmt.Sprintf("\t %s", tok)))
 	}
 }

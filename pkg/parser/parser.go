@@ -1,8 +1,6 @@
 package parser
 
 import (
-	"fmt"
-
 	"github.com/wf001/modo/pkg/log"
 	mTypes "github.com/wf001/modo/pkg/types"
 )
@@ -60,7 +58,7 @@ func parseIdent(
 	parentKind mTypes.NodeKind,
 ) (*mTypes.Token, *mTypes.Node) {
 	if parentKind == mTypes.ND_DECLARE {
-		log.Debug("is Variable declaration :have %+v", tok)
+		log.DebugValueColored("is Variable declaration :have %s", tok)
 
 		identName := tok.Val
 		typeCur := &mTypes.Node{}
@@ -106,7 +104,7 @@ func parseIdent(
 		return tok, child
 
 	} else {
-		log.Debug("is Variable reference :have %+v", tok)
+		log.DebugValueColored("is Variable reference :have %+v", tok)
 		return tok.Next, newNodeParent(mTypes.ND_VAR_REFERENCE, nil, tok.Val)
 
 	}
@@ -145,7 +143,8 @@ func parseLambda(tok *mTypes.Token, head *mTypes.Node) (*mTypes.Token, *mTypes.N
 
 // NOTE: typed at here: ND_SCALAR, ND_VAR_DECLARE, ND_VAR_REFERENCE(Args), ND_EQ, ND_ADD
 func parseDeclare(tok *mTypes.Token, parentKind mTypes.NodeKind) (*mTypes.Token, *mTypes.Node) {
-	log.Debug(log.GREEN(fmt.Sprintf("%+v", tok)))
+	// Note: no need
+	//log.Debug(log.GREEN(fmt.Sprintf("%+v", tok)))
 	head := &mTypes.Node{}
 
 	if tok.IsKindAndVal(mTypes.TK_PAREN, mTypes.PARREN_OPEN) {
@@ -196,14 +195,14 @@ func parseDeclare(tok *mTypes.Token, parentKind mTypes.NodeKind) (*mTypes.Token,
 			return nextToken, bind
 
 		} else if tok.IsKind(mTypes.TK_LIBCALL) {
-			log.Debug("is Library :have %+v", tok)
+			log.DebugValueColored("is Library :have %+v", tok)
 			v := tok.Val
 			tok, head = parseBody(tok, mTypes.ND_LIBCALL, v)
 
 			head.Type = mTypes.RetType[v]
 
 		} else if tok.IsKind(mTypes.TK_IF) {
-			log.Debug("is If :have %+v", tok)
+			log.DebugValueColored("is IF :have %s", tok)
 			head.Kind = mTypes.ND_IF
 
 			nextToken, cond := parseDeclare(tok.Next, mTypes.ND_IF)
@@ -217,7 +216,7 @@ func parseDeclare(tok *mTypes.Token, parentKind mTypes.NodeKind) (*mTypes.Token,
 			tok = nextToken
 
 		} else if tok.IsKind(mTypes.TK_IDENT) {
-			log.Debug("is calling function :have %+v", tok)
+			log.DebugValueColored("is calling function :have %+v", tok)
 			tok, head = parseBody(tok, mTypes.ND_FUNCCALL, tok.Val)
 		}
 

@@ -110,6 +110,18 @@ type Node struct {
 	IRValue  value.Value //
 }
 
+func (n *Node) String() string {
+
+	return fmt.Sprintf(
+		"{Kind:%#+v, Val:%#+v, Type:%#+v, Len:%d, ElemType:%#+v}",
+		n.Kind,
+		n.Val,
+		n.Type,
+		n.Len,
+		n.ElemType,
+	)
+}
+
 // pred kind
 func (node *Node) IsKind(kind NodeKind) bool {
 	return node.Kind == kind
@@ -207,17 +219,12 @@ func (node *Node) Debug(depth int) {
 	if node == nil {
 		return
 	}
-	log.Debug(
+	log.DebugNoLine(
 		log.BLUE(
 			fmt.Sprintf(
-				"%s %p Kind=%#+v Type=%#+v Val=%#+v Len=%d ElemType=%#+v",
+				"%s %s",
 				strings.Repeat("  ", depth),
 				node,
-				node.Kind,
-				node.Type,
-				node.Val,
-				node.Len,
-				node.ElemType,
 			),
 		),
 	)

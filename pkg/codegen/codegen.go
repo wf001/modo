@@ -68,14 +68,14 @@ func newStr(ctx *context, n *mTypes.Node) *ir.InstLoad {
 }
 
 func newStrHeap(ctx *context, n *mTypes.Node) *ir.InstCall {
-	strVal := n.Val // null終端追加
+	strVal := n.Val
 	strLen := len(strVal)
 
 	mallocSize := constant.NewInt(types.I64, int64(strLen))
 	dest := ctx.block.NewCall(ctx.prog.BuiltinLibs.Malloc.FuncPtr, mallocSize)
 
 	strConst := constant.NewCharArrayFromString(strVal)
-	strConstType := strConst.Typ // => [N x i8]
+	strConstType := strConst.Typ
 
 	srcAlloca := ctx.block.NewAlloca(strConstType)
 
@@ -173,7 +173,6 @@ func newVectorGlobal(ctx *context, n *mTypes.Node) value.Value {
 			arrLength++
 		}
 
-		// GEPでi8*を作成
 		var strGlobalPtrs []constant.Constant
 		for _, g := range strGlobals {
 			gep := constant.NewGetElementPtr(
@@ -185,7 +184,6 @@ func newVectorGlobal(ctx *context, n *mTypes.Node) value.Value {
 			strGlobalPtrs = append(strGlobalPtrs, gep)
 		}
 
-		// @fruits = global [3 x ptr] [ptr @.str, ptr @.str.1, ptr @.str.2], align 8
 		arrType := types.NewArray(uint64(len(strGlobalPtrs)), types.NewPointer(types.I8))
 		arrConst := constant.NewArray(arrType, strGlobalPtrs...)
 		vecGlobal := ctx.mod.NewGlobalDef(

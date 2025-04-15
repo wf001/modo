@@ -70,7 +70,6 @@ func prnVector(libs *mTypes.BuiltinLibProp, block *ir.Block, n *mTypes.Node) {
 			constant.NewInt(types.I32, 0),
 			constant.NewInt(types.I32, int64(i)),
 		)
-		// Arrayの要素の型取得
 		elem := block.NewLoad(t.ElemType, elemPtr)
 
 		formatStr, _ := mTypes.GetPrintFormat(elem.ElemType, libs)

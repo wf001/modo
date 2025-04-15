@@ -100,49 +100,33 @@ func newStrHeap(ctx *context, n *mTypes.Node) *ir.InstCall {
 
 func newVector(ctx *context, n *mTypes.Node) value.Value {
 	elemType, _ := mTypes.GetLLVMType(n.ElemType)
-	var arrLength uint64 = 0
-	var arr value.Value
+
+	var arrContent []constant.Constant
+	arrLength := 0
 
 	if elemType == types.I8Ptr {
-
-		strGlobals := []*ir.Global{}
-		for i, e := 0, n.Child; e != nil; e, i = e.Next, i+1 {
+		// Define each string as a global variable and get a pointer to its contents using GEP.
+		for e := n.Child; e != nil; e = e.Next {
 			strConst := constant.NewCharArrayFromString(e.Val)
-			elementStr := ctx.mod.NewGlobalDef(
+			globalStr := ctx.mod.NewGlobalDef(
 				fmt.Sprintf(".str.%d", len(ctx.mod.Globals)),
 				strConst,
 			)
-			elementStr.Linkage = enum.LinkagePrivate
-			elementStr.UnnamedAddr = enum.UnnamedAddrUnnamedAddr
-			elementStr.Immutable = true
-			elementStr.Align = 1
+			globalStr.Linkage = enum.LinkagePrivate
+			globalStr.UnnamedAddr = enum.UnnamedAddrUnnamedAddr
+			globalStr.Immutable = true
+			globalStr.Align = 1
 
-			strGlobals = append(strGlobals, elementStr)
-			arrLength++
-		}
-
-		var strGlobalPtrs []constant.Constant
-		for _, g := range strGlobals {
 			gep := constant.NewGetElementPtr(
-				g.ContentType, // = types.NewArray(len(str), types.I8)
-				g,
+				globalStr.ContentType,
+				globalStr,
 				constant.NewInt(types.I32, 0),
 				constant.NewInt(types.I32, 0),
 			)
-			strGlobalPtrs = append(strGlobalPtrs, gep)
+			arrContent = append(arrContent, gep)
+			arrLength++
 		}
-
-		arrType := types.NewArray(uint64(len(strGlobalPtrs)), types.NewPointer(types.I8))
-		arrConst := constant.NewArray(arrType, strGlobalPtrs...)
-		vecGlobal := ctx.mod.NewGlobalDef(
-			fmt.Sprintf(".vector.%d", len(ctx.mod.Globals)),
-			arrConst,
-		)
-		vecGlobal.Align = 8
-		arr = vecGlobal
-
 	} else {
-		arrContent := []constant.Constant{}
 		for e := n.Child; e != nil; e = e.Next {
 			e.IRValue = ctx.gen(e)
 			c, ok := e.IRValue.(constant.Constant)
@@ -152,20 +136,19 @@ func newVector(ctx *context, n *mTypes.Node) value.Value {
 			arrContent = append(arrContent, c)
 			arrLength++
 		}
-
-		arrType := types.NewArray(arrLength, elemType)
-
-		arrConst := constant.NewArray(arrType, arrContent...)
-		vecGlobal := ctx.mod.NewGlobalDef(
-			fmt.Sprintf(".vector.%d", len(ctx.mod.Globals)),
-			arrConst,
-		)
-		vecGlobal.Align = 8
-		arr = vecGlobal
-
 	}
-	n.IRValue = arr
-	return arr
+
+	arrType := types.NewArray(uint64(arrLength), elemType)
+	arrConst := constant.NewArray(arrType, arrContent...)
+
+	vecGlobal := ctx.mod.NewGlobalDef(
+		fmt.Sprintf(".vector.%d", len(ctx.mod.Globals)),
+		arrConst,
+	)
+	vecGlobal.Align = 8
+
+	n.IRValue = vecGlobal
+	return vecGlobal
 }
 
 func newVectorHeap(ctx *context, n *mTypes.Node) value.Value {
@@ -178,15 +161,15 @@ func newVectorHeap(ctx *context, n *mTypes.Node) value.Value {
 		arrLength++
 	}
 	elemType, _ := mTypes.GetLLVMType(n.ElemType)
-	arrType1, _ := mTypes.GetLLVMTypeForVector(n)
-	arrType2, _ := arrType1.(*types.PointerType)
+	pointorArrType, _ := mTypes.GetLLVMTypeForVector(n)
+	arrType, _ := pointorArrType.(*types.PointerType)
 
 	typeSize := constant.NewInt(types.I64, int64(mTypes.GetBitWidth(elemType)))
-	elemSize := constant.NewInt(types.I64, int64(arrLength))
-	totalSize := ctx.block.NewMul(typeSize, elemSize)
+	arrSize := constant.NewInt(types.I64, int64(arrLength))
+	allocSize := ctx.block.NewMul(typeSize, arrSize)
 
-	rawPtr := ctx.block.NewCall(ctx.prog.BuiltinLibs.Malloc.FuncPtr, totalSize)
-	arrayPtr := ctx.block.NewBitCast(rawPtr, types.NewPointer(arrType2.ElemType))
+	allocatedPtr := ctx.block.NewCall(ctx.prog.BuiltinLibs.Malloc.FuncPtr, allocSize)
+	arrayPtr := ctx.block.NewBitCast(allocatedPtr, types.NewPointer(arrType.ElemType))
 
 	for i, e := range arrContent {
 		ptr := ctx.block.NewGetElementPtr(elemType, arrayPtr, constant.NewInt(types.I32, int64(i)))

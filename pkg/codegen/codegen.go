@@ -220,6 +220,40 @@ func newVectorGlobal(ctx *context, n *mTypes.Node) value.Value {
 	return arr
 }
 
+func newVectorHeap(ctx *context, n *mTypes.Node) value.Value {
+	log.Debug("heap")
+	elemType, _ := mTypes.GetLLVMType(n.ElemType)
+	bitWidth := mTypes.GetBitWidth(elemType)
+	var arrLength uint64
+	var elems []value.Value
+
+	// 各要素を収集
+	for e := n.Child; e != nil; e = e.Next {
+		e.IRValue = ctx.gen(e)
+		elems = append(elems, e.IRValue)
+		arrLength++
+	}
+
+	// 配列の型: [length x elemType]
+
+	// malloc するサイズ = 要素サイズ * 配列長
+	elemSize := bitWidth * arrLength
+	totalSize := constant.NewInt(types.I64, int64(elemSize*uint64(arrLength)))
+	mallocPtr := ctx.block.NewCall(ctx.prog.BuiltinLibs.Malloc.FuncPtr, totalSize)
+
+	// 要素の型ポインタにキャスト
+	vecPtr := ctx.block.NewBitCast(mallocPtr, types.NewPointer(elemType))
+
+	// 各要素を書き込む
+	for i, elem := range elems {
+		gep := ctx.block.NewGetElementPtr(elemType, vecPtr, constant.NewInt(types.I64, int64(i)))
+		ctx.block.NewStore(elem, gep)
+	}
+
+	n.IRValue = vecPtr
+	return vecPtr
+}
+
 func (ctx *context) genVarDeclare(node *mTypes.Node) value.Value {
 	if node.Val == "main" {
 		// means declaring main function regarded as entrypoint
@@ -544,7 +578,7 @@ func (ctx *context) gen(node *mTypes.Node) value.Value {
 		}
 	} else if node.IsKind(mTypes.ND_COLLECTION) {
 
-		return newVectorGlobal(ctx, node)
+		return newVectorHeap(ctx, node)
 	} else {
 		log.Panic("unresolved Nodekind: have %+v", node)
 	}

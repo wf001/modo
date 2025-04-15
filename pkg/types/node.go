@@ -104,6 +104,7 @@ type Node struct {
 	Len      uint64 // the number of bytes, used with string type
 	Bind     *Node
 	Args     *Node
+	IsGlobal bool
 	VarPtr   value.Value // binded local variable
 	FuncPtr  *ir.Func    // declared function, library function
 	IRValue  value.Value //

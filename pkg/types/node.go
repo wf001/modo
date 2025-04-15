@@ -209,7 +209,7 @@ func (node *Node) Debug(depth int) {
 	log.Debug(
 		log.BLUE(
 			fmt.Sprintf(
-				"%s %p %#+v %#+v %#+v %d %#+v",
+				"%s %p Kind=%#+v Type=%#+v Val=%#+v Len=%d ElemType=%#+v",
 				strings.Repeat("  ", depth),
 				node,
 				node.Kind,

@@ -21,6 +21,7 @@ testexec(){
 
   assertexec '(def main ::int (fn [] (prn (* 4 5))))' "20\\\n"
   assertexec '(def main ::int (fn [] (prn (* 9 5))))' "45\\\n"
+  assertexec '(def main ::int (fn [] (prn (* 2 3 4))))' "24\\\n"
   assertexec '(def main ::int (fn [] (prn (* (+ 2 3) 5))))' "25\\\n"
 
   assertexec '(def main ::int (fn [] (prn (/ 4 2))))' "2\\\n"
@@ -36,6 +37,9 @@ testexec(){
   assertexec '(def main ::int (fn [] (prn (= 5 (+ 3 2)))))' "true\\\n"
   assertexec '(def main ::int (fn [] (prn (= (+ 4 3) (+ 3 2)))))' "false\\\n"
   assertexec '(def main ::int (fn [] (prn (= (+ 4 -3) (+ 3 -2)))))' "true\\\n"
+  assertexec '(def main ::int (fn [] (prn (= true true))))' "true\\\n"
+  assertexec '(def main ::int (fn [] (prn (= true false))))' "false\\\n"
+  assertexec '(def main ::int (fn [] (prn (= false false))))' "true\\\n"
   assertexec '(def main ::int (fn [] (prn (= "foo" "foo"))))' "true\\\n"
   assertexec '(def main ::int (fn [] (prn (= "www" "rrr"))))' "false\\\n"
   assertexec '(def main ::int (fn [] (prn (= "foo" "foo" "foo"))))' "true\\\n"
@@ -52,6 +56,8 @@ testexec(){
   assertexec '(def main ::int (fn [] (prn (< 8 2))))' "false\\\n"
   assertexec '(def main ::int (fn [] (prn (< 1 2))))' "true\\\n"
   assertexec '(def main ::int (fn [] (prn (< 2 2))))' "false\\\n"
+  assertexec '(def main ::int (fn [] (prn (< 1 2 3))))' "true\\\n"
+  assertexec '(def main ::int (fn [] (prn (< 1 2 1))))' "false\\\n"
 
   # logical operator
   echo "== logical operator ==="

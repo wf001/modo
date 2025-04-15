@@ -2,7 +2,6 @@ package core
 
 import (
 	"github.com/llir/llvm/ir"
-	"github.com/llir/llvm/ir/constant"
 	"github.com/llir/llvm/ir/types"
 	"github.com/llir/llvm/ir/value"
 
@@ -29,32 +28,15 @@ func prnScalar(
 }
 
 func prnVector(libs *mTypes.BuiltinLibProp, block *ir.Block, n *mTypes.Node) {
-	var ptr value.Value
-	var t *types.ArrayType
+	var arr value.Value
+	var arrType *types.ArrayType
 
 	switch v := n.IRValue.(type) {
-	// Note: so ugly :(
-	case *ir.InstCall: //gs, gi
-		ptr = v
-		ptrType, ok := v.Type().(*types.PointerType)
-		if !ok {
-			log.Panic("Expected pointer return from call, got: %+v", v.Type())
-		}
-		t, ok = ptrType.ElemType.(*types.ArrayType)
-		if !ok {
-			log.Panic("Expected pointer to array, got: %+v", ptrType.ElemType)
-		}
-
-	case *ir.InstBitCast: //ls, li
-		ptrType, ok := v.To.(*types.PointerType)
-		if !ok {
-			log.Panic("Unsupported IRValue type: %#+v", n.IRValue)
-		}
-		t, ok = ptrType.ElemType.(*types.ArrayType)
-		if !ok {
-			log.Panic("Expected pointer to array, got: %+v", ptrType.ElemType)
-		}
-		ptr = n.IRValue
+	// The vector on global space: InstCall,
+	// The vector on local space: InstBitCast
+	case *ir.InstCall, *ir.InstBitCast:
+		arrType = mTypes.GetArrType(v)
+		arr = v
 
 	default:
 		log.Panic("Unsupported IRValue type: %#+v", n.IRValue)
@@ -62,24 +44,18 @@ func prnVector(libs *mTypes.BuiltinLibProp, block *ir.Block, n *mTypes.Node) {
 
 	block.NewCall(libs.Printf.FuncPtr, libs.GlobalVar.FormatBracketOpen)
 
-	for i := uint64(0); i < t.Len; i++ {
-		elemPtr := block.NewGetElementPtr(
-			t,
-			ptr,
-			constant.NewInt(types.I32, 0),
-			constant.NewInt(types.I32, int64(i)),
-		)
-		elem := block.NewLoad(t.ElemType, elemPtr)
+	for i := uint64(0); i < arrType.Len; i++ {
+		elem := mTypes.LoadArrElem(block, arr, arrType, i)
 
 		formatStr, _ := mTypes.GetPrintFormat(elem.ElemType, libs)
-		if t.ElemType == types.I1 {
+		if arrType.ElemType == types.I1 {
 			v := block.NewSelect(elem, libs.GlobalVar.TrueValue, libs.GlobalVar.FalseValue)
 			block.NewCall(libs.Printf.FuncPtr, formatStr, v)
 		} else {
 			block.NewCall(libs.Printf.FuncPtr, formatStr, elem)
 		}
 
-		if i < uint64(t.Len-1) {
+		if i < uint64(arrType.Len-1) {
 			block.NewCall(libs.Printf.FuncPtr, libs.GlobalVar.FormatComma)
 			block.NewCall(libs.Printf.FuncPtr, libs.GlobalVar.FormatSpace)
 		}

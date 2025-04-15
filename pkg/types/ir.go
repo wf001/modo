@@ -2,8 +2,11 @@ package types
 
 import (
 	"github.com/llir/llvm/ir"
+	"github.com/llir/llvm/ir/constant"
 	"github.com/llir/llvm/ir/types"
 	"github.com/llir/llvm/ir/value"
+
+	"github.com/wf001/modo/pkg/log"
 )
 
 func GetPrintFormat(ty types.Type, libs *BuiltinLibProp) (*ir.Global, bool) {
@@ -27,4 +30,28 @@ func IsScalar(v value.Value) bool {
 		v.Type().Equal(types.I8Ptr) ||
 		v.Type().Equal(types.Void)
 
+}
+
+func LoadArrElem(block *ir.Block, src value.Value, ty *types.ArrayType, i uint64) *ir.InstLoad {
+	elemPtr := block.NewGetElementPtr(
+		ty,
+		src,
+		constant.NewInt(types.I32, 0),
+		constant.NewInt(types.I32, int64(i)),
+	)
+	return block.NewLoad(ty.ElemType, elemPtr)
+
+}
+func GetArrType(v value.Value) *types.ArrayType {
+	ptrElemType, ok := v.Type().(*types.PointerType)
+
+	if !ok {
+		log.Panic("Expected pointer return from call, got: %+v", v.Type())
+	}
+	arrType, ok := ptrElemType.ElemType.(*types.ArrayType)
+
+	if !ok {
+		log.Panic("Expected pointer to array, got: %+v", ptrElemType.ElemType)
+	}
+	return arrType
 }

@@ -19,7 +19,7 @@ func InvokePop(block *ir.Block, libs *mTypes.BuiltinLibProp, node *mTypes.Node) 
 
 	oldArr := oldArrPtr.ElemType.(*types.ArrayType)
 
-	newArr := vector.CopyArray(block, oldArrPtr, oldArr.ElemType, oldArr.Len-1, oldArr.Len-1)
+	newArr := vector.CopyArrayOld(block, oldArrPtr, oldArr.ElemType, oldArr.Len-1, oldArr.Len-1)
 
 	return newArr
 }

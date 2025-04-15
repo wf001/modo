@@ -173,13 +173,16 @@ testexec(){
   # vector
   echo "== vector ==="
   assertexec '(def main :: int (fn [] (let [vec :: [int] [41, 28, 239]] (prn vec))))'  "[41, 28, 239]\\\n"
+  assertexec '(def main :: int (fn [] (let [vec :: [string] ["Apple", "Banana"]] (prn vec))))' "[Apple, Banana]\\\n"
+  assertexec '(def v :: [int] [233, 842]) (def main :: int (fn [] (prn v)))' "[233, 842]\\\n"
+  assertexec '(def v :: [string] ["Global", "Banana"]) (def main :: int (fn [] (prn v)))' "[Global, Banana]\\\n"
+
   assertexec '(def main :: int (fn [] (let [vec :: [bool] [true, false, false, true]] (prn vec))))' "[true, false, false, true]\\\n"
   # assertexec '(def main :: int (fn [] (let [vec :: [int] [41, 28, 239]] (prn (get vec 1)))))'  "28\\\n"
-  # assertexec '(def main :: int (fn [] (let [vec :: [int] [423, 83, 90]] (prn (conj vec 27)) (prn vec))))' "[423, 83, 90, 27]\\\n[423, 83, 90]\\\n"
+  assertexec '(def main :: int (fn [] (let [vec :: [int] [423, 83, 90]] (prn (conj vec 27)) (prn vec))))' "[423, 83, 90, 27]\\\n[423, 83, 90]\\\n"
   # assertexec '(def main :: int (fn [] (let [vec :: [int] [423, 83, 90]] (prn (assoc vec 1 27)) (prn vec))))' "[423, 27, 90]\\\n[423, 83, 90]\\\n"
   # assertexec '(def main :: int (fn [] (let [vec :: [int] [423, 83, 90]] (prn (pop vec)) (prn vec))))'  "[423, 83]\\\n[423, 83, 90]\\\n"
 
-  assertexec '(def main :: int (fn [] (let [vec :: [string] ["Apple", "Banana"]] (prn vec))))' "[Apple, Banana]\\\n"
 
 }
 

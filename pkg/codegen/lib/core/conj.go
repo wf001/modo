@@ -12,13 +12,13 @@ import (
 )
 
 func InvokeConj(block *ir.Block, libs *mTypes.BuiltinLibProp, node *mTypes.Node) value.Value {
-	var arrType *types.ArrayType
+	var oldArrType *types.ArrayType
 
 	var oldArrPtr value.Value
 
 	switch v := node.IRValue.(type) {
 	case *ir.InstCall, *ir.InstBitCast:
-		arrType = mTypes.GetArrType(v)
+		oldArrType = mTypes.GetArrType(v)
 		oldArrPtr = v
 
 	default:
@@ -27,35 +27,24 @@ func InvokeConj(block *ir.Block, libs *mTypes.BuiltinLibProp, node *mTypes.Node)
 
 	newValue := node.Next.IRValue
 
-	typeSize := constant.NewInt(types.I64, int64(mTypes.GetBitWidth(arrType.ElemType)))
-	newArrSize := constant.NewInt(types.I64, int64(arrType.Len+1))
+	typeSize := constant.NewInt(types.I64, int64(mTypes.GetBitWidth(oldArrType.ElemType)))
+	newArrSize := constant.NewInt(types.I64, int64(oldArrType.Len+1))
 	allocSize := block.NewMul(typeSize, newArrSize)
-	allocatedPtr := block.NewCall(libs.Malloc.FuncPtr, allocSize)
-
-	newArrType := types.NewArray(arrType.Len+1, arrType.ElemType)
-	newArrPtr := block.NewBitCast(allocatedPtr, types.NewPointer(newArrType))
-
-	for i := uint64(0); i < arrType.Len; i++ {
-		elem := mTypes.LoadArrElem(block, oldArrPtr, arrType, i)
-		destPtr := block.NewGetElementPtr(
-			newArrType,
-			newArrPtr,
-			constant.NewInt(types.I32, 0),
-			constant.NewInt(types.I32, int64(i)),
-		)
-		block.NewStore(elem, destPtr)
-	}
+	newArrType := types.NewArray(oldArrType.Len+1, oldArrType.ElemType)
+	newArrPtr := vector.CopyArray(block, libs, allocSize, oldArrType, oldArrPtr, newArrType)
 
 	destPtr := block.NewGetElementPtr(
 		newArrType,
 		newArrPtr,
 		constant.NewInt(types.I32, 0),
-		constant.NewInt(types.I32, int64(arrType.Len)),
+		constant.NewInt(types.I32, int64(oldArrType.Len)),
 	)
 	block.NewStore(newValue, destPtr)
 
 	return newArrPtr
 }
+
+// TODO: deprecated
 func InvokeConjOld(block *ir.Block, libs *mTypes.BuiltinLibProp, node *mTypes.Node) value.Value {
 	oldArrPtr, ok := node.IRValue.(*ir.InstAlloca)
 	if !ok {
@@ -65,7 +54,7 @@ func InvokeConjOld(block *ir.Block, libs *mTypes.BuiltinLibProp, node *mTypes.No
 	newValue := node.Next.IRValue
 	oldArr := oldArrPtr.ElemType.(*types.ArrayType)
 
-	newArr := vector.CopyArray(block, oldArrPtr, oldArr.ElemType, oldArr.Len+1, oldArr.Len)
+	newArr := vector.CopyArrayOld(block, oldArrPtr, oldArr.ElemType, oldArr.Len+1, oldArr.Len)
 
 	newElemPtr := block.NewGetElementPtr(
 		newArr.ElemType,

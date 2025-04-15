@@ -20,7 +20,7 @@ func InvokeAssoc(block *ir.Block, libs *mTypes.BuiltinLibProp, node *mTypes.Node
 	pos, newValue := node.Next.IRValue, node.Next.Next.IRValue
 	oldArr := oldArrPtr.ElemType.(*types.ArrayType)
 
-	newArr := vector.CopyArray(block, oldArrPtr, oldArr.ElemType, oldArr.Len, oldArr.Len)
+	newArr := vector.CopyArrayOld(block, oldArrPtr, oldArr.ElemType, oldArr.Len, oldArr.Len)
 
 	newElemPtr := block.NewGetElementPtr(
 		newArr.ElemType,

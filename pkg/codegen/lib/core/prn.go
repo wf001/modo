@@ -45,17 +45,16 @@ func prnVector(libs *mTypes.BuiltinLibProp, block *ir.Block, n *mTypes.Node) {
 			log.Panic("Expected pointer to array, got: %+v", ptrType.ElemType)
 		}
 
-	case *ir.Global: //ls, li
-		ptr = v
-		ty, ok := v.ContentType.(*types.ArrayType)
+	case *ir.InstBitCast: //ls, li
+		ptrType, ok := v.To.(*types.PointerType)
 		if !ok {
-			log.Panic("Unsupported IRValue type: %#+v", ty)
+			log.Panic("Unsupported IRValue type: %#+v", n.IRValue)
 		}
-		if _, ok := ty.ElemType.(*types.PointerType); ok {
-			t = &types.ArrayType{ElemType: types.I8Ptr, Len: ty.Len}
-		} else {
-			t = ty
+		t, ok = ptrType.ElemType.(*types.ArrayType)
+		if !ok {
+			log.Panic("Expected pointer to array, got: %+v", ptrType.ElemType)
 		}
+		ptr = n.IRValue
 
 	default:
 		log.Panic("Unsupported IRValue type: %#+v", n.IRValue)

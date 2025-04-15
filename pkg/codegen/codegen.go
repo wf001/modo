@@ -221,37 +221,32 @@ func newVectorGlobal(ctx *context, n *mTypes.Node) value.Value {
 }
 
 func newVectorHeap(ctx *context, n *mTypes.Node) value.Value {
-	log.Debug("heap")
-	elemType, _ := mTypes.GetLLVMType(n.ElemType)
-	bitWidth := mTypes.GetBitWidth(elemType)
 	var arrLength uint64
-	var elems []value.Value
 
-	// 各要素を収集
+	arrContent := []value.Value{}
 	for e := n.Child; e != nil; e = e.Next {
 		e.IRValue = ctx.gen(e)
-		elems = append(elems, e.IRValue)
+		arrContent = append(arrContent, e.IRValue)
 		arrLength++
 	}
+	elemType, _ := mTypes.GetLLVMType(n.ElemType)
+	arrType1, _ := mTypes.GetLLVMTypeForVector(n)
+	arrType2, _ := arrType1.(*types.PointerType)
 
-	// 配列の型: [length x elemType]
+	typeSize := constant.NewInt(types.I64, int64(mTypes.GetBitWidth(elemType)))
+	elemSize := constant.NewInt(types.I64, int64(arrLength))
+	totalSize := ctx.block.NewMul(typeSize, elemSize)
 
-	// malloc するサイズ = 要素サイズ * 配列長
-	elemSize := bitWidth * arrLength
-	totalSize := constant.NewInt(types.I64, int64(elemSize*uint64(arrLength)))
-	mallocPtr := ctx.block.NewCall(ctx.prog.BuiltinLibs.Malloc.FuncPtr, totalSize)
+	rawPtr := ctx.block.NewCall(ctx.prog.BuiltinLibs.Malloc.FuncPtr, totalSize)
+	arrayPtr := ctx.block.NewBitCast(rawPtr, types.NewPointer(arrType2.ElemType))
 
-	// 要素の型ポインタにキャスト
-	vecPtr := ctx.block.NewBitCast(mallocPtr, types.NewPointer(elemType))
-
-	// 各要素を書き込む
-	for i, elem := range elems {
-		gep := ctx.block.NewGetElementPtr(elemType, vecPtr, constant.NewInt(types.I64, int64(i)))
-		ctx.block.NewStore(elem, gep)
+	for i, e := range arrContent {
+		ptr := ctx.block.NewGetElementPtr(elemType, arrayPtr, constant.NewInt(types.I32, int64(i)))
+		ctx.block.NewStore(e, ptr)
 	}
 
-	n.IRValue = vecPtr
-	return vecPtr
+	return arrayPtr
+
 }
 
 func (ctx *context) genVarDeclare(node *mTypes.Node) value.Value {

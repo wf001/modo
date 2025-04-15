@@ -12,6 +12,51 @@ import (
 )
 
 func InvokeConj(block *ir.Block, libs *mTypes.BuiltinLibProp, node *mTypes.Node) value.Value {
+	var arrType *types.ArrayType
+
+	var oldArrPtr value.Value
+
+	switch v := node.IRValue.(type) {
+	case *ir.InstCall, *ir.InstBitCast:
+		arrType = mTypes.GetArrType(v)
+		oldArrPtr = v
+
+	default:
+		log.Panic("Unsupported IRValue type: %#+v", node.IRValue)
+	}
+
+	newValue := node.Next.IRValue
+
+	typeSize := constant.NewInt(types.I64, int64(mTypes.GetBitWidth(arrType.ElemType)))
+	newArrSize := constant.NewInt(types.I64, int64(arrType.Len+1))
+	allocSize := block.NewMul(typeSize, newArrSize)
+	allocatedPtr := block.NewCall(libs.Malloc.FuncPtr, allocSize)
+
+	newArrType := types.NewArray(arrType.Len+1, arrType.ElemType)
+	newArrPtr := block.NewBitCast(allocatedPtr, types.NewPointer(newArrType))
+
+	for i := uint64(0); i < arrType.Len; i++ {
+		elem := mTypes.LoadArrElem(block, oldArrPtr, arrType, i)
+		destPtr := block.NewGetElementPtr(
+			newArrType,
+			newArrPtr,
+			constant.NewInt(types.I32, 0),
+			constant.NewInt(types.I32, int64(i)),
+		)
+		block.NewStore(elem, destPtr)
+	}
+
+	destPtr := block.NewGetElementPtr(
+		newArrType,
+		newArrPtr,
+		constant.NewInt(types.I32, 0),
+		constant.NewInt(types.I32, int64(arrType.Len)),
+	)
+	block.NewStore(newValue, destPtr)
+
+	return newArrPtr
+}
+func InvokeConjOld(block *ir.Block, libs *mTypes.BuiltinLibProp, node *mTypes.Node) value.Value {
 	oldArrPtr, ok := node.IRValue.(*ir.InstAlloca)
 	if !ok {
 		log.Panic("Array elements must be ir.InstAlloca: have %+v", oldArrPtr)

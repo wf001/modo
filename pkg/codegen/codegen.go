@@ -68,7 +68,7 @@ func newStr(ctx *context, n *mTypes.Node) *ir.InstLoad {
 }
 
 func newStrHeap(ctx *context, n *mTypes.Node) *ir.InstCall {
-	strVal := n.Val + "\x00" // null終端追加
+	strVal := n.Val // null終端追加
 	strLen := len(strVal)
 
 	mallocSize := constant.NewInt(types.I64, int64(strLen))

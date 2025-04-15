@@ -13,6 +13,35 @@ import (
 )
 
 func InvokeGet(block *ir.Block, libs *mTypes.BuiltinLibProp, node *mTypes.Node) value.Value {
+	var oldArrType *types.ArrayType
+
+	var oldArrPtr value.Value
+
+	switch v := node.IRValue.(type) {
+	case *ir.InstCall, *ir.InstBitCast:
+		oldArrType = mTypes.GetArrType(v)
+		oldArrPtr = v
+
+	default:
+		log.Panic("Unsupported IRValue type: %#+v", node.IRValue)
+	}
+
+	i, _ := strconv.ParseInt(node.Next.Val, 10, 32)
+	if i >= int64(oldArrType.Len) {
+		log.Panic("Array index out of range: have %d but array length %d", i, node.Len)
+	}
+
+	typeSize := constant.NewInt(types.I64, int64(mTypes.GetBitWidth(oldArrType.ElemType)))
+	allocatedPtr := block.NewCall(libs.Malloc.FuncPtr, typeSize)
+	newArrPtr := block.NewBitCast(allocatedPtr, types.NewPointer(oldArrType.ElemType))
+
+	loadedValue := mTypes.LoadArrElem(block, oldArrPtr, oldArrType, uint64(i))
+	block.NewStore(loadedValue, newArrPtr)
+
+	return newArrPtr
+}
+
+func InvokeGetOld(block *ir.Block, libs *mTypes.BuiltinLibProp, node *mTypes.Node) value.Value {
 	value, ok := node.IRValue.(*ir.InstAlloca)
 	if !ok {
 		log.Panic("Array elements must be ir.InstAlloca: have %+v", value)

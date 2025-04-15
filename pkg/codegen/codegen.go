@@ -530,6 +530,9 @@ func (ctx *context) gen(node *mTypes.Node) value.Value {
 			return newI32(node.Val)
 
 		} else if node.IsType(mTypes.TY_STR) {
+			if node.IsGlobal {
+				return newStr(ctx, node)
+			}
 			return newStrHeap(ctx, node)
 
 		} else if node.IsType(mTypes.TY_NIL) {

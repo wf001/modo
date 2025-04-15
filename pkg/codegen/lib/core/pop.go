@@ -2,6 +2,7 @@ package core
 
 import (
 	"github.com/llir/llvm/ir"
+	"github.com/llir/llvm/ir/constant"
 	"github.com/llir/llvm/ir/types"
 	"github.com/llir/llvm/ir/value"
 
@@ -11,6 +12,29 @@ import (
 )
 
 func InvokePop(block *ir.Block, libs *mTypes.BuiltinLibProp, node *mTypes.Node) value.Value {
+	var oldArrType *types.ArrayType
+
+	var oldArrPtr value.Value
+
+	switch v := node.IRValue.(type) {
+	case *ir.InstCall, *ir.InstBitCast:
+		oldArrType = mTypes.GetArrType(v)
+		oldArrPtr = v
+
+	default:
+		log.Panic("Unsupported IRValue type: %#+v", node.IRValue)
+	}
+
+	typeSize := constant.NewInt(types.I64, int64(mTypes.GetBitWidth(oldArrType.ElemType)))
+	newArrSize := constant.NewInt(types.I64, int64(oldArrType.Len-1))
+	allocSize := block.NewMul(typeSize, newArrSize)
+	newArrType := types.NewArray(oldArrType.Len-1, oldArrType.ElemType)
+	newArrPtr := vector.CopyArray(block, libs, allocSize, oldArrType, oldArrPtr, newArrType)
+
+	return newArrPtr
+}
+
+func InvokePopOld(block *ir.Block, libs *mTypes.BuiltinLibProp, node *mTypes.Node) value.Value {
 
 	oldArrPtr, ok := node.IRValue.(*ir.InstAlloca)
 	if !ok {

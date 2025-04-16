@@ -28,7 +28,9 @@ func IsScalar(v value.Value) bool {
 	return v.Type().Equal(types.I32) ||
 		v.Type().Equal(types.I1) ||
 		v.Type().Equal(types.I8Ptr) ||
-		v.Type().Equal(types.Void)
+		v.Type().Equal(types.Void) ||
+		v.Type().Equal((types.I32Ptr)) ||
+		v.Type().Equal((types.I1Ptr))
 
 }
 
@@ -42,16 +44,20 @@ func LoadArrElem(block *ir.Block, src value.Value, ty *types.ArrayType, i uint64
 	return block.NewLoad(ty.ElemType, elemPtr)
 
 }
-func GetArrType(v value.Value) *types.ArrayType {
+
+func AssertArrType(v value.Value) (*types.ArrayType, bool) {
 	ptrElemType, ok := v.Type().(*types.PointerType)
 
 	if !ok {
-		log.Panic("Expected pointer return from call, got: %+v", v.Type())
+		log.Warn("Not pointer type, got: %+v", v.Type())
+		return nil, false
+
 	}
 	arrType, ok := ptrElemType.ElemType.(*types.ArrayType)
 
 	if !ok {
-		log.Panic("Expected pointer to array, got: %+v", ptrElemType.ElemType)
+		log.Warn("Not pointer type to array, got: %+v", ptrElemType.ElemType)
+		return nil, false
 	}
-	return arrType
+	return arrType, true
 }

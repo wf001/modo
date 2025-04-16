@@ -19,7 +19,7 @@ func InvokeGet(block *ir.Block, libs *mTypes.BuiltinLibProp, node *mTypes.Node) 
 
 	switch v := node.IRValue.(type) {
 	case *ir.InstCall, *ir.InstBitCast:
-		oldArrType = mTypes.GetArrType(v)
+		oldArrType, _ = mTypes.AssertArrType(v)
 		oldArrPtr = v
 
 	default:

@@ -48,7 +48,7 @@ func prnVector(libs *mTypes.BuiltinLibProp, block *ir.Block, n *mTypes.Node) {
 	// The vector on global space: InstCall,
 	// The vector on local space: InstBitCast
 	case *ir.InstCall, *ir.InstBitCast:
-		arrType = mTypes.GetArrType(v)
+		arrType, _ = mTypes.AssertArrType(v)
 		arr = v
 
 	default:
@@ -80,17 +80,12 @@ func prnVector(libs *mTypes.BuiltinLibProp, block *ir.Block, n *mTypes.Node) {
 func InvokePrn(block *ir.Block, libs *mTypes.BuiltinLibProp, node *mTypes.Node) value.Value {
 
 	for n := node; n != nil; n = n.Next {
-		rootTy := n.IRValue.Type()
-
 		if mTypes.IsScalar(n.IRValue) {
 			prnScalar(libs, block, n)
 
-		} else if pointerElemTy, ok := rootTy.(*types.PointerType); ok {
-			if _, ok := pointerElemTy.ElemType.(*types.ArrayType); ok {
-				prnVector(libs, block, n)
-			} else {
-				prnScalar(libs, block, n)
-			}
+		} else if _, ok := mTypes.AssertArrType(n.IRValue); ok {
+			prnVector(libs, block, n)
+
 		} else {
 			log.Panic("unresolved type: have %+v", n)
 		}

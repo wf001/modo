@@ -100,7 +100,11 @@ func parseIdent(
 		child := newNodeParent(mTypes.ND_VAR_DECLARE, head, identName)
 		child.Type = typeHead.Type
 		// HACK: seems buggy
-		child.Child.ElemType = typeHead.ElemType
+		child.ElemType = typeHead.ElemType
+		if child.Child.Kind == mTypes.ND_COLLECTION {
+			child.Child.Type = typeHead.Type
+			child.Child.ElemType = typeHead.ElemType
+		}
 		return tok, child
 
 	} else {
@@ -258,7 +262,6 @@ func parseDeclare(tok *mTypes.Token, parentKind mTypes.NodeKind) (*mTypes.Token,
 			log.Panic("vector must be closed with bracket :have %+v", tok)
 		}
 		tok = tok.Next
-		rootNode.Type = mTypes.TY_VECTOR
 		return tok, rootNode
 
 	} else {

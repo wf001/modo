@@ -31,7 +31,6 @@ func IsScalar(v value.Value) bool {
 		v.Type().Equal(types.Void) ||
 		v.Type().Equal((types.I32Ptr)) ||
 		v.Type().Equal((types.I1Ptr))
-
 }
 
 func LoadArrElem(block *ir.Block, src value.Value, ty *types.ArrayType, i uint64) *ir.InstLoad {

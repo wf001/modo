@@ -26,7 +26,7 @@ func prnScalar(
 		value = libs.GlobalVar.NilValue
 
 	} else if pointerElemTy, isPtr := rootTy.(*types.PointerType); isPtr {
-		if isArr := pointerElemTy.ElemType.Equal(types.I32); isArr {
+		if isStr := rootTy.Equal(types.I8Ptr); !isStr {
 			ptr := block.NewLoad(pointerElemTy, n.IRValue)
 			value = block.NewGetElementPtr(
 				pointerElemTy,

@@ -34,6 +34,7 @@ func InvokePop(block *ir.Block, libs *mTypes.BuiltinLibProp, node *mTypes.Node) 
 	return newArrPtr
 }
 
+// Note: remain here until it will be defined the strategy of memory lifecycle
 func InvokePopOld(block *ir.Block, libs *mTypes.BuiltinLibProp, node *mTypes.Node) value.Value {
 
 	oldArrPtr, ok := node.IRValue.(*ir.InstAlloca)

@@ -34,7 +34,7 @@ func CopyArray(
 	return newArrPtr
 }
 
-// TODO: deprecated
+// Note: remain here until it will be defined the strategy of memory lifecycle
 func CopyArrayOld(
 	block *ir.Block,
 	oldArrPtr *ir.InstAlloca, // Pointer to the allocated memory of the original array

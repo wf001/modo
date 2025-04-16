@@ -39,6 +39,7 @@ func InvokeGet(block *ir.Block, libs *mTypes.BuiltinLibProp, node *mTypes.Node) 
 	return newValue
 }
 
+// Note: remain here until it will be defined the strategy of memory lifecycle
 func InvokeGetOld(block *ir.Block, libs *mTypes.BuiltinLibProp, node *mTypes.Node) value.Value {
 	value, ok := node.IRValue.(*ir.InstAlloca)
 	if !ok {

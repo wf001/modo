@@ -46,7 +46,7 @@ func newI32(s string) *constant.Int {
 	return constant.NewInt(types.I32, i)
 }
 
-func newStr(ctx *context, n *mTypes.Node) *ir.InstLoad {
+func newStrGlobal(ctx *context, n *mTypes.Node) *ir.InstLoad {
 	strConst := constant.NewCharArrayFromString(n.Val)
 	globalStr := ctx.mod.NewGlobalDef(fmt.Sprintf(".str.%d", len(ctx.mod.Globals)), strConst)
 	globalStr.Linkage = enum.LinkagePrivate
@@ -98,7 +98,60 @@ func newStrHeap(ctx *context, n *mTypes.Node) *ir.InstCall {
 	return dest
 }
 
-func newVector(ctx *context, n *mTypes.Node) value.Value {
+// Note: remain here until it will be defined the strategy of memory lifecycle
+func newVectorOld(ctx *context, n *mTypes.Node) value.Value {
+	elemType, _ := mTypes.GetLLVMType(n.ElemType)
+
+	var arrLength uint64 = 0
+	var arr value.Value
+
+	if elemType == types.I8Ptr {
+		arrContent := []value.Value{}
+		for e := n.Child; e != nil; e = e.Next {
+			e.IRValue = ctx.gen(e)
+			arrContent = append(arrContent, e.IRValue)
+			arrLength++
+		}
+
+		arrType := types.NewArray(arrLength, elemType)
+		arr = ctx.block.NewAlloca(arrType)
+
+		for i := uint64(0); i < arrLength; i++ {
+			elemPtr := ctx.block.NewGetElementPtr(
+				arrType,
+				arr,
+				constant.NewInt(types.I32, 0),
+				constant.NewInt(types.I32, int64(i)),
+			)
+			ctx.block.NewStore(arrContent[i], elemPtr)
+		}
+
+	} else {
+		arrContent := []constant.Constant{}
+		for e := n.Child; e != nil; e = e.Next {
+			e.IRValue = ctx.gen(e)
+			c, ok := e.IRValue.(constant.Constant)
+			if !ok {
+				log.Panic("Each array element must be constant.Constant: have %+v", e.IRValue)
+			}
+			arrContent = append(arrContent, c)
+			arrLength++
+		}
+
+		arrType := types.NewArray(arrLength, elemType)
+		arr = ctx.block.NewAlloca(arrType)
+		ctx.block.NewStore(
+			constant.NewArray(
+				arrType,
+				arrContent...,
+			),
+			arr,
+		)
+	}
+	n.IRValue = arr
+	return arr
+}
+func newVectorGlobal(ctx *context, n *mTypes.Node) value.Value {
 	elemType, _ := mTypes.GetLLVMType(n.ElemType)
 
 	var arrContent []constant.Constant
@@ -489,12 +542,12 @@ func (ctx *context) gen(node *mTypes.Node) value.Value {
 
 		} else if node.IsType(mTypes.TY_STR) {
 			if node.IsGlobal {
-				return newStr(ctx, node)
+				return newStrGlobal(ctx, node)
 			}
 			return newStrHeap(ctx, node)
 
 		} else if node.IsType(mTypes.TY_NIL) {
-			return newStr(ctx, node)
+			return newStrGlobal(ctx, node)
 
 		} else if node.IsType(mTypes.TY_BOOL) {
 			return newBool(node.Val)
@@ -505,7 +558,7 @@ func (ctx *context) gen(node *mTypes.Node) value.Value {
 	} else if node.IsKind(mTypes.ND_COLLECTION) {
 
 		if node.IsGlobal {
-			return newVector(ctx, node)
+			return newVectorGlobal(ctx, node)
 		}
 		return newVectorHeap(ctx, node)
 	} else {

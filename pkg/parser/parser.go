@@ -91,7 +91,9 @@ func parseIdent(
 				if typeHead.Type == "" {
 					log.Panic("type required :have %+v, %+v", typeCur, a)
 				}
+				// Note: so buggy what's a and typeHead?
 				a.Type = typeHead.Type
+				a.ElemType = typeHead.ElemType
 				typeHead = typeHead.Next
 			}
 

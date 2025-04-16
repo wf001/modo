@@ -253,11 +253,15 @@ func (ctx *context) genVarDeclare(node *mTypes.Node) value.Value {
 		// means declaring global variable or function named except main
 
 		// define function return type
-		// TODO: in vector need to see Child.ElemType
-		varType, ok := mTypes.GetLLVMType(node.Type)
+		retType, ok := mTypes.GetLLVMType(node.Type)
 
 		if !ok {
-			varType, ok = mTypes.GetLLVMTypeForVector(node.Child)
+			if node.Child.Kind == mTypes.ND_COLLECTION {
+				retType, _ = mTypes.GetLLVMTypeForVector(node.Child)
+
+			} else {
+				retType, _ = mTypes.GetLLVMTypeForVector(node)
+			}
 		}
 
 		funcName := node.GetFuncName()
@@ -267,7 +271,10 @@ func (ctx *context) genVarDeclare(node *mTypes.Node) value.Value {
 
 		// define arguments type of function
 		for a := node.Child.Args; a != nil; a = a.Next {
-			childType, _ := mTypes.GetLLVMType(a.Type)
+			childType, ok := mTypes.GetLLVMType(a.Type)
+			if !ok {
+				childType, _ = mTypes.GetLLVMTypeForVector(a)
+			}
 
 			arg = append(arg, ir.NewParam(a.Val, childType))
 			argp = append(argp, ir.NewParam(a.Val, childType))
@@ -275,7 +282,7 @@ func (ctx *context) genVarDeclare(node *mTypes.Node) value.Value {
 
 		fnc := ctx.mod.NewFunc(
 			funcName,
-			varType,
+			retType,
 			argp...,
 		)
 		llBlock := fnc.NewBlock("")

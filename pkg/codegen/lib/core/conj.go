@@ -17,7 +17,7 @@ func InvokeConj(block *ir.Block, libs *mTypes.BuiltinLibProp, node *mTypes.Node)
 	var oldArrPtr value.Value
 
 	switch v := node.IRValue.(type) {
-	case *ir.InstCall, *ir.InstBitCast:
+	case *ir.InstCall, *ir.InstBitCast, *ir.Param:
 		oldArrType, _ = mTypes.AssertArrType(v)
 		oldArrPtr = v
 

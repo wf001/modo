@@ -153,7 +153,7 @@ func parseDeclare(tok *mTypes.Token, parentKind mTypes.NodeKind) (*mTypes.Token,
 		if tok.IsKind(mTypes.TK_DECLARE) {
 			tok, head = parseDeclare(tok.Next, mTypes.ND_DECLARE)
 			// A child of ND_DECLARE must be either value(such as string, int, vector) or lambda
-			// In case of value, the grant value as global scope variable
+			// In case of value, grant it as global scope variable
 			if head.Kind == mTypes.ND_VAR_DECLARE && head.Child.Kind != mTypes.ND_LAMBDA {
 				head.Child.IsGlobal = true
 			}

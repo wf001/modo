@@ -176,29 +176,6 @@ func GetLLVMType(ty ModoType) (types.Type, bool) {
 	}
 	return nil, false
 }
-
-func GetBitWidth(t types.Type) uint64 {
-	switch typ := t.(type) {
-	case *types.IntType:
-		return typ.BitSize
-	case *types.FloatType:
-		switch typ.Kind {
-		case types.FloatKindHalf:
-			return 16
-		case types.FloatKindFloat:
-			return 32
-		case types.FloatKindDouble:
-			return 64
-		default:
-			return 0
-		}
-	case *types.PointerType:
-		// 通常は64bitだが、プラットフォームによって異なる
-		return 64
-	default:
-		return 0 // 未対応型など
-	}
-}
 func GetLLVMTypeForVector(node *Node) (types.Type, bool) {
 
 	elemType, ok := GetLLVMType(node.ElemType)
@@ -223,6 +200,29 @@ func GetLLVMTypeForVector(node *Node) (types.Type, bool) {
 		return t, true
 	}
 	return nil, true
+}
+
+func GetBitWidth(t types.Type) uint64 {
+	switch typ := t.(type) {
+	case *types.IntType:
+		return typ.BitSize
+	case *types.FloatType:
+		switch typ.Kind {
+		case types.FloatKindHalf:
+			return 16
+		case types.FloatKindFloat:
+			return 32
+		case types.FloatKindDouble:
+			return 64
+		default:
+			return 0
+		}
+	case *types.PointerType:
+		// 通常は64bitだが、プラットフォームによって異なる
+		return 64
+	default:
+		return 0 // 未対応型など
+	}
 }
 
 // debug

@@ -16,18 +16,18 @@ func prnScalar(
 	n *mTypes.Node,
 ) {
 	value := n.IRValue
-	rootTy := n.IRValue.Type()
+	rootTy := value.Type()
 	formatStr, _ := mTypes.GetPrintFormat(rootTy, libs)
 
 	if rootTy.Equal(types.I1) {
-		value = block.NewSelect(n.IRValue, libs.GlobalVar.TrueValue, libs.GlobalVar.FalseValue)
+		value = block.NewSelect(value, libs.GlobalVar.TrueValue, libs.GlobalVar.FalseValue)
 
 	} else if rootTy.Equal(types.Void) {
 		value = libs.GlobalVar.NilValue
 
 	} else if pointerElemTy, isPtr := rootTy.(*types.PointerType); isPtr {
 		if isStr := rootTy.Equal(types.I8Ptr); !isStr {
-			ptr := block.NewLoad(pointerElemTy, n.IRValue)
+			ptr := block.NewLoad(pointerElemTy, value)
 			value = block.NewGetElementPtr(
 				pointerElemTy,
 				ptr,

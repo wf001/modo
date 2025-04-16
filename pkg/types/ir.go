@@ -12,25 +12,26 @@ import (
 func GetPrintFormat(ty types.Type, libs *BuiltinLibProp) (*ir.Global, bool) {
 
 	formatMap := map[types.Type]*ir.Global{
-		types.I32:   libs.GlobalVar.FormatDigit,
 		types.I1:    libs.GlobalVar.FormatStr,
 		types.I8Ptr: libs.GlobalVar.FormatStr,
+		types.I32:   libs.GlobalVar.FormatDigit,
 		types.Void:  libs.GlobalVar.FormatStr,
 	}
 	if f, ok := formatMap[ty]; ok {
 		return f, true
 	}
 
+	log.Debug("unresolved type: have %+v", ty)
 	return nil, false
 }
 
 func IsScalar(v value.Value) bool {
-	return v.Type().Equal(types.I32) ||
-		v.Type().Equal(types.I1) ||
+	return v.Type().Equal(types.I1) ||
+		v.Type().Equal((types.I1Ptr)) ||
 		v.Type().Equal(types.I8Ptr) ||
-		v.Type().Equal(types.Void) ||
+		v.Type().Equal(types.I32) ||
 		v.Type().Equal((types.I32Ptr)) ||
-		v.Type().Equal((types.I1Ptr))
+		v.Type().Equal(types.Void)
 }
 
 func LoadArrElem(block *ir.Block, src value.Value, ty *types.ArrayType, i uint64) *ir.InstLoad {

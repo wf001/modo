@@ -2,6 +2,7 @@ package core
 
 import (
 	"github.com/llir/llvm/ir"
+	"github.com/llir/llvm/ir/constant"
 	"github.com/llir/llvm/ir/types"
 	"github.com/llir/llvm/ir/value"
 
@@ -15,13 +16,25 @@ func prnScalar(
 	n *mTypes.Node,
 ) {
 	value := n.IRValue
-	ty := n.IRValue.Type()
-	formatStr, _ := mTypes.GetPrintFormat(ty, libs)
+	rootTy := n.IRValue.Type()
+	formatStr, _ := mTypes.GetPrintFormat(rootTy, libs)
 
-	if ty.Equal(types.I1) {
+	if rootTy.Equal(types.I1) {
 		value = block.NewSelect(n.IRValue, libs.GlobalVar.TrueValue, libs.GlobalVar.FalseValue)
-	} else if ty.Equal(types.Void) {
+
+	} else if rootTy.Equal(types.Void) {
 		value = libs.GlobalVar.NilValue
+
+	} else if pointerElemTy, isPtr := rootTy.(*types.PointerType); isPtr {
+		if isArr := pointerElemTy.ElemType.Equal(types.I32); isArr {
+			ptr := block.NewLoad(pointerElemTy, n.IRValue)
+			value = block.NewGetElementPtr(
+				pointerElemTy,
+				ptr,
+				constant.NewInt(types.I32, 0),
+			)
+			formatStr, _ = mTypes.GetPrintFormat(pointerElemTy.ElemType, libs)
+		}
 	}
 
 	block.NewCall(libs.Printf.FuncPtr, formatStr, value)
@@ -67,14 +80,17 @@ func prnVector(libs *mTypes.BuiltinLibProp, block *ir.Block, n *mTypes.Node) {
 func InvokePrn(block *ir.Block, libs *mTypes.BuiltinLibProp, node *mTypes.Node) value.Value {
 
 	for n := node; n != nil; n = n.Next {
-		ty := n.IRValue.Type()
+		rootTy := n.IRValue.Type()
 
 		if mTypes.IsScalar(n.IRValue) {
 			prnScalar(libs, block, n)
 
-		} else if _, ok := ty.(*types.PointerType); ok {
-			prnVector(libs, block, n)
-
+		} else if pointerElemTy, ok := rootTy.(*types.PointerType); ok {
+			if _, ok := pointerElemTy.ElemType.(*types.ArrayType); ok {
+				prnVector(libs, block, n)
+			} else {
+				prnScalar(libs, block, n)
+			}
 		} else {
 			log.Panic("unresolved type: have %+v", n)
 		}

@@ -31,14 +31,12 @@ func InvokeGet(block *ir.Block, libs *mTypes.BuiltinLibProp, node *mTypes.Node) 
 		log.Panic("Array index out of range: have %d but array length %d", i, node.Len)
 	}
 
-	typeSize := constant.NewInt(types.I64, int64(mTypes.GetBitWidth(oldArrType.ElemType)))
-	allocatedPtr := block.NewCall(libs.Malloc.FuncPtr, typeSize)
-	newArrPtr := block.NewBitCast(allocatedPtr, types.NewPointer(oldArrType.ElemType))
+	newValue := block.NewAlloca(oldArrType.ElemType)
 
 	loadedValue := mTypes.LoadArrElem(block, oldArrPtr, oldArrType, uint64(i))
-	block.NewStore(loadedValue, newArrPtr)
+	block.NewStore(loadedValue, newValue)
 
-	return newArrPtr
+	return newValue
 }
 
 func InvokeGetOld(block *ir.Block, libs *mTypes.BuiltinLibProp, node *mTypes.Node) value.Value {

@@ -4,7 +4,6 @@ import (
 	"github.com/llir/llvm/ir"
 	"github.com/llir/llvm/ir/types"
 
-	"github.com/wf001/modo/pkg/log"
 	mTypes "github.com/wf001/modo/pkg/types"
 )
 
@@ -21,11 +20,4 @@ func declareVectorType(ir *ir.Module, Prelude *mTypes.PreludeProps) {
 	ir.NewTypeDef("prelude.vector.string", arrayStringType)
 	Prelude.Types.VectorString = arrayStringType
 
-}
-
-func declarePrelude(ir *ir.Module, prelude *mTypes.PreludeProps) {
-
-	declareVectorType(ir, prelude)
-
-	log.DebugMessage("vector types declared")
 }

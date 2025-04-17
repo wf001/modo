@@ -11,7 +11,7 @@ import (
 	mTypes "github.com/wf001/modo/pkg/types"
 )
 
-func InvokeConj(ctx *Context, n *mTypes.Node) value.Value {
+func PreludeConj(ctx *Context, n *mTypes.Node) value.Value {
 	// もとのベクターの構造体をロード
 	oldStructedArrPtr := n.IRValue
 	structPtrType := oldStructedArrPtr.Type().(*types.PointerType)
@@ -94,7 +94,7 @@ func InvokeConj(ctx *Context, n *mTypes.Node) value.Value {
 }
 
 // Note: remain here until it will be defined the strategy of memory lifecycle
-func InvokeConjOld(block *ir.Block, libs *mTypes.Internal, node *mTypes.Node) value.Value {
+func PreludeConjOld(block *ir.Block, libs *mTypes.Internal, node *mTypes.Node) value.Value {
 	oldArrPtr, ok := node.IRValue.(*ir.InstAlloca)
 	if !ok {
 		log.Panic("Array elements must be ir.InstAlloca: have %+v", oldArrPtr)

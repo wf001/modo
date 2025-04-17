@@ -7,7 +7,7 @@ import (
 	mTypes "github.com/wf001/modo/pkg/types"
 )
 
-func declareInternalConstString(ir *ir.Module, libs *mTypes.Internal) {
+func declareInternalConst(ir *ir.Module, libs *mTypes.Internal) {
 	globalConst := &mTypes.GlobalConst{}
 
 	globalConst.FormatDigit = ir.NewGlobalDef(

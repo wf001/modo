@@ -8,7 +8,7 @@ import (
 
 func declareInternal(ir *ir.Module, libs *mTypes.Internal) {
 
-	declareInternalConstString(ir, libs)
+	declareInternalConst(ir, libs)
 	declareCstd(ir, libs)
 
 	log.DebugMessage("built-in library declared")

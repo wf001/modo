@@ -11,7 +11,7 @@ import (
 )
 
 // arithmetic
-func InvokeAdd(ctx *Context, node *mTypes.Node) value.Value {
+func PreludeAdd(ctx *Context, node *mTypes.Node) value.Value {
 	return invokeFoldArithmetic(
 		node,
 		func(x, y value.Value) value.Value {
@@ -19,7 +19,7 @@ func InvokeAdd(ctx *Context, node *mTypes.Node) value.Value {
 		})
 }
 
-func InvokeSub(ctx *Context, node *mTypes.Node) value.Value {
+func PreludeSub(ctx *Context, node *mTypes.Node) value.Value {
 	return invokeFoldArithmetic(
 		node,
 		func(x, y value.Value) value.Value {
@@ -27,14 +27,14 @@ func InvokeSub(ctx *Context, node *mTypes.Node) value.Value {
 		})
 }
 
-func InvokeMul(ctx *Context, node *mTypes.Node) value.Value {
+func PreludeMul(ctx *Context, node *mTypes.Node) value.Value {
 	return invokeFoldArithmetic(
 		node,
 		func(x, y value.Value) value.Value {
 			return ctx.block.NewMul(x, y)
 		})
 }
-func InvokeDiv(ctx *Context, node *mTypes.Node) value.Value {
+func PreludeDiv(ctx *Context, node *mTypes.Node) value.Value {
 	return invokeFoldArithmetic(
 		node,
 		func(x, y value.Value) value.Value {
@@ -42,12 +42,12 @@ func InvokeDiv(ctx *Context, node *mTypes.Node) value.Value {
 		})
 }
 
-func InvokeMod(ctx *Context, node *mTypes.Node) value.Value {
+func PreludeMod(ctx *Context, node *mTypes.Node) value.Value {
 	return ctx.block.NewSRem(node.IRValue, node.Next.IRValue)
 }
 
 // equality
-func InvokeEq(ctx *Context, node *mTypes.Node) value.Value {
+func PreludeEq(ctx *Context, node *mTypes.Node) value.Value {
 	// In case of comparing InstCall, compare the value itself by strcmp, not the address.
 	_, ok := node.IRValue.(*ir.InstCall)
 	if ok && node.Type == mTypes.TY_STR {
@@ -78,7 +78,7 @@ func InvokeEq(ctx *Context, node *mTypes.Node) value.Value {
 
 	}
 }
-func InvokeGt(ctx *Context, node *mTypes.Node) value.Value {
+func PreludeGt(ctx *Context, node *mTypes.Node) value.Value {
 	return invokeFoldPred(
 		ctx.block,
 		node,
@@ -86,7 +86,7 @@ func InvokeGt(ctx *Context, node *mTypes.Node) value.Value {
 			return ctx.block.NewICmp(enum.IPredSGT, x, y)
 		})
 }
-func InvokeLt(ctx *Context, node *mTypes.Node) value.Value {
+func PreludeLt(ctx *Context, node *mTypes.Node) value.Value {
 	return invokeFoldPred(
 		ctx.block,
 		node,
@@ -96,7 +96,7 @@ func InvokeLt(ctx *Context, node *mTypes.Node) value.Value {
 }
 
 // logical
-func InvokeAnd(ctx *Context, node *mTypes.Node) value.Value {
+func PreludeAnd(ctx *Context, node *mTypes.Node) value.Value {
 	return invokeFoldPred(
 		ctx.block,
 		node,
@@ -104,7 +104,7 @@ func InvokeAnd(ctx *Context, node *mTypes.Node) value.Value {
 			return ctx.block.NewAnd(x, y)
 		})
 }
-func InvokeOr(ctx *Context, node *mTypes.Node) value.Value {
+func PreludeOr(ctx *Context, node *mTypes.Node) value.Value {
 	return invokeFoldPred(
 		ctx.block,
 		node,

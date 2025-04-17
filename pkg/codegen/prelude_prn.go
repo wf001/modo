@@ -169,7 +169,7 @@ func prnStructVector(
 
 }
 
-func InvokePrn(
+func PreludePrn(
 	ctx *Context,
 	node *mTypes.Node,
 ) value.Value {

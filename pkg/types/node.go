@@ -43,25 +43,10 @@ const (
 	TY_VECTOR = ModoType("TY_VECTOR")
 )
 
-// NOTE: must improve
-// function.Sig.RetType = its-type in the function
-var RetType = map[string]ModoType{
-	OPERATOR_ADD:  TY_INT32,
-	OPERATOR_EQ:   TY_BOOL,
-	OPERATOR_GT:   TY_BOOL,
-	OPERATOR_LT:   TY_BOOL,
-	OPERATOR_AND:  TY_BOOL,
-	OPERATOR_OR:   TY_BOOL,
-	PRELUDE_CONJ:  TY_VECTOR,
-	PRELUDE_ASSOC: TY_VECTOR,
-	PRELUDE_POP:   TY_VECTOR,
-	PRELUDE_GET:   TY_INT32, // HACK: is not TRUE
-}
-
 type Program struct {
 	Declares          *Node
 	Prelude           *PreludeProps
-	DeclaredGlobalStr []*ir.InstLoad
+	DeclaredGlobalVar []*ir.InstLoad
 	Internal          *Internal
 }
 

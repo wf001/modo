@@ -60,7 +60,7 @@ func newStrGlobal(ctx *Context, n *mTypes.Node) *ir.InstLoad {
 	)
 	ctx.block.NewStore(strGEP, strPtr)
 	str := ctx.block.NewLoad(types.I8Ptr, strPtr)
-	ctx.prog.DeclaredGlobalStr = append(ctx.prog.DeclaredGlobalStr, str)
+	ctx.prog.DeclaredGlobalVar = append(ctx.prog.DeclaredGlobalVar, str)
 	return str
 }
 
@@ -362,7 +362,8 @@ func (ctx *Context) genVarReference(node *mTypes.Node) value.Value {
 		if scope.Val == node.Val {
 			if scope.Child.IsScalar() {
 				return scope.VarPtr
-
+			} else if scope.Child.IsKind(mTypes.ND_LIBCALL) {
+				return scope.VarPtr
 			} else if scope.Child.IsType(mTypes.TY_VECTOR) {
 				return scope.VarPtr
 

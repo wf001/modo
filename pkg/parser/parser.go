@@ -205,8 +205,6 @@ func parseDeclare(tok *mTypes.Token, parentKind mTypes.NodeKind) (*mTypes.Token,
 			v := tok.Val
 			tok, head = parseBody(tok, mTypes.ND_LIBCALL, v)
 
-			head.Type = mTypes.RetType[v]
-
 		} else if tok.IsKind(mTypes.TK_IF) {
 			log.DebugValueColored("is IF :have %s", tok)
 			head.Kind = mTypes.ND_IF

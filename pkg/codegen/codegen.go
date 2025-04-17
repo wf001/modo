@@ -289,13 +289,14 @@ func (ctx *Context) genVarDeclare(node *mTypes.Node) value.Value {
 
 		// define arguments type of function
 		for a := node.Child.Args; a != nil; a = a.Next {
-			childType, ok := mTypes.GetLLVMType(a.Type)
+			ty, ok := mTypes.GetLLVMType(a.Type)
 			if !ok {
-				childType, _ = mTypes.GetLLVMTypeForVector(a, ctx.prog.ArrayType)
+				structTy, _ := mTypes.GetLLVMTypeForVector(a, ctx.prog.ArrayType)
+				ty = types.NewPointer(structTy)
 			}
 
-			arg = append(arg, ir.NewParam(a.Val, childType))
-			argp = append(argp, ir.NewParam(a.Val, childType))
+			arg = append(arg, ir.NewParam(a.Val, ty))
+			argp = append(argp, ir.NewParam(a.Val, ty))
 		}
 
 		fnc := ctx.mod.NewFunc(

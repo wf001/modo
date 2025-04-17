@@ -187,7 +187,10 @@ testexec(){
   # assertexec '(def v :: [int] [233, 842]) (def main :: int (fn [] (prn (conj v 569))))' "[233, 842, 569]\\\n"
   # assertexec '(def v :: [int] [233, 842]) (def main :: int (fn [] (prn (assoc v 1 388))))' "[233, 388]\\\n"
   # assertexec '(def v :: [int] [233, 842]) (def main :: int (fn [] (prn (pop v))))' "[233]\\\n"
-  #assertexec "(def f :: [int] => [int] (fn [v] v)) (def main :: int (fn [] (let [vec :: [int] [42, 23]] (prn (f vec)))))" "[42, 23]\\\n"
+  # assertexec "(def f :: [int] => [int] (fn [v] v)) (def main :: int (fn [] (let [vec :: [int] [42, 23]] (prn (f vec)))))" "[42, 23]\\\n"
+  assertexec "(def f::[int] => nil (fn[v] (prn v))) (def main::int (fn[] (let[v::[int][42, 64, 90]] (f v))))" "[42, 64, 90]\\\n"
+  assertexec "(def f::[int] (fn[] (let[v::[int] [42, 64, 90, 84]]v))) (def main::int (fn[] (prn f)))" "[42, 64, 90, 84]\\\n"
+  assertexec "(def f :: [int] => [int] (fn [v] v)) (def main :: int (fn [] (let [v :: [int] [42, 64, 90]] (prn (f v)))))" "[42, 64, 90]\\\n"
 
 
 }

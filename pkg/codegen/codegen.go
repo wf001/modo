@@ -273,10 +273,12 @@ func (ctx *Context) genVarDeclare(node *mTypes.Node) value.Value {
 
 		if !ok {
 			if node.Child.Kind == mTypes.ND_COLLECTION {
-				retType, _ = mTypes.GetLLVMTypeForVector(node.Child, ctx.prog.ArrayType)
+				structType, _ := mTypes.GetLLVMTypeForVector(node.Child, ctx.prog.ArrayType)
+				retType = types.NewPointer(structType)
 
 			} else {
-				retType, _ = mTypes.GetLLVMTypeForVector(node, ctx.prog.ArrayType)
+				structType, _ := mTypes.GetLLVMTypeForVector(node, ctx.prog.ArrayType)
+				retType = types.NewPointer(structType)
 			}
 		}
 

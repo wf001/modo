@@ -153,6 +153,9 @@ func InvokePrn(
 		} else if _, ok := n.IRValue.Type().(*types.PointerType); ok {
 			prnStructVector(ctx, n)
 
+		} else if _, ok := n.IRValue.Type().(*types.StructType); ok {
+			prnStructVector(ctx, n)
+
 		} else if _, ok := mTypes.AssertArrType(n.IRValue); ok {
 			prnVector(ctx.prog.BuiltinLibs, ctx.block, n)
 

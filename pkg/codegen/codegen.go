@@ -245,7 +245,7 @@ func newVectorHeap(ctx *Context, n *mTypes.Node) value.Value {
 		newI32("0"),
 		newI32("0"),
 	)
-	arrElemPtr.SetName(mTypes.GetVarName("arrElemPtr", ctx.block.Insts))
+	arrElemPtr.SetName(n.GetVarName("arrElemPtr", ctx.block.Insts))
 	ctx.block.NewStore(arrayPtr, arrElemPtr)
 
 	lenElemPtr := ctx.block.NewGetElementPtr(
@@ -254,7 +254,7 @@ func newVectorHeap(ctx *Context, n *mTypes.Node) value.Value {
 		newI32("0"),
 		newI32("1"),
 	)
-	lenElemPtr.SetName(mTypes.GetVarName("lenElemPtr", ctx.block.Insts))
+	lenElemPtr.SetName(n.GetVarName("lenElemPtr", ctx.block.Insts))
 	ctx.block.NewStore(constant.NewInt(types.I64, arrLength), lenElemPtr)
 
 	return arrayIntAlloca

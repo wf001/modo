@@ -159,8 +159,8 @@ func (node *Node) GetBlockName(s string, blks []*ir.Block) string {
 	return fmt.Sprintf("%s.%p.%d", s, node, len(blks))
 }
 
-func GetVarName(s string, insts []ir.Instruction) string {
-	return fmt.Sprintf("%s.%d", s, len(insts))
+func (node *Node) GetVarName(s string, insts []ir.Instruction) string {
+	return fmt.Sprintf("%s.%p", s, node)
 }
 
 // Returns the last node of the linked list.

@@ -110,7 +110,7 @@ func prnStructVector(
 
 	// インデックスの初期化
 	idx := ctx.block.NewAlloca(types.I64)
-	idx.SetName(mTypes.GetVarName("idx", ctx.block.Insts))
+	idx.SetName(n.GetVarName("idx", ctx.block.Insts))
 	ctx.block.NewStore(constant.NewInt(types.I64, 0), idx)
 
 	loopBlock := ctx.function.NewBlock(n.GetBlockName("loop", ctx.function.Blocks))

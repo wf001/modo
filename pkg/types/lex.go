@@ -72,18 +72,18 @@ var (
 	DECLARE_REG_EXP = fmt.Sprintf("\\b(%s|%s|%s)\\b", SYMBOL_DEF, SYMBOL_LET, SYMBOL_FN)
 
 	// Core library
-	LIB_CORE_PRN     = "prn"
-	LIB_CORE_GET     = "get"
-	LIB_CORE_CONJ    = "conj"
-	LIB_CORE_ASSOC   = "assoc"
-	LIB_CORE_POP     = "pop"
-	LIB_CORE_REG_EXP = fmt.Sprintf(
+	PRELUDE_PRN              = "prn"
+	PRELUDE_GET              = "get"
+	PRELUDE_CONJ             = "conj"
+	PRELUDE_ASSOC            = "assoc"
+	PRELUDE_POP              = "pop"
+	PRELUDE_FUNCTION_REG_EXP = fmt.Sprintf(
 		"\\b(%s|%s|%s|%s|%s)\\b",
-		LIB_CORE_PRN,
-		LIB_CORE_GET,
-		LIB_CORE_CONJ,
-		LIB_CORE_ASSOC,
-		LIB_CORE_POP,
+		PRELUDE_PRN,
+		PRELUDE_GET,
+		PRELUDE_CONJ,
+		PRELUDE_ASSOC,
+		PRELUDE_POP,
 	)
 
 	// Type signature
@@ -126,7 +126,7 @@ var (
 				BRANCH_REG_EXP,
 				OPERATORS_REG_EXP,
 				BRACKETS_REG_EXP,
-				LIB_CORE_PRN,
+				PRELUDE_PRN,
 				SYMBOL_UNDEFINED_REG_EXP,
 			},
 			"|",

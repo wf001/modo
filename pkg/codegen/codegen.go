@@ -555,8 +555,8 @@ func (ctx *Context) gen(node *mTypes.Node) value.Value {
 			n.IRValue = arg
 		}
 
-		libFunc := LibInsts[node.Val]
-		return libFunc(ctx, node.Child)
+		preludeFunc := PreludeFunction[node.Val]
+		return preludeFunc(ctx, node.Child)
 
 	} else if node.IsKind(mTypes.ND_FUNCCALL) {
 		var arg []value.Value

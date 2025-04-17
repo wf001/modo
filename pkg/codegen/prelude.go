@@ -8,10 +8,10 @@ import (
 	mTypes "github.com/wf001/modo/pkg/types"
 )
 
-var LibInsts = map[string]func(*Context, *mTypes.Node) value.Value{
-	mTypes.LIB_CORE_PRN: PreludePrn,
+var PreludeFunction = map[string]func(*Context, *mTypes.Node) value.Value{
+	mTypes.PRELUDE_PRN: PreludePrn,
 	//mTypes.LIB_CORE_GET:   PreludeGet,
-	mTypes.LIB_CORE_CONJ: PreludeConj,
+	mTypes.PRELUDE_CONJ: PreludeConj,
 	//mTypes.LIB_CORE_ASSOC: PreludeAssoc,
 	//mTypes.LIB_CORE_POP:   PreludePop,
 	// nary

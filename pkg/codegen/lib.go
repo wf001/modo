@@ -1,13 +1,13 @@
-package core
+package codegen
 
 import (
 	"github.com/llir/llvm/ir"
 	"github.com/llir/llvm/ir/value"
-
+	"github.com/wf001/modo/pkg/log"
 	mTypes "github.com/wf001/modo/pkg/types"
 )
 
-var LibInsts = map[string]func(*ir.Func, *ir.Block, *mTypes.BuiltinLibProp, *mTypes.Node, *mTypes.ArrayTypeProps) value.Value{
+var LibInsts = map[string]func(*Context, *mTypes.Node) value.Value{
 	mTypes.LIB_CORE_PRN: InvokePrn,
 	//mTypes.LIB_CORE_GET:   InvokeGet,
 	//mTypes.LIB_CORE_CONJ:  InvokeConj,
@@ -25,4 +25,12 @@ var LibInsts = map[string]func(*ir.Func, *ir.Block, *mTypes.BuiltinLibProp, *mTy
 	//mTypes.OPERATOR_OR:  InvokeOr,
 	//// binary
 	//mTypes.OPERATOR_MOD: InvokeMod,
+}
+
+func DeclareBuiltin(ir *ir.Module, libs *mTypes.BuiltinLibProp) {
+
+	declareVariable(ir, libs)
+	DeclareCstd(ir, libs)
+
+	log.DebugMessage("built-in library declared")
 }

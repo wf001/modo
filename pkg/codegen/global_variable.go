@@ -1,4 +1,4 @@
-package lib
+package codegen
 
 import (
 	"github.com/llir/llvm/ir"

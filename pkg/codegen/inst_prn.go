@@ -1,4 +1,4 @@
-package core
+package codegen
 
 import (
 	"github.com/llir/llvm/ir"
@@ -79,26 +79,23 @@ func prnVector(libs *mTypes.BuiltinLibProp, block *ir.Block, n *mTypes.Node) {
 }
 
 func prnStructVector(
-	fnc *ir.Func,
-	libs *mTypes.BuiltinLibProp,
-	block *ir.Block,
+	ctx *Context,
 	n *mTypes.Node,
-	arrType *mTypes.ArrayTypeProps,
 ) {
-	loaded := block.NewLoad(arrType.TypeInt, n.IRValue)
+	loaded := ctx.block.NewLoad(ctx.prog.ArrayType.TypeInt, n.IRValue)
 
 	// 構造体のフィールドから arrPtr と len を取り出す
-	resultArrPtr := block.NewExtractValue(loaded, 0)
-	resultLen := block.NewExtractValue(loaded, 1)
+	resultArrPtr := ctx.block.NewExtractValue(loaded, 0)
+	resultLen := ctx.block.NewExtractValue(loaded, 1)
 
 	// インデックスの初期化
-	idx := block.NewAlloca(types.I64)
+	idx := ctx.block.NewAlloca(types.I64)
 	idx.SetName("idx")
-	block.NewStore(constant.NewInt(types.I64, 0), idx)
+	ctx.block.NewStore(constant.NewInt(types.I64, 0), idx)
 
-	loopBlock := fnc.NewBlock("loop")
-	endBlock := fnc.NewBlock("end")
-	block.NewBr(loopBlock)
+	loopBlock := ctx.function.NewBlock("loop")
+	endBlock := ctx.function.NewBlock("end")
+	ctx.block.NewBr(loopBlock)
 
 	// ループ内部の処理
 	// i をロード
@@ -107,7 +104,11 @@ func prnStructVector(
 	// 配列の各要素を取り出して表示
 	elemPtr := loopBlock.NewGetElementPtr(types.I32, resultArrPtr, i)
 	elem := loopBlock.NewLoad(types.I32, elemPtr)
-	loopBlock.NewCall(libs.Printf.FuncPtr, libs.GlobalVar.FormatDigit, elem)
+	loopBlock.NewCall(
+		ctx.prog.BuiltinLibs.Printf.FuncPtr,
+		ctx.prog.BuiltinLibs.GlobalVar.FormatDigit,
+		elem,
+	)
 
 	// i++
 	nextI := loopBlock.NewAdd(i, constant.NewInt(types.I64, 1))
@@ -116,36 +117,36 @@ func prnStructVector(
 	// i < len ?
 	cond := loopBlock.NewICmp(enum.IPredSLT, nextI, resultLen)
 	loopBlock.NewCondBr(cond, loopBlock, endBlock)
-	block = endBlock
+	ctx.block = endBlock
 
 }
 
 func InvokePrn(
-	fnc *ir.Func,
-	block *ir.Block,
-	libs *mTypes.BuiltinLibProp,
+	ctx *Context,
 	node *mTypes.Node,
-	arrType *mTypes.ArrayTypeProps,
 ) value.Value {
 
 	for n := node; n != nil; n = n.Next {
 		if mTypes.IsScalar(n.IRValue) {
-			prnScalar(libs, block, n)
+			prnScalar(ctx.prog.BuiltinLibs, ctx.block, n)
 
 		} else if _, ok := n.IRValue.Type().(*types.PointerType); ok {
-			prnStructVector(fnc, libs, block, n, arrType)
+			prnStructVector(ctx, n)
 
 		} else if _, ok := mTypes.AssertArrType(n.IRValue); ok {
-			prnVector(libs, block, n)
+			prnVector(ctx.prog.BuiltinLibs, ctx.block, n)
 
 		} else {
 			log.Panic("unresolved type: have %+v", n)
 		}
 
 		if n.Next == nil {
-			block.NewCall(libs.Printf.FuncPtr, libs.GlobalVar.FormatCR)
+			ctx.block.NewCall(
+				ctx.prog.BuiltinLibs.Printf.FuncPtr,
+				ctx.prog.BuiltinLibs.GlobalVar.FormatCR,
+			)
 		} else {
-			block.NewCall(libs.Printf.FuncPtr, libs.GlobalVar.FormatSpace)
+			ctx.block.NewCall(ctx.prog.BuiltinLibs.Printf.FuncPtr, ctx.prog.BuiltinLibs.GlobalVar.FormatSpace)
 		}
 	}
 

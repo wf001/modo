@@ -1,4 +1,4 @@
-package core
+package codegen
 
 import (
 	"github.com/llir/llvm/ir"
@@ -6,7 +6,6 @@ import (
 	"github.com/llir/llvm/ir/types"
 	"github.com/llir/llvm/ir/value"
 
-	"github.com/wf001/modo/pkg/codegen/lib/core/vector"
 	"github.com/wf001/modo/pkg/log"
 	mTypes "github.com/wf001/modo/pkg/types"
 )
@@ -29,7 +28,7 @@ func InvokePop(block *ir.Block, libs *mTypes.BuiltinLibProp, node *mTypes.Node) 
 	newArrSize := constant.NewInt(types.I64, int64(oldArrType.Len-1))
 	allocSize := block.NewMul(typeSize, newArrSize)
 	newArrType := types.NewArray(oldArrType.Len-1, oldArrType.ElemType)
-	newArrPtr := vector.CopyArray(block, libs, allocSize, oldArrType, oldArrPtr, newArrType)
+	newArrPtr := CopyArray(block, libs, allocSize, oldArrType, oldArrPtr, newArrType)
 
 	return newArrPtr
 }
@@ -44,7 +43,7 @@ func InvokePopOld(block *ir.Block, libs *mTypes.BuiltinLibProp, node *mTypes.Nod
 
 	oldArr := oldArrPtr.ElemType.(*types.ArrayType)
 
-	newArr := vector.CopyArrayOld(block, oldArrPtr, oldArr.ElemType, oldArr.Len-1, oldArr.Len-1)
+	newArr := CopyArrayOld(block, oldArrPtr, oldArr.ElemType, oldArr.Len-1, oldArr.Len-1)
 
 	return newArr
 }

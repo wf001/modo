@@ -11,9 +11,6 @@ import (
 	"github.com/llir/llvm/ir/types"
 	"github.com/llir/llvm/ir/value"
 
-	"github.com/wf001/modo/pkg/codegen/array_type"
-	"github.com/wf001/modo/pkg/codegen/lib"
-	"github.com/wf001/modo/pkg/codegen/lib/core"
 	"github.com/wf001/modo/pkg/log"
 	mTypes "github.com/wf001/modo/pkg/types"
 )
@@ -544,8 +541,8 @@ func (ctx *Context) gen(node *mTypes.Node) value.Value {
 			n.IRValue = arg
 		}
 
-		libFunc := core.LibInsts[node.Val]
-		return libFunc(ctx.function, ctx.block, ctx.prog.BuiltinLibs, node.Child, ctx.prog.ArrayType)
+		libFunc := LibInsts[node.Val]
+		return libFunc(ctx, node)
 
 	} else if node.IsKind(mTypes.ND_FUNCCALL) {
 		var arg []value.Value
@@ -596,9 +593,9 @@ func (ctx *Context) gen(node *mTypes.Node) value.Value {
 func constructModule(prog *mTypes.Program) *ir.Module {
 	module := ir.NewModule()
 	prog.BuiltinLibs = &mTypes.BuiltinLibProp{}
-	lib.DeclareBuiltin(module, prog.BuiltinLibs)
+	DeclareBuiltin(module, prog.BuiltinLibs)
 	prog.ArrayType = &mTypes.ArrayTypeProps{}
-	array_type.DeclareType(module, prog.ArrayType)
+	DeclareType(module, prog.ArrayType)
 
 	for declare := prog.Declares; declare != nil; declare = declare.Next {
 		c := &Context{

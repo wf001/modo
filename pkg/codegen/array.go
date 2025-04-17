@@ -1,4 +1,4 @@
-package array_type
+package codegen
 
 import (
 	"github.com/llir/llvm/ir"

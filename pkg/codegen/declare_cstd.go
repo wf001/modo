@@ -1,4 +1,4 @@
-package core
+package codegen
 
 import (
 	"github.com/llir/llvm/ir"
@@ -70,7 +70,7 @@ func declareStrcmp(
 	}
 }
 
-func Declare(ir *ir.Module, libs *mTypes.BuiltinLibProp) {
+func DeclareCstd(ir *ir.Module, libs *mTypes.BuiltinLibProp) {
 	declarePrintf(ir, libs)
 	declareMalloc(ir, libs)
 	declareMemcpy(ir, libs)

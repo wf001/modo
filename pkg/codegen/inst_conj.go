@@ -45,9 +45,9 @@ func InvokeConj(ctx *Context, n *mTypes.Node) value.Value {
 	loopIndex := ctx.block.NewAlloca(types.I64)
 	ctx.block.NewStore(constant.NewInt(types.I64, 0), loopIndex)
 
-	loopBlock := ctx.function.NewBlock(n.GetBlockName("copy_loop", ctx.function.Blocks))
-	condBlock := ctx.function.NewBlock(n.GetBlockName("copy_cond", ctx.function.Blocks))
-	endBlock := ctx.function.NewBlock(n.GetBlockName("copy_end", ctx.function.Blocks))
+	loopBlock := ctx.function.NewBlock(n.GetBlockName("copy.loop", ctx.function.Blocks))
+	condBlock := ctx.function.NewBlock(n.GetBlockName("copy.cond", ctx.function.Blocks))
+	endBlock := ctx.function.NewBlock(n.GetBlockName("copy.end", ctx.function.Blocks))
 
 	ctx.block.NewBr(condBlock)
 

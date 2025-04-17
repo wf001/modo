@@ -113,9 +113,9 @@ func prnStructVector(
 	idx.SetName(n.GetVarName("idx", ctx.block.Insts))
 	ctx.block.NewStore(constant.NewInt(types.I64, 0), idx)
 
-	loopBlock := ctx.function.NewBlock(n.GetBlockName("loop", ctx.function.Blocks))
-	continueBlock := ctx.function.NewBlock(n.GetBlockName("continue", ctx.function.Blocks))
-	endBlock := ctx.function.NewBlock(n.GetBlockName("end", ctx.function.Blocks))
+	loopBlock := ctx.function.NewBlock(n.GetBlockName("printf.loop", ctx.function.Blocks))
+	continueBlock := ctx.function.NewBlock(n.GetBlockName("printf.continue", ctx.function.Blocks))
+	endBlock := ctx.function.NewBlock(n.GetBlockName("printf.end", ctx.function.Blocks))
 
 	ctx.block.NewCall(
 		ctx.prog.BuiltinLibs.Printf.FuncPtr,

@@ -90,12 +90,12 @@ func prnStructVector(
 
 	// インデックスの初期化
 	idx := ctx.block.NewAlloca(types.I64)
-	idx.SetName("idx")
+	idx.SetName(mTypes.GetVarName("idx", ctx.block.Insts))
 	ctx.block.NewStore(constant.NewInt(types.I64, 0), idx)
 
-	loopBlock := ctx.function.NewBlock("loop")
-	continueBlock := ctx.function.NewBlock("continue")
-	endBlock := ctx.function.NewBlock("end")
+	loopBlock := ctx.function.NewBlock(n.GetBlockName("loop", ctx.function.Blocks))
+	continueBlock := ctx.function.NewBlock(n.GetBlockName("continue", ctx.function.Blocks))
+	endBlock := ctx.function.NewBlock(n.GetBlockName("end", ctx.function.Blocks))
 
 	ctx.block.NewCall(
 		ctx.prog.BuiltinLibs.Printf.FuncPtr,

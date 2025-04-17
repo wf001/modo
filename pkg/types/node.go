@@ -44,6 +44,7 @@ const (
 )
 
 // NOTE: must improve
+// function.Sig.RetType = its-type in the function
 var RetType = map[string]ModoType{
 	OPERATOR_ADD:   TY_INT32,
 	OPERATOR_EQ:    TY_BOOL,

@@ -11,43 +11,43 @@ import (
 )
 
 // arithmetic
-func InvokeAdd(block *ir.Block, libs *mTypes.BuiltinLibProp, node *mTypes.Node) value.Value {
+func InvokeAdd(ctx *Context, node *mTypes.Node) value.Value {
 	return invokeFoldArithmetic(
 		node,
 		func(x, y value.Value) value.Value {
-			return block.NewAdd(x, y)
+			return ctx.block.NewAdd(x, y)
 		})
 }
 
-func InvokeSub(block *ir.Block, libs *mTypes.BuiltinLibProp, node *mTypes.Node) value.Value {
+func InvokeSub(ctx *Context, node *mTypes.Node) value.Value {
 	return invokeFoldArithmetic(
 		node,
 		func(x, y value.Value) value.Value {
-			return block.NewSub(x, y)
+			return ctx.block.NewSub(x, y)
 		})
 }
 
-func InvokeMul(block *ir.Block, libs *mTypes.BuiltinLibProp, node *mTypes.Node) value.Value {
+func InvokeMul(ctx *Context, node *mTypes.Node) value.Value {
 	return invokeFoldArithmetic(
 		node,
 		func(x, y value.Value) value.Value {
-			return block.NewMul(x, y)
+			return ctx.block.NewMul(x, y)
 		})
 }
-func InvokeDiv(block *ir.Block, libs *mTypes.BuiltinLibProp, node *mTypes.Node) value.Value {
+func InvokeDiv(ctx *Context, node *mTypes.Node) value.Value {
 	return invokeFoldArithmetic(
 		node,
 		func(x, y value.Value) value.Value {
-			return block.NewSDiv(x, y)
+			return ctx.block.NewSDiv(x, y)
 		})
 }
 
-func InvokeMod(block *ir.Block, libs *mTypes.BuiltinLibProp, node *mTypes.Node) value.Value {
-	return block.NewSRem(node.IRValue, node.Next.IRValue)
+func InvokeMod(ctx *Context, node *mTypes.Node) value.Value {
+	return ctx.block.NewSRem(node.IRValue, node.Next.IRValue)
 }
 
 // equality
-func InvokeEq(block *ir.Block, libs *mTypes.BuiltinLibProp, node *mTypes.Node) value.Value {
+func InvokeEq(ctx *Context, node *mTypes.Node) value.Value {
 	// In case of comparing InstCall, compare the value itself by strcmp, not the address.
 	_, ok := node.IRValue.(*ir.InstCall)
 	if ok && node.Type == mTypes.TY_STR {
@@ -56,59 +56,59 @@ func InvokeEq(block *ir.Block, libs *mTypes.BuiltinLibProp, node *mTypes.Node) v
 		node = node.Next
 		snd := node.IRValue
 
-		cmpRes := block.NewCall(libs.Strcmp.FuncPtr, fst, snd)
-		isEq := block.NewICmp(enum.IPredEQ, cmpRes, constant.NewInt(types.I1, 0))
-		res := block.NewAnd(isEq, constant.NewInt(types.I1, 1))
+		cmpRes := ctx.block.NewCall(ctx.prog.BuiltinLibs.Strcmp.FuncPtr, fst, snd)
+		isEq := ctx.block.NewICmp(enum.IPredEQ, cmpRes, constant.NewInt(types.I1, 0))
+		res := ctx.block.NewAnd(isEq, constant.NewInt(types.I1, 1))
 
 		for n := node.Next; n != nil; n = n.Next {
 			snd = n.IRValue
-			cmpRes = block.NewCall(libs.Strcmp.FuncPtr, fst, snd)
-			isEq = block.NewICmp(enum.IPredEQ, cmpRes, constant.NewInt(types.I1, 0))
-			res = block.NewAnd(res, isEq)
+			cmpRes = ctx.block.NewCall(ctx.prog.BuiltinLibs.Strcmp.FuncPtr, fst, snd)
+			isEq = ctx.block.NewICmp(enum.IPredEQ, cmpRes, constant.NewInt(types.I1, 0))
+			res = ctx.block.NewAnd(res, isEq)
 		}
 		return res
 
 	} else {
 		return invokeFoldPred(
-			block,
+			ctx.block,
 			node,
 			func(x, y value.Value) value.Value {
-				return block.NewICmp(enum.IPredEQ, x, y)
+				return ctx.block.NewICmp(enum.IPredEQ, x, y)
 			})
 
 	}
 }
-func InvokeGt(block *ir.Block, libs *mTypes.BuiltinLibProp, node *mTypes.Node) value.Value {
+func InvokeGt(ctx *Context, node *mTypes.Node) value.Value {
 	return invokeFoldPred(
-		block,
+		ctx.block,
 		node,
 		func(x, y value.Value) value.Value {
-			return block.NewICmp(enum.IPredSGT, x, y)
+			return ctx.block.NewICmp(enum.IPredSGT, x, y)
 		})
 }
-func InvokeLt(block *ir.Block, libs *mTypes.BuiltinLibProp, node *mTypes.Node) value.Value {
+func InvokeLt(ctx *Context, node *mTypes.Node) value.Value {
 	return invokeFoldPred(
-		block,
+		ctx.block,
 		node,
 		func(x, y value.Value) value.Value {
-			return block.NewICmp(enum.IPredSLT, x, y)
+			return ctx.block.NewICmp(enum.IPredSLT, x, y)
 		})
 }
 
 // logical
-func InvokeAnd(block *ir.Block, libs *mTypes.BuiltinLibProp, node *mTypes.Node) value.Value {
+func InvokeAnd(ctx *Context, node *mTypes.Node) value.Value {
 	return invokeFoldPred(
-		block,
+		ctx.block,
 		node,
 		func(x, y value.Value) value.Value {
-			return block.NewAnd(x, y)
+			return ctx.block.NewAnd(x, y)
 		})
 }
-func InvokeOr(block *ir.Block, libs *mTypes.BuiltinLibProp, node *mTypes.Node) value.Value {
+func InvokeOr(ctx *Context, node *mTypes.Node) value.Value {
 	return invokeFoldPred(
-		block,
+		ctx.block,
 		node,
 		func(x, y value.Value) value.Value {
-			return block.NewOr(x, y)
+			return ctx.block.NewOr(x, y)
 		})
 }

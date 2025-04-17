@@ -12,7 +12,7 @@ import (
 	mTypes "github.com/wf001/modo/pkg/types"
 )
 
-func PreludeGet(block *ir.Block, libs *mTypes.Internal, node *mTypes.Node) value.Value {
+func PreludeGet(block *ir.Block, internal *mTypes.Internal, node *mTypes.Node) value.Value {
 	var oldArrType *types.ArrayType
 
 	var oldArrPtr value.Value
@@ -40,7 +40,7 @@ func PreludeGet(block *ir.Block, libs *mTypes.Internal, node *mTypes.Node) value
 }
 
 // Note: remain here until it will be defined the strategy of memory lifecycle
-func PreludeGetOld(block *ir.Block, libs *mTypes.Internal, node *mTypes.Node) value.Value {
+func PreludeGetOld(block *ir.Block, internal *mTypes.Internal, node *mTypes.Node) value.Value {
 	value, ok := node.IRValue.(*ir.InstAlloca)
 	if !ok {
 		log.Panic("Array elements must be ir.InstAlloca: have %+v", value)

@@ -11,13 +11,13 @@ import (
 
 func CopyArray(
 	block *ir.Block,
-	libs *mTypes.Internal,
+	internal *mTypes.Internal,
 	allocSize *ir.InstMul, // The number of bytes to allocate
 	oldArrType *types.ArrayType,
 	oldArrPtr value.Value,
 	newArrType *types.ArrayType,
 ) *ir.InstBitCast {
-	allocatedPtr := block.NewCall(libs.Cstd.Malloc, allocSize)
+	allocatedPtr := block.NewCall(internal.Cstd.Malloc, allocSize)
 
 	newArrPtr := block.NewBitCast(allocatedPtr, types.NewPointer(newArrType))
 

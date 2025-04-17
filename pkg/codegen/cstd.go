@@ -35,7 +35,7 @@ func declareMalloc(
 }
 func declareMemcpy(
 	module *ir.Module,
-	libs *mTypes.Internal,
+	internal *mTypes.Internal,
 ) {
 
 	memcpyFunc := module.NewFunc(
@@ -46,11 +46,11 @@ func declareMemcpy(
 		ir.NewParam("", types.I64),
 		ir.NewParam("", types.I1),
 	)
-	libs.Cstd.Memcpy = memcpyFunc
+	internal.Cstd.Memcpy = memcpyFunc
 }
 func declareStrcmp(
 	module *ir.Module,
-	libs *mTypes.Internal,
+	internal *mTypes.Internal,
 ) {
 
 	memcpyFunc := module.NewFunc(
@@ -59,12 +59,12 @@ func declareStrcmp(
 		ir.NewParam("", types.I8Ptr),
 		ir.NewParam("", types.I8Ptr),
 	)
-	libs.Cstd.Strcmp = memcpyFunc
+	internal.Cstd.Strcmp = memcpyFunc
 }
 
-func declareCstd(ir *ir.Module, libs *mTypes.Internal) {
-	declarePrintf(ir, libs)
-	declareMalloc(ir, libs)
-	declareMemcpy(ir, libs)
-	declareStrcmp(ir, libs)
+func declareCstd(ir *ir.Module, internal *mTypes.Internal) {
+	declarePrintf(ir, internal)
+	declareMalloc(ir, internal)
+	declareMemcpy(ir, internal)
+	declareStrcmp(ir, internal)
 }

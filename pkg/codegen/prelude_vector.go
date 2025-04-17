@@ -15,9 +15,9 @@ func declareVectorType(ir *ir.Module, Prelude *mTypes.PreludeProps) {
 	Prelude.Types.VectorInt = vectorIntType
 
 	// 型: struct { i8** %arrElm, i64 %len}
-	arrayStringType := types.NewStruct(types.NewPointer(types.I8Ptr), types.I64)
-	arrayStringType.SetName("prelude.vector.string")
-	ir.NewTypeDef("prelude.vector.string", arrayStringType)
-	Prelude.Types.VectorString = arrayStringType
+	vectorStringType := types.NewStruct(types.NewPointer(types.I8Ptr), types.I64)
+	vectorStringType.SetName("prelude.vector.string")
+	ir.NewTypeDef("prelude.vector.string", vectorStringType)
+	Prelude.Types.VectorString = vectorStringType
 
 }

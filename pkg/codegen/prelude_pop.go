@@ -10,7 +10,7 @@ import (
 	mTypes "github.com/wf001/modo/pkg/types"
 )
 
-func PreludePop(block *ir.Block, libs *mTypes.Internal, node *mTypes.Node) value.Value {
+func PreludePop(block *ir.Block, internal *mTypes.Internal, node *mTypes.Node) value.Value {
 	var oldArrType *types.ArrayType
 
 	var oldArrPtr value.Value
@@ -28,13 +28,13 @@ func PreludePop(block *ir.Block, libs *mTypes.Internal, node *mTypes.Node) value
 	newArrSize := constant.NewInt(types.I64, int64(oldArrType.Len-1))
 	allocSize := block.NewMul(typeSize, newArrSize)
 	newArrType := types.NewArray(oldArrType.Len-1, oldArrType.ElemType)
-	newArrPtr := CopyArray(block, libs, allocSize, oldArrType, oldArrPtr, newArrType)
+	newArrPtr := CopyArray(block, internal, allocSize, oldArrType, oldArrPtr, newArrType)
 
 	return newArrPtr
 }
 
 // Note: remain here until it will be defined the strategy of memory lifecycle
-func PreludePopOld(block *ir.Block, libs *mTypes.Internal, node *mTypes.Node) value.Value {
+func PreludePopOld(block *ir.Block, internal *mTypes.Internal, node *mTypes.Node) value.Value {
 
 	oldArrPtr, ok := node.IRValue.(*ir.InstAlloca)
 	if !ok {

@@ -6,10 +6,10 @@ import (
 	mTypes "github.com/wf001/modo/pkg/types"
 )
 
-func declareInternal(ir *ir.Module, libs *mTypes.Internal) {
+func declareInternal(ir *ir.Module, internal *mTypes.Internal) {
 
-	declareInternalConst(ir, libs)
-	declareCstd(ir, libs)
+	declareInternalConst(ir, internal)
+	declareCstd(ir, internal)
 
 	log.DebugMessage("built-in library declared")
 }

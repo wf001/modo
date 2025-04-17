@@ -94,7 +94,7 @@ func PreludeConj(ctx *Context, n *mTypes.Node) value.Value {
 }
 
 // Note: remain here until it will be defined the strategy of memory lifecycle
-func PreludeConjOld(block *ir.Block, libs *mTypes.Internal, node *mTypes.Node) value.Value {
+func PreludeConjOld(block *ir.Block, internal *mTypes.Internal, node *mTypes.Node) value.Value {
 	oldArrPtr, ok := node.IRValue.(*ir.InstAlloca)
 	if !ok {
 		log.Panic("Array elements must be ir.InstAlloca: have %+v", oldArrPtr)

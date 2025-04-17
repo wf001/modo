@@ -10,7 +10,7 @@ import (
 	mTypes "github.com/wf001/modo/pkg/types"
 )
 
-func PreludeAssoc(block *ir.Block, libs *mTypes.Internal, node *mTypes.Node) value.Value {
+func PreludeAssoc(block *ir.Block, internal *mTypes.Internal, node *mTypes.Node) value.Value {
 	var oldArrType *types.ArrayType
 
 	var oldArrPtr value.Value
@@ -30,7 +30,7 @@ func PreludeAssoc(block *ir.Block, libs *mTypes.Internal, node *mTypes.Node) val
 	newArrSize := constant.NewInt(types.I64, int64(oldArrType.Len))
 	allocSize := block.NewMul(typeSize, newArrSize)
 	newArrType := types.NewArray(oldArrType.Len, oldArrType.ElemType)
-	newArrPtr := CopyArray(block, libs, allocSize, oldArrType, oldArrPtr, newArrType)
+	newArrPtr := CopyArray(block, internal, allocSize, oldArrType, oldArrPtr, newArrType)
 
 	destPtr := block.NewGetElementPtr(
 		newArrType,
@@ -42,7 +42,7 @@ func PreludeAssoc(block *ir.Block, libs *mTypes.Internal, node *mTypes.Node) val
 
 	return newArrPtr
 }
-func PreludeAssocOld(block *ir.Block, libs *mTypes.Internal, node *mTypes.Node) value.Value {
+func PreludeAssocOld(block *ir.Block, internal *mTypes.Internal, node *mTypes.Node) value.Value {
 	oldArrPtr, ok := node.IRValue.(*ir.InstAlloca)
 	if !ok {
 		log.Panic("Array elements must be ir.InstAlloca: have %+v", oldArrPtr)

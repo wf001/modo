@@ -7,7 +7,7 @@ import (
 	mTypes "github.com/wf001/modo/pkg/types"
 )
 
-func declareInternalConst(ir *ir.Module, libs *mTypes.Internal) {
+func declareInternalConst(ir *ir.Module, internal *mTypes.Internal) {
 	globalConst := &mTypes.GlobalConst{}
 
 	globalConst.FormatDigit = ir.NewGlobalDef(
@@ -51,7 +51,7 @@ func declareInternalConst(ir *ir.Module, libs *mTypes.Internal) {
 		constant.NewCharArrayFromString(",\x00"),
 	)
 
-	libs.GlobalConst = globalConst
+	internal.GlobalConst = globalConst
 
 	log.DebugMessage("built-in variable declared")
 }

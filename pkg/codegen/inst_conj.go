@@ -13,8 +13,8 @@ import (
 
 func InvokeConj(ctx *Context, n *mTypes.Node) value.Value {
 	// もとのベクターの構造体をロード
-	originalVector := n.IRValue
-	structPtrType := originalVector.Type().(*types.PointerType)
+	oldStructedArrPtr := n.IRValue
+	structPtrType := oldStructedArrPtr.Type().(*types.PointerType)
 	structType := structPtrType.ElemType.(*types.StructType)
 
 	var m1 = map[string]*types.StructType{
@@ -29,66 +29,66 @@ func InvokeConj(ctx *Context, n *mTypes.Node) value.Value {
 	structedArrType := m1[structType.TypeName]
 	elemType := m2[structType.TypeName]
 
-	loaded := ctx.block.NewLoad(structedArrType, originalVector)
-	resultArrPtr := ctx.block.NewExtractValue(loaded, 0)
-	resultLen := ctx.block.NewExtractValue(loaded, 1)
+	oldStructedArr := ctx.block.NewLoad(structedArrType, oldStructedArrPtr)
+	oldArrPtr := ctx.block.NewExtractValue(oldStructedArr, 0)
+	oldLen := ctx.block.NewExtractValue(oldStructedArr, 1)
 
 	// 長さ +1 の新しい vector を確保
-	typeSize := constant.NewInt(types.I64, int64(mTypes.GetBitWidth(elemType)))
-	newLen := ctx.block.NewAdd(resultLen, constant.NewInt(types.I64, 1))
-	allocSize := ctx.block.NewMul(typeSize, newLen)
+	elemSize := constant.NewInt(types.I64, int64(mTypes.GetBitWidth(elemType)))
+	newLen := ctx.block.NewAdd(oldLen, constant.NewInt(types.I64, 1))
+	newArrAllocSize := ctx.block.NewMul(elemSize, newLen)
 
-	allocatedPtr := ctx.block.NewCall(ctx.prog.BuiltinLibs.Malloc.FuncPtr, allocSize)
-	newArrayPtr := ctx.block.NewBitCast(allocatedPtr, types.NewPointer(elemType))
+	newArrAllocPtr := ctx.block.NewCall(ctx.prog.BuiltinLibs.Malloc.FuncPtr, newArrAllocSize)
+	newArrPtr := ctx.block.NewBitCast(newArrAllocPtr, types.NewPointer(elemType))
 
 	// もとの要素をコピー
 	loopIndex := ctx.block.NewAlloca(types.I64)
 	ctx.block.NewStore(constant.NewInt(types.I64, 0), loopIndex)
 
-	loop := ctx.function.NewBlock(n.GetBlockName("copy_loop", ctx.function.Blocks))
-	cond := ctx.function.NewBlock(n.GetBlockName("copy_cond", ctx.function.Blocks))
-	end := ctx.function.NewBlock(n.GetBlockName("copy_end", ctx.function.Blocks))
+	loopBlock := ctx.function.NewBlock(n.GetBlockName("copy_loop", ctx.function.Blocks))
+	condBlock := ctx.function.NewBlock(n.GetBlockName("copy_cond", ctx.function.Blocks))
+	endBlock := ctx.function.NewBlock(n.GetBlockName("copy_end", ctx.function.Blocks))
 
-	ctx.block.NewBr(cond)
+	ctx.block.NewBr(condBlock)
 
 	// 条件チェックブロック
-	condI := cond.NewLoad(types.I64, loopIndex)
-	shouldContinue := cond.NewICmp(enum.IPredULT, condI, resultLen)
-	cond.NewCondBr(shouldContinue, loop, end)
+	idx := condBlock.NewLoad(types.I64, loopIndex)
+	copyContinue := condBlock.NewICmp(enum.IPredULT, idx, oldLen)
+	condBlock.NewCondBr(copyContinue, loopBlock, endBlock)
 
 	// コピー処理ブロック
-	elemPtr := loop.NewGetElementPtr(elemType, resultArrPtr, condI)
-	elem := loop.NewLoad(elemType, elemPtr)
-	newElemPtr := loop.NewGetElementPtr(elemType, newArrayPtr, condI)
-	loop.NewStore(elem, newElemPtr)
+	oldArrElemPtr := loopBlock.NewGetElementPtr(elemType, oldArrPtr, idx)
+	oldElem := loopBlock.NewLoad(elemType, oldArrElemPtr)
+	newArrElemPtr := loopBlock.NewGetElementPtr(elemType, newArrPtr, idx)
+	loopBlock.NewStore(oldElem, newArrElemPtr)
 
-	nextI := loop.NewAdd(condI, constant.NewInt(types.I64, 1))
-	loop.NewStore(nextI, loopIndex)
-	loop.NewBr(cond)
+	incI := loopBlock.NewAdd(idx, constant.NewInt(types.I64, 1))
+	loopBlock.NewStore(incI, loopIndex)
+	loopBlock.NewBr(condBlock)
 
 	// end: 追加要素を挿入
-	ctx.block = end
-	newElemPtr = ctx.block.NewGetElementPtr(elemType, newArrayPtr, resultLen)
-	ctx.block.NewStore(n.Next.IRValue, newElemPtr)
+	ctx.block = endBlock
+	newArrElemPtr = ctx.block.NewGetElementPtr(elemType, newArrPtr, oldLen)
+	ctx.block.NewStore(n.Next.IRValue, newArrElemPtr)
 
 	// 新しい構造体を返す
 	newStructAlloca := ctx.block.NewAlloca(structedArrType)
 
-	ptrField := ctx.block.NewGetElementPtr(
+	newArrField := ctx.block.NewGetElementPtr(
 		structedArrType,
 		newStructAlloca,
 		newI32("0"),
 		newI32("0"),
 	)
-	ctx.block.NewStore(newArrayPtr, ptrField)
+	ctx.block.NewStore(newArrPtr, newArrField)
 
-	lenField := ctx.block.NewGetElementPtr(
+	newLenField := ctx.block.NewGetElementPtr(
 		structedArrType,
 		newStructAlloca,
 		newI32("0"),
 		newI32("1"),
 	)
-	ctx.block.NewStore(newLen, lenField)
+	ctx.block.NewStore(newLen, newLenField)
 
 	return newStructAlloca
 }

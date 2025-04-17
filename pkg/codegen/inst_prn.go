@@ -82,7 +82,25 @@ func prnStructVector(
 	ctx *Context,
 	n *mTypes.Node,
 ) {
-	loaded := ctx.block.NewLoad(ctx.prog.ArrayType.TypeInt, n.IRValue)
+	v := n.IRValue
+	structPtrType, _ := v.Type().(*types.PointerType)
+	structType := structPtrType.ElemType.(*types.StructType)
+	var m1 = map[string]*types.StructType{
+		"array.int":    ctx.prog.ArrayType.TypeInt,
+		"array.string": ctx.prog.ArrayType.TypeString,
+	}
+	var m2 = map[string]types.Type{
+		"array.int":    types.I32,
+		"array.string": types.I8Ptr,
+	}
+	var m3 = map[string]*ir.Global{
+		"array.int":    ctx.prog.BuiltinLibs.GlobalVar.FormatDigit,
+		"array.string": ctx.prog.BuiltinLibs.GlobalVar.FormatStr,
+	}
+	ty := m1[structType.TypeName]
+	elemTy := m2[structType.TypeName]
+	formatStr := m3[structType.TypeName]
+	loaded := ctx.block.NewLoad(ty, n.IRValue)
 
 	// 構造体のフィールドから arrPtr と len を取り出す
 	resultArrPtr := ctx.block.NewExtractValue(loaded, 0)
@@ -108,11 +126,11 @@ func prnStructVector(
 	i := loopBlock.NewLoad(types.I64, idx)
 
 	// 配列の各要素を取り出して表示
-	elemPtr := loopBlock.NewGetElementPtr(types.I32, resultArrPtr, i)
-	elem := loopBlock.NewLoad(types.I32, elemPtr)
+	elemPtr := loopBlock.NewGetElementPtr(elemTy, resultArrPtr, i)
+	elem := loopBlock.NewLoad(elemTy, elemPtr)
 	loopBlock.NewCall(
 		ctx.prog.BuiltinLibs.Printf.FuncPtr,
-		ctx.prog.BuiltinLibs.GlobalVar.FormatDigit,
+		formatStr,
 		elem,
 	)
 
@@ -150,14 +168,15 @@ func InvokePrn(
 		if mTypes.IsScalar(n.IRValue) {
 			prnScalar(ctx.prog.BuiltinLibs, ctx.block, n)
 
+		} else if _, ok := mTypes.AssertArrType(n.IRValue); ok {
+			log.Debug("use prnVector")
+			prnVector(ctx.prog.BuiltinLibs, ctx.block, n)
+
 		} else if _, ok := n.IRValue.Type().(*types.PointerType); ok {
 			prnStructVector(ctx, n)
 
 		} else if _, ok := n.IRValue.Type().(*types.StructType); ok {
 			prnStructVector(ctx, n)
-
-		} else if _, ok := mTypes.AssertArrType(n.IRValue); ok {
-			prnVector(ctx.prog.BuiltinLibs, ctx.block, n)
 
 		} else {
 			log.Panic("unresolved type: have %+v", n)

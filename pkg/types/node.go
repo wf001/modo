@@ -66,7 +66,8 @@ type Program struct {
 }
 
 type ArrayTypeProps struct {
-	TypeInt *types.StructType
+	TypeInt    *types.StructType
+	TypeString *types.StructType
 }
 
 type BuiltinLibProp struct {
@@ -197,10 +198,14 @@ func GetNodeSize(node *Node) uint64 {
 func GetLLVMTypeForVector(node *Node, arrTy *ArrayTypeProps) (types.Type, bool) {
 
 	var typeMap = map[ModoType]types.Type{
-		TY_VECTOR: arrTy.TypeInt,
+		TY_INT32: arrTy.TypeInt,
+		TY_STR:   arrTy.TypeString,
+	}
+	if node.Type != TY_VECTOR {
+		return nil, true
 	}
 
-	if t, ok := typeMap[node.Type]; ok {
+	if t, ok := typeMap[node.ElemType]; ok {
 		return t, true
 	}
 	return nil, true

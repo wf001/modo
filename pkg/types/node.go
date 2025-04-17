@@ -61,7 +61,12 @@ var RetType = map[string]ModoType{
 type Program struct {
 	Declares    *Node
 	BuiltinLibs *BuiltinLibProp
+	ArrayType   *ArrayTypeProps
 	GlobalStr   []*ir.InstLoad
+}
+
+type ArrayTypeProps struct {
+	TypeInt *types.StructType
 }
 
 type BuiltinLibProp struct {

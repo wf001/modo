@@ -11,6 +11,7 @@ import (
 	"github.com/llir/llvm/ir/types"
 	"github.com/llir/llvm/ir/value"
 
+	"github.com/wf001/modo/pkg/codegen/array_type"
 	"github.com/wf001/modo/pkg/codegen/lib"
 	"github.com/wf001/modo/pkg/codegen/lib/core"
 	"github.com/wf001/modo/pkg/log"
@@ -578,6 +579,8 @@ func constructModule(prog *mTypes.Program) *ir.Module {
 	module := ir.NewModule()
 	prog.BuiltinLibs = &mTypes.BuiltinLibProp{}
 	lib.DeclareBuiltin(module, prog.BuiltinLibs)
+	prog.ArrayType = &mTypes.ArrayTypeProps{}
+	array_type.DeclareType(module, prog.ArrayType)
 
 	for declare := prog.Declares; declare != nil; declare = declare.Next {
 		c := &context{

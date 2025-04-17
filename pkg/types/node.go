@@ -100,7 +100,6 @@ type Node struct {
 	Bind     *Node
 	Args     *Node
 	IsGlobal bool
-	VarPtr   value.Value // binded local variable
 	FuncPtr  *ir.Func    // declared function, library function
 	IRValue  value.Value //
 }

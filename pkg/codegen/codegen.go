@@ -361,11 +361,11 @@ func (ctx *Context) genVarReference(node *mTypes.Node) value.Value {
 	for scope := ctx.scope; scope != nil; scope = scope.Next {
 		if scope.Val == node.Val {
 			if scope.Child.IsScalar() {
-				return scope.VarPtr
+				return scope.IRValue
 			} else if scope.Child.IsKind(mTypes.ND_LIBCALL) {
-				return scope.VarPtr
+				return scope.IRValue
 			} else if scope.Child.IsType(mTypes.TY_VECTOR) {
-				return scope.VarPtr
+				return scope.IRValue
 
 			} else {
 				log.Panic("unresolved NodeType: have %+v", node)
@@ -518,16 +518,16 @@ func (ctx *Context) gen(node *mTypes.Node) value.Value {
 			child := ctx.gen(bind.Child)
 
 			if bind.IsType(mTypes.TY_INT32) {
-				bind.VarPtr = child
+				bind.IRValue = child
 
 			} else if bind.IsType(mTypes.TY_STR) {
-				bind.VarPtr = child
+				bind.IRValue = child
 
 			} else if bind.IsType(mTypes.TY_BOOL) {
-				bind.VarPtr = child
+				bind.IRValue = child
 
 			} else if bind.IsType(mTypes.TY_VECTOR) {
-				bind.VarPtr = child
+				bind.IRValue = child
 
 			} else {
 				log.Panic("unresolved NodeType: have %+v", node)

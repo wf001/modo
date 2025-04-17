@@ -149,6 +149,18 @@ func newVectorOld(ctx *Context, n *mTypes.Node) value.Value {
 	n.IRValue = arr
 	return arr
 }
+
+// Unlike strings, vectors use malloc, which means structures containing pointer types cannot be
+// used directly in the global space. While a vector used as a local variable can be represented
+// as a structure, and a global vector can be defined using types.ArrayType, the added complexity
+// doesn't seem worth the benefit.
+//
+// Therefore, global vectors also use heap memory. At the point of view, this function is NOT USED
+// currently.
+
+// However, if fixed-size arrays — which are different from vectors — are implemented in the future,
+// this logic may be reused. So, the decision to delete this function will be postponed until it is
+// determined whether fixed-size arrays will be supported.
 func newVectorGlobal(ctx *Context, n *mTypes.Node) value.Value {
 	elemType, _ := mTypes.GetLLVMType(n.ElemType)
 
@@ -582,10 +594,6 @@ func (ctx *Context) gen(node *mTypes.Node) value.Value {
 			log.Panic("unresolved Scalar: have %+v", node)
 		}
 	} else if node.IsKind(mTypes.ND_COLLECTION) {
-
-		if node.IsGlobal {
-			return newVectorGlobal(ctx, node)
-		}
 		return newVectorHeap(ctx, node)
 	} else {
 		log.Panic("unresolved Nodekind: have %+v", node)

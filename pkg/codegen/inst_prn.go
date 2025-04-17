@@ -41,6 +41,8 @@ func prnScalar(
 	block.NewCall(libs.Printf.FuncPtr, formatStr, value)
 }
 
+// Note: NOT USED
+// see newVectorGlobal comment
 func prnVector(libs *mTypes.BuiltinLibProp, block *ir.Block, n *mTypes.Node) {
 	var arr value.Value
 	var arrType *types.ArrayType
@@ -167,10 +169,6 @@ func InvokePrn(
 	for n := node; n != nil; n = n.Next {
 		if mTypes.IsScalar(n.IRValue) {
 			prnScalar(ctx.prog.BuiltinLibs, ctx.block, n)
-
-		} else if _, ok := mTypes.AssertArrType(n.IRValue); ok {
-			log.Debug("use prnVector")
-			prnVector(ctx.prog.BuiltinLibs, ctx.block, n)
 
 		} else if _, ok := n.IRValue.Type().(*types.PointerType); ok {
 			prnStructVector(ctx, n)

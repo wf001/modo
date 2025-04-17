@@ -48,7 +48,6 @@ func newStrGlobal(ctx *Context, n *mTypes.Node) *ir.InstLoad {
 	strConst := constant.NewCharArrayFromString(n.Val)
 	globalStr := ctx.mod.NewGlobalDef(fmt.Sprintf(".str.%d", len(ctx.mod.Globals)), strConst)
 	globalStr.Linkage = enum.LinkagePrivate
-	globalStr.UnnamedAddr = enum.UnnamedAddrUnnamedAddr
 	globalStr.Immutable = true
 	globalStr.Align = 1
 

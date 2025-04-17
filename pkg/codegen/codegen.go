@@ -542,7 +542,7 @@ func (ctx *Context) gen(node *mTypes.Node) value.Value {
 		}
 
 		libFunc := LibInsts[node.Val]
-		return libFunc(ctx, node)
+		return libFunc(ctx, node.Child)
 
 	} else if node.IsKind(mTypes.ND_FUNCCALL) {
 		var arg []value.Value

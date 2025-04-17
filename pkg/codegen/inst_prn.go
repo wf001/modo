@@ -94,7 +94,13 @@ func prnStructVector(
 	ctx.block.NewStore(constant.NewInt(types.I64, 0), idx)
 
 	loopBlock := ctx.function.NewBlock("loop")
+	continueBlock := ctx.function.NewBlock("continue")
 	endBlock := ctx.function.NewBlock("end")
+
+	ctx.block.NewCall(
+		ctx.prog.BuiltinLibs.Printf.FuncPtr,
+		ctx.prog.BuiltinLibs.GlobalVar.FormatBracketOpen,
+	)
 	ctx.block.NewBr(loopBlock)
 
 	// ループ内部の処理
@@ -114,10 +120,24 @@ func prnStructVector(
 	nextI := loopBlock.NewAdd(i, constant.NewInt(types.I64, 1))
 	loopBlock.NewStore(nextI, idx)
 
+	continueBlock.NewCall(
+		ctx.prog.BuiltinLibs.Printf.FuncPtr,
+		ctx.prog.BuiltinLibs.GlobalVar.FormatComma,
+	)
+	continueBlock.NewCall(
+		ctx.prog.BuiltinLibs.Printf.FuncPtr,
+		ctx.prog.BuiltinLibs.GlobalVar.FormatSpace,
+	)
+	continueBlock.NewBr(loopBlock)
+
 	// i < len ?
 	cond := loopBlock.NewICmp(enum.IPredSLT, nextI, resultLen)
-	loopBlock.NewCondBr(cond, loopBlock, endBlock)
+	loopBlock.NewCondBr(cond, continueBlock, endBlock)
 	ctx.block = endBlock
+	ctx.block.NewCall(
+		ctx.prog.BuiltinLibs.Printf.FuncPtr,
+		ctx.prog.BuiltinLibs.GlobalVar.FormatBracketClose,
+	)
 
 }
 

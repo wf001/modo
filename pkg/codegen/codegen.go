@@ -214,49 +214,49 @@ func newVectorGlobal(ctx *Context, n *mTypes.Node) value.Value {
 }
 
 func newVectorHeap(ctx *Context, n *mTypes.Node) value.Value {
-	var arrLength int64
+	var vecLength int64
 
-	arrContent := []value.Value{}
+	vecContent := []value.Value{}
 	for e := n.Child; e != nil; e = e.Next {
 		e.IRValue = ctx.gen(e)
-		arrContent = append(arrContent, e.IRValue)
-		arrLength++
+		vecContent = append(vecContent, e.IRValue)
+		vecLength++
 	}
 	elemType, _ := mTypes.GetLLVMType(n.ElemType)
 	structedArrType, _ := mTypes.GetLLVMTypeForVector(n, ctx.prog.Prelude)
 
 	typeSize := constant.NewInt(types.I64, int64(mTypes.GetBitWidth(elemType)))
-	arrSize := constant.NewInt(types.I64, int64(arrLength))
-	allocSize := ctx.block.NewMul(typeSize, arrSize)
+	vecSize := constant.NewInt(types.I64, int64(vecLength))
+	allocSize := ctx.block.NewMul(typeSize, vecSize)
 
 	allocatedPtr := ctx.block.NewCall(ctx.prog.Internal.Cstd.Malloc, allocSize)
-	arrayPtr := ctx.block.NewBitCast(allocatedPtr, types.NewPointer(elemType))
+	vecPtr := ctx.block.NewBitCast(allocatedPtr, types.NewPointer(elemType))
 
-	for i, e := range arrContent {
-		ptr := ctx.block.NewGetElementPtr(elemType, arrayPtr, constant.NewInt(types.I32, int64(i)))
+	for i, e := range vecContent {
+		ptr := ctx.block.NewGetElementPtr(elemType, vecPtr, constant.NewInt(types.I32, int64(i)))
 		ctx.block.NewStore(e, ptr)
 	}
-	arrayIntAlloca := ctx.block.NewAlloca(structedArrType)
+	vecIntAlloca := ctx.block.NewAlloca(structedArrType)
 
-	arrElemPtr := ctx.block.NewGetElementPtr(
+	vecElemPtr := ctx.block.NewGetElementPtr(
 		structedArrType,
-		arrayIntAlloca,
+		vecIntAlloca,
 		newI32("0"),
 		newI32("0"),
 	)
-	arrElemPtr.SetName(n.GetVarName("arrElemPtr", ctx.block.Insts))
-	ctx.block.NewStore(arrayPtr, arrElemPtr)
+	vecElemPtr.SetName(n.GetVarName("vecElemPtr", ctx.block.Insts))
+	ctx.block.NewStore(vecPtr, vecElemPtr)
 
 	lenElemPtr := ctx.block.NewGetElementPtr(
 		structedArrType,
-		arrayIntAlloca,
+		vecIntAlloca,
 		newI32("0"),
 		newI32("1"),
 	)
 	lenElemPtr.SetName(n.GetVarName("lenElemPtr", ctx.block.Insts))
-	ctx.block.NewStore(constant.NewInt(types.I64, arrLength), lenElemPtr)
+	ctx.block.NewStore(constant.NewInt(types.I64, vecLength), lenElemPtr)
 
-	return arrayIntAlloca
+	return vecIntAlloca
 
 }
 

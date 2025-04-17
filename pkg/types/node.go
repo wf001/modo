@@ -182,24 +182,18 @@ func GetLLVMType(ty ModoType) (types.Type, bool) {
 	}
 	return nil, false
 }
-func GetLLVMTypeForVector(node *Node) (types.Type, bool) {
-
-	elemType, ok := GetLLVMType(node.ElemType)
-	if !ok {
-		return nil, false
-	}
+func GetNodeSize(node *Node) uint64 {
 	var length uint64 = 0
 	for n := node.Child; n != nil; n = n.Next {
 		length++
 	}
+	return length
+
+}
+func GetLLVMTypeForVector(node *Node, arrTy *ArrayTypeProps) (types.Type, bool) {
 
 	var typeMap = map[ModoType]types.Type{
-		TY_VECTOR: &types.PointerType{
-			ElemType: &types.ArrayType{
-				ElemType: elemType,
-				Len:      length,
-			},
-		},
+		TY_VECTOR: arrTy.TypeInt,
 	}
 
 	if t, ok := typeMap[node.Type]; ok {

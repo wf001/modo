@@ -22,7 +22,7 @@ type assembler struct {
 	program *mTypes.Program
 }
 
-type context struct {
+type Context struct {
 	mod      *ir.Module
 	function *ir.Func
 	block    *ir.Block
@@ -47,7 +47,7 @@ func newI32(s string) *constant.Int {
 	return constant.NewInt(types.I32, i)
 }
 
-func newStrGlobal(ctx *context, n *mTypes.Node) *ir.InstLoad {
+func newStrGlobal(ctx *Context, n *mTypes.Node) *ir.InstLoad {
 	strConst := constant.NewCharArrayFromString(n.Val)
 	globalStr := ctx.mod.NewGlobalDef(fmt.Sprintf(".str.%d", len(ctx.mod.Globals)), strConst)
 	globalStr.Linkage = enum.LinkagePrivate
@@ -68,7 +68,7 @@ func newStrGlobal(ctx *context, n *mTypes.Node) *ir.InstLoad {
 	return str
 }
 
-func newStrHeap(ctx *context, n *mTypes.Node) *ir.InstCall {
+func newStrHeap(ctx *Context, n *mTypes.Node) *ir.InstCall {
 	strVal := n.Val
 	strLen := len(strVal)
 
@@ -100,7 +100,7 @@ func newStrHeap(ctx *context, n *mTypes.Node) *ir.InstCall {
 }
 
 // Note: remain here until it will be defined the strategy of memory lifecycle
-func newVectorOld(ctx *context, n *mTypes.Node) value.Value {
+func newVectorOld(ctx *Context, n *mTypes.Node) value.Value {
 	elemType, _ := mTypes.GetLLVMType(n.ElemType)
 
 	var arrLength uint64 = 0
@@ -152,7 +152,7 @@ func newVectorOld(ctx *context, n *mTypes.Node) value.Value {
 	n.IRValue = arr
 	return arr
 }
-func newVectorGlobal(ctx *context, n *mTypes.Node) value.Value {
+func newVectorGlobal(ctx *Context, n *mTypes.Node) value.Value {
 	elemType, _ := mTypes.GetLLVMType(n.ElemType)
 
 	var arrContent []constant.Constant
@@ -205,8 +205,8 @@ func newVectorGlobal(ctx *context, n *mTypes.Node) value.Value {
 	return vecGlobal
 }
 
-func newVectorHeap(ctx *context, n *mTypes.Node) value.Value {
-	var arrLength uint64
+func newVectorHeap(ctx *Context, n *mTypes.Node) value.Value {
+	var arrLength int64
 
 	arrContent := []value.Value{}
 	for e := n.Child; e != nil; e = e.Next {
@@ -215,26 +215,44 @@ func newVectorHeap(ctx *context, n *mTypes.Node) value.Value {
 		arrLength++
 	}
 	elemType, _ := mTypes.GetLLVMType(n.ElemType)
-	pointorArrType, _ := mTypes.GetLLVMTypeForVector(n)
-	arrType, _ := pointorArrType.(*types.PointerType)
+	structedArrType, _ := mTypes.GetLLVMTypeForVector(n, ctx.prog.ArrayType)
 
 	typeSize := constant.NewInt(types.I64, int64(mTypes.GetBitWidth(elemType)))
 	arrSize := constant.NewInt(types.I64, int64(arrLength))
 	allocSize := ctx.block.NewMul(typeSize, arrSize)
 
 	allocatedPtr := ctx.block.NewCall(ctx.prog.BuiltinLibs.Malloc.FuncPtr, allocSize)
-	arrayPtr := ctx.block.NewBitCast(allocatedPtr, types.NewPointer(arrType.ElemType))
+	arrayPtr := ctx.block.NewBitCast(allocatedPtr, types.NewPointer(elemType))
 
 	for i, e := range arrContent {
 		ptr := ctx.block.NewGetElementPtr(elemType, arrayPtr, constant.NewInt(types.I32, int64(i)))
 		ctx.block.NewStore(e, ptr)
 	}
+	arrayIntAlloca := ctx.block.NewAlloca(structedArrType)
 
-	return arrayPtr
+	arrElemPtr := ctx.block.NewGetElementPtr(
+		structedArrType,
+		arrayIntAlloca,
+		newI32("0"),
+		newI32("0"),
+	)
+	arrElemPtr.SetName("arrElemPtr")
+	ctx.block.NewStore(arrayPtr, arrElemPtr)
+
+	lenElemPtr := ctx.block.NewGetElementPtr(
+		structedArrType,
+		arrayIntAlloca,
+		newI32("0"),
+		newI32("1"),
+	)
+	lenElemPtr.SetName("lenElemPtr")
+	ctx.block.NewStore(constant.NewInt(types.I64, arrLength), lenElemPtr)
+
+	return arrayIntAlloca
 
 }
 
-func (ctx *context) genVarDeclare(node *mTypes.Node) value.Value {
+func (ctx *Context) genVarDeclare(node *mTypes.Node) value.Value {
 	if node.Val == "main" {
 		// means declaring main function regarded as entrypoint
 
@@ -258,10 +276,10 @@ func (ctx *context) genVarDeclare(node *mTypes.Node) value.Value {
 
 		if !ok {
 			if node.Child.Kind == mTypes.ND_COLLECTION {
-				retType, _ = mTypes.GetLLVMTypeForVector(node.Child)
+				retType, _ = mTypes.GetLLVMTypeForVector(node.Child, ctx.prog.ArrayType)
 
 			} else {
-				retType, _ = mTypes.GetLLVMTypeForVector(node)
+				retType, _ = mTypes.GetLLVMTypeForVector(node, ctx.prog.ArrayType)
 			}
 		}
 
@@ -274,7 +292,7 @@ func (ctx *context) genVarDeclare(node *mTypes.Node) value.Value {
 		for a := node.Child.Args; a != nil; a = a.Next {
 			childType, ok := mTypes.GetLLVMType(a.Type)
 			if !ok {
-				childType, _ = mTypes.GetLLVMTypeForVector(a)
+				childType, _ = mTypes.GetLLVMTypeForVector(a, ctx.prog.ArrayType)
 			}
 
 			arg = append(arg, ir.NewParam(a.Val, childType))
@@ -310,7 +328,7 @@ func (ctx *context) genVarDeclare(node *mTypes.Node) value.Value {
 	return nil
 }
 
-func (ctx *context) genVarReference(node *mTypes.Node) value.Value {
+func (ctx *Context) genVarReference(node *mTypes.Node) value.Value {
 	// PERFORMANCE: too redundant
 	// TODO: prohibit same name identifier between global var, binded variable and function argument
 
@@ -355,7 +373,7 @@ func (ctx *context) genVarReference(node *mTypes.Node) value.Value {
 	return nil
 }
 
-func (ctx *context) genLambda(node *mTypes.Node) value.Value {
+func (ctx *Context) genLambda(node *mTypes.Node) value.Value {
 	isParentMain := ctx.function.GlobalName == "main"
 	unnamedFuncName := node.GetUnnamedFuncName()
 	fnEntryBlockName := "fn.entry"
@@ -397,7 +415,7 @@ func (ctx *context) genLambda(node *mTypes.Node) value.Value {
 	}
 }
 
-func (ctx *context) genBranch(
+func (ctx *Context) genBranch(
 	block *ir.Block,
 	node *mTypes.Node,
 	condRet value.Value,
@@ -423,7 +441,7 @@ func (ctx *context) genBranch(
 	}
 }
 
-func (ctx *context) genCondition(node *mTypes.Node) {
+func (ctx *Context) genCondition(node *mTypes.Node) {
 	// cond
 	condBlock := ctx.function.NewBlock(node.GetBlockName("if.cond"))
 	ctx.block.NewBr(condBlock)
@@ -460,7 +478,7 @@ func (ctx *context) genCondition(node *mTypes.Node) {
 	ctx.block = exitBlock
 }
 
-func (ctx *context) gen(node *mTypes.Node) value.Value {
+func (ctx *Context) gen(node *mTypes.Node) value.Value {
 	// Note: no more need?
 	// log.DebugNoLine(log.GREEN(fmt.Sprintf("%+v \"%+v\"", node.Kind, node.Val)))
 	if node.IsKind(mTypes.ND_DECLARE) {
@@ -527,7 +545,7 @@ func (ctx *context) gen(node *mTypes.Node) value.Value {
 		}
 
 		libFunc := core.LibInsts[node.Val]
-		return libFunc(ctx.block, ctx.prog.BuiltinLibs, node.Child)
+		return libFunc(ctx.function, ctx.block, ctx.prog.BuiltinLibs, node.Child, ctx.prog.ArrayType)
 
 	} else if node.IsKind(mTypes.ND_FUNCCALL) {
 		var arg []value.Value
@@ -583,7 +601,7 @@ func constructModule(prog *mTypes.Program) *ir.Module {
 	array_type.DeclareType(module, prog.ArrayType)
 
 	for declare := prog.Declares; declare != nil; declare = declare.Next {
-		c := &context{
+		c := &Context{
 			mod:  module,
 			prog: prog,
 		}

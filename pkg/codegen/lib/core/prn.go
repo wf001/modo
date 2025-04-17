@@ -3,6 +3,7 @@ package core
 import (
 	"github.com/llir/llvm/ir"
 	"github.com/llir/llvm/ir/constant"
+	"github.com/llir/llvm/ir/enum"
 	"github.com/llir/llvm/ir/types"
 	"github.com/llir/llvm/ir/value"
 
@@ -77,11 +78,62 @@ func prnVector(libs *mTypes.BuiltinLibProp, block *ir.Block, n *mTypes.Node) {
 	block.NewCall(libs.Printf.FuncPtr, libs.GlobalVar.FormatBracketClose)
 }
 
-func InvokePrn(block *ir.Block, libs *mTypes.BuiltinLibProp, node *mTypes.Node) value.Value {
+func prnStructVector(
+	fnc *ir.Func,
+	libs *mTypes.BuiltinLibProp,
+	block *ir.Block,
+	n *mTypes.Node,
+	arrType *mTypes.ArrayTypeProps,
+) {
+	loaded := block.NewLoad(arrType.TypeInt, n.IRValue)
+
+	// 構造体のフィールドから arrPtr と len を取り出す
+	resultArrPtr := block.NewExtractValue(loaded, 0)
+	resultLen := block.NewExtractValue(loaded, 1)
+
+	// インデックスの初期化
+	idx := block.NewAlloca(types.I64)
+	idx.SetName("idx")
+	block.NewStore(constant.NewInt(types.I64, 0), idx)
+
+	loopBlock := fnc.NewBlock("loop")
+	endBlock := fnc.NewBlock("end")
+	block.NewBr(loopBlock)
+
+	// ループ内部の処理
+	// i をロード
+	i := loopBlock.NewLoad(types.I64, idx)
+
+	// 配列の各要素を取り出して表示
+	elemPtr := loopBlock.NewGetElementPtr(types.I32, resultArrPtr, i)
+	elem := loopBlock.NewLoad(types.I32, elemPtr)
+	loopBlock.NewCall(libs.Printf.FuncPtr, libs.GlobalVar.FormatDigit, elem)
+
+	// i++
+	nextI := loopBlock.NewAdd(i, constant.NewInt(types.I64, 1))
+	loopBlock.NewStore(nextI, idx)
+
+	// i < len ?
+	cond := loopBlock.NewICmp(enum.IPredSLT, nextI, resultLen)
+	loopBlock.NewCondBr(cond, loopBlock, endBlock)
+	block = endBlock
+
+}
+
+func InvokePrn(
+	fnc *ir.Func,
+	block *ir.Block,
+	libs *mTypes.BuiltinLibProp,
+	node *mTypes.Node,
+	arrType *mTypes.ArrayTypeProps,
+) value.Value {
 
 	for n := node; n != nil; n = n.Next {
 		if mTypes.IsScalar(n.IRValue) {
 			prnScalar(libs, block, n)
+
+		} else if _, ok := n.IRValue.Type().(*types.PointerType); ok {
+			prnStructVector(fnc, libs, block, n, arrType)
 
 		} else if _, ok := mTypes.AssertArrType(n.IRValue); ok {
 			prnVector(libs, block, n)

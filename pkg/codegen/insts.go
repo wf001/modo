@@ -8,7 +8,7 @@ import (
 var LibInsts = map[string]func(*Context, *mTypes.Node) value.Value{
 	mTypes.LIB_CORE_PRN: InvokePrn,
 	//mTypes.LIB_CORE_GET:   InvokeGet,
-	//mTypes.LIB_CORE_CONJ:  InvokeConj,
+	mTypes.LIB_CORE_CONJ: InvokeConj,
 	//mTypes.LIB_CORE_ASSOC: InvokeAssoc,
 	//mTypes.LIB_CORE_POP:   InvokePop,
 	// nary

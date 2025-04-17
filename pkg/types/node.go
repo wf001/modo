@@ -61,11 +61,11 @@ var RetType = map[string]ModoType{
 type Program struct {
 	Declares    *Node
 	BuiltinLibs *BuiltinLibProp
-	ArrayType   *ArrayTypeProps
+	VectorType  *VectorTypeProps
 	GlobalStr   []*ir.InstLoad
 }
 
-type ArrayTypeProps struct {
+type VectorTypeProps struct {
 	TypeInt    *types.StructType
 	TypeString *types.StructType
 }
@@ -195,7 +195,7 @@ func GetNodeSize(node *Node) uint64 {
 	return length
 
 }
-func GetLLVMTypeForVector(node *Node, arrTy *ArrayTypeProps) (types.Type, bool) {
+func GetLLVMTypeForVector(node *Node, arrTy *VectorTypeProps) (types.Type, bool) {
 
 	var typeMap = map[ModoType]types.Type{
 		TY_INT32: arrTy.TypeInt,

@@ -88,16 +88,16 @@ func prnStructVector(
 	structPtrType, _ := v.Type().(*types.PointerType)
 	structType := structPtrType.ElemType.(*types.StructType)
 	var m1 = map[string]*types.StructType{
-		"array.int":    ctx.prog.ArrayType.TypeInt,
-		"array.string": ctx.prog.ArrayType.TypeString,
+		"prelude.vector.int":    ctx.prog.VectorType.TypeInt,
+		"prelude.vector.string": ctx.prog.VectorType.TypeString,
 	}
 	var m2 = map[string]types.Type{
-		"array.int":    types.I32,
-		"array.string": types.I8Ptr,
+		"prelude.vector.int":    types.I32,
+		"prelude.vector.string": types.I8Ptr,
 	}
 	var m3 = map[string]*ir.Global{
-		"array.int":    ctx.prog.BuiltinLibs.GlobalVar.FormatDigit,
-		"array.string": ctx.prog.BuiltinLibs.GlobalVar.FormatStr,
+		"prelude.vector.int":    ctx.prog.BuiltinLibs.GlobalVar.FormatDigit,
+		"prelude.vector.string": ctx.prog.BuiltinLibs.GlobalVar.FormatStr,
 	}
 	ty := m1[structType.TypeName]
 	elemTy := m2[structType.TypeName]

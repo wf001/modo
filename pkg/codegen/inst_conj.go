@@ -18,12 +18,12 @@ func InvokeConj(ctx *Context, n *mTypes.Node) value.Value {
 	structType := structPtrType.ElemType.(*types.StructType)
 
 	var m1 = map[string]*types.StructType{
-		"array.int":    ctx.prog.ArrayType.TypeInt,
-		"array.string": ctx.prog.ArrayType.TypeString,
+		"prelude.vector.int":    ctx.prog.VectorType.TypeInt,
+		"prelude.vector.string": ctx.prog.VectorType.TypeString,
 	}
 	var m2 = map[string]types.Type{
-		"array.int":    types.I32,
-		"array.string": types.I8Ptr,
+		"prelude.vector.int":    types.I32,
+		"prelude.vector.string": types.I8Ptr,
 	}
 	// array type の情報を取得
 	structedArrType := m1[structType.TypeName]

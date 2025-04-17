@@ -7,51 +7,51 @@ import (
 	mTypes "github.com/wf001/modo/pkg/types"
 )
 
-func declareVariable(ir *ir.Module, libs *mTypes.BuiltinLibProp) {
-	globalVars := &mTypes.BuiltinGlobalVarsProp{}
+func declareInternalConstString(ir *ir.Module, libs *mTypes.Internal) {
+	globalConst := &mTypes.GlobalConst{}
 
-	globalVars.FormatDigit = ir.NewGlobalDef(
-		"format.digit",
+	globalConst.FormatDigit = ir.NewGlobalDef(
+		"_format.digit",
 		constant.NewCharArrayFromString("%d\x00"),
 	)
-	globalVars.FormatStr = ir.NewGlobalDef(
-		"format.string",
+	globalConst.FormatStr = ir.NewGlobalDef(
+		"_format.string",
 		constant.NewCharArrayFromString("%s\x00"),
 	)
-	globalVars.FormatSpace = ir.NewGlobalDef(
-		"format.space",
+	globalConst.StringSpace = ir.NewGlobalDef(
+		"_constant.string.space",
 		constant.NewCharArrayFromString(" \x00"),
 	)
-	globalVars.FormatCR = ir.NewGlobalDef(
-		"format.cr",
+	globalConst.StringCR = ir.NewGlobalDef(
+		"_constant.string.cr",
 		constant.NewCharArrayFromString("\n\x00"),
 	)
-	globalVars.TrueValue = ir.NewGlobalDef(
-		"value.true",
+	globalConst.StringTrue = ir.NewGlobalDef(
+		"_constant.string.true",
 		constant.NewCharArrayFromString("true\x00"),
 	)
-	globalVars.FalseValue = ir.NewGlobalDef(
-		"value.false",
+	globalConst.StringFalse = ir.NewGlobalDef(
+		"_constant.string.false",
 		constant.NewCharArrayFromString("false\x00"),
 	)
-	globalVars.NilValue = ir.NewGlobalDef(
-		"value.nil",
+	globalConst.StringNil = ir.NewGlobalDef(
+		"_constant.string.nil",
 		constant.NewCharArrayFromString("nil\x00"),
 	)
-	globalVars.FormatBracketOpen = ir.NewGlobalDef(
-		"format.bracket.open",
+	globalConst.StringBracketOpen = ir.NewGlobalDef(
+		"_constant.string.bracket.open",
 		constant.NewCharArrayFromString("[\x00"),
 	)
-	globalVars.FormatBracketClose = ir.NewGlobalDef(
-		"format.bracket.close",
+	globalConst.StringBracketClose = ir.NewGlobalDef(
+		"_constant.string.bracket.close",
 		constant.NewCharArrayFromString("]\x00"),
 	)
-	globalVars.FormatComma = ir.NewGlobalDef(
-		"format.comma",
+	globalConst.StringComma = ir.NewGlobalDef(
+		"_constant.string.comma",
 		constant.NewCharArrayFromString(",\x00"),
 	)
 
-	libs.GlobalVar = globalVars
+	libs.GlobalConst = globalConst
 
 	log.DebugMessage("built-in variable declared")
 }

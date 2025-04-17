@@ -10,7 +10,7 @@ import (
 	mTypes "github.com/wf001/modo/pkg/types"
 )
 
-func InvokePop(block *ir.Block, libs *mTypes.BuiltinLibProp, node *mTypes.Node) value.Value {
+func InvokePop(block *ir.Block, libs *mTypes.Internal, node *mTypes.Node) value.Value {
 	var oldArrType *types.ArrayType
 
 	var oldArrPtr value.Value
@@ -34,7 +34,7 @@ func InvokePop(block *ir.Block, libs *mTypes.BuiltinLibProp, node *mTypes.Node) 
 }
 
 // Note: remain here until it will be defined the strategy of memory lifecycle
-func InvokePopOld(block *ir.Block, libs *mTypes.BuiltinLibProp, node *mTypes.Node) value.Value {
+func InvokePopOld(block *ir.Block, libs *mTypes.Internal, node *mTypes.Node) value.Value {
 
 	oldArrPtr, ok := node.IRValue.(*ir.InstAlloca)
 	if !ok {

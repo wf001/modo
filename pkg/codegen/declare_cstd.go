@@ -9,7 +9,7 @@ import (
 
 func declarePrintf(
 	module *ir.Module,
-	libs *mTypes.BuiltinLibProp,
+	internal *mTypes.Internal,
 ) {
 	printfFunc := module.NewFunc(
 		"printf",
@@ -18,28 +18,24 @@ func declarePrintf(
 	)
 	printfFunc.Sig.Variadic = true
 
-	libs.Printf = &mTypes.BuiltinProp{
-		FuncPtr: printfFunc,
-	}
+	internal.Cstd.Printf = printfFunc
 
 }
 func declareMalloc(
 	module *ir.Module,
-	libs *mTypes.BuiltinLibProp,
+	libs *mTypes.Internal,
 ) {
 	mallocFunc := module.NewFunc(
 		"malloc",
 		types.I8Ptr,
 	)
 
-	libs.Malloc = &mTypes.BuiltinProp{
-		FuncPtr: mallocFunc,
-	}
+	libs.Cstd.Malloc = mallocFunc
 
 }
 func declareMemcpy(
 	module *ir.Module,
-	libs *mTypes.BuiltinLibProp,
+	libs *mTypes.Internal,
 ) {
 
 	memcpyFunc := module.NewFunc(
@@ -50,13 +46,11 @@ func declareMemcpy(
 		ir.NewParam("", types.I64),
 		ir.NewParam("", types.I1),
 	)
-	libs.Memcpy = &mTypes.BuiltinProp{
-		FuncPtr: memcpyFunc,
-	}
+	libs.Cstd.Memcpy = memcpyFunc
 }
 func declareStrcmp(
 	module *ir.Module,
-	libs *mTypes.BuiltinLibProp,
+	libs *mTypes.Internal,
 ) {
 
 	memcpyFunc := module.NewFunc(
@@ -65,12 +59,10 @@ func declareStrcmp(
 		ir.NewParam("", types.I8Ptr),
 		ir.NewParam("", types.I8Ptr),
 	)
-	libs.Strcmp = &mTypes.BuiltinProp{
-		FuncPtr: memcpyFunc,
-	}
+	libs.Cstd.Strcmp = memcpyFunc
 }
 
-func DeclareCstd(ir *ir.Module, libs *mTypes.BuiltinLibProp) {
+func declareCstd(ir *ir.Module, libs *mTypes.Internal) {
 	declarePrintf(ir, libs)
 	declareMalloc(ir, libs)
 	declareMemcpy(ir, libs)

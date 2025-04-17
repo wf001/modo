@@ -8,24 +8,24 @@ import (
 	mTypes "github.com/wf001/modo/pkg/types"
 )
 
-func declareVectorType(ir *ir.Module, vectorType *mTypes.VectorTypeProps) {
+func declareVectorType(ir *ir.Module, Prelude *mTypes.PreludeProps) {
 	// 型: struct { i32* %arrElm, i64 %len}
 	vectorIntType := types.NewStruct(types.NewPointer(types.I32), types.I64)
 	vectorIntType.SetName("prelude.vector.int")
 	ir.NewTypeDef("prelude.vector.int", vectorIntType)
-	vectorType.TypeInt = vectorIntType
+	Prelude.Types.VectorInt = vectorIntType
 
 	// 型: struct { i8** %arrElm, i64 %len}
 	arrayStringType := types.NewStruct(types.NewPointer(types.I8Ptr), types.I64)
 	arrayStringType.SetName("prelude.vector.string")
 	ir.NewTypeDef("prelude.vector.string", arrayStringType)
-	vectorType.TypeString = arrayStringType
+	Prelude.Types.VectorString = arrayStringType
 
 }
 
-func DeclareType(ir *ir.Module, arrayType *mTypes.VectorTypeProps) {
+func declarePrelude(ir *ir.Module, prelude *mTypes.PreludeProps) {
 
-	declareVectorType(ir, arrayType)
+	declareVectorType(ir, prelude)
 
 	log.DebugMessage("vector types declared")
 }

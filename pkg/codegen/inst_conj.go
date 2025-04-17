@@ -18,8 +18,8 @@ func InvokeConj(ctx *Context, n *mTypes.Node) value.Value {
 	structType := structPtrType.ElemType.(*types.StructType)
 
 	var m1 = map[string]*types.StructType{
-		"prelude.vector.int":    ctx.prog.VectorType.TypeInt,
-		"prelude.vector.string": ctx.prog.VectorType.TypeString,
+		"prelude.vector.int":    ctx.prog.Prelude.Types.VectorInt,
+		"prelude.vector.string": ctx.prog.Prelude.Types.VectorString,
 	}
 	var m2 = map[string]types.Type{
 		"prelude.vector.int":    types.I32,
@@ -38,7 +38,7 @@ func InvokeConj(ctx *Context, n *mTypes.Node) value.Value {
 	newLen := ctx.block.NewAdd(oldLen, constant.NewInt(types.I64, 1))
 	newArrAllocSize := ctx.block.NewMul(elemSize, newLen)
 
-	newArrAllocPtr := ctx.block.NewCall(ctx.prog.BuiltinLibs.Malloc.FuncPtr, newArrAllocSize)
+	newArrAllocPtr := ctx.block.NewCall(ctx.prog.Internal.Cstd.Malloc, newArrAllocSize)
 	newArrPtr := ctx.block.NewBitCast(newArrAllocPtr, types.NewPointer(elemType))
 
 	// もとの要素をコピー
@@ -94,7 +94,7 @@ func InvokeConj(ctx *Context, n *mTypes.Node) value.Value {
 }
 
 // Note: remain here until it will be defined the strategy of memory lifecycle
-func InvokeConjOld(block *ir.Block, libs *mTypes.BuiltinLibProp, node *mTypes.Node) value.Value {
+func InvokeConjOld(block *ir.Block, libs *mTypes.Internal, node *mTypes.Node) value.Value {
 	oldArrPtr, ok := node.IRValue.(*ir.InstAlloca)
 	if !ok {
 		log.Panic("Array elements must be ir.InstAlloca: have %+v", oldArrPtr)

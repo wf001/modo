@@ -12,7 +12,7 @@ import (
 	mTypes "github.com/wf001/modo/pkg/types"
 )
 
-func InvokeGet(block *ir.Block, libs *mTypes.BuiltinLibProp, node *mTypes.Node) value.Value {
+func InvokeGet(block *ir.Block, libs *mTypes.Internal, node *mTypes.Node) value.Value {
 	var oldArrType *types.ArrayType
 
 	var oldArrPtr value.Value
@@ -40,7 +40,7 @@ func InvokeGet(block *ir.Block, libs *mTypes.BuiltinLibProp, node *mTypes.Node) 
 }
 
 // Note: remain here until it will be defined the strategy of memory lifecycle
-func InvokeGetOld(block *ir.Block, libs *mTypes.BuiltinLibProp, node *mTypes.Node) value.Value {
+func InvokeGetOld(block *ir.Block, libs *mTypes.Internal, node *mTypes.Node) value.Value {
 	value, ok := node.IRValue.(*ir.InstAlloca)
 	if !ok {
 		log.Panic("Array elements must be ir.InstAlloca: have %+v", value)

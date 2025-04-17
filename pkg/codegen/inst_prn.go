@@ -12,7 +12,7 @@ import (
 )
 
 func prnScalar(
-	libs *mTypes.BuiltinLibProp,
+	libs *mTypes.Internal,
 	block *ir.Block,
 	n *mTypes.Node,
 ) {
@@ -21,10 +21,14 @@ func prnScalar(
 	formatStr, _ := mTypes.GetPrintFormat(rootTy, libs)
 
 	if rootTy.Equal(types.I1) {
-		value = block.NewSelect(value, libs.GlobalVar.TrueValue, libs.GlobalVar.FalseValue)
+		value = block.NewSelect(
+			value,
+			libs.GlobalConst.StringTrue,
+			libs.GlobalConst.StringFalse,
+		)
 
 	} else if rootTy.Equal(types.Void) {
-		value = libs.GlobalVar.NilValue
+		value = libs.GlobalConst.StringNil
 
 	} else if pointerElemTy, isPtr := rootTy.(*types.PointerType); isPtr {
 		if isStr := rootTy.Equal(types.I8Ptr); !isStr {
@@ -38,12 +42,12 @@ func prnScalar(
 		}
 	}
 
-	block.NewCall(libs.Printf.FuncPtr, formatStr, value)
+	block.NewCall(libs.Cstd.Printf, formatStr, value)
 }
 
 // Note: NOT USED
 // see newVectorGlobal comment
-func prnVector(libs *mTypes.BuiltinLibProp, block *ir.Block, n *mTypes.Node) {
+func prnVector(libs *mTypes.Internal, block *ir.Block, n *mTypes.Node) {
 	var arr value.Value
 	var arrType *types.ArrayType
 
@@ -58,26 +62,30 @@ func prnVector(libs *mTypes.BuiltinLibProp, block *ir.Block, n *mTypes.Node) {
 		log.Panic("Unsupported IRValue type: %#+v", n.IRValue)
 	}
 
-	block.NewCall(libs.Printf.FuncPtr, libs.GlobalVar.FormatBracketOpen)
+	block.NewCall(libs.Cstd.Printf, libs.GlobalConst.StringBracketOpen)
 
 	for i := uint64(0); i < arrType.Len; i++ {
 		elem := mTypes.LoadArrElem(block, arr, arrType, i)
 
 		formatStr, _ := mTypes.GetPrintFormat(elem.ElemType, libs)
 		if arrType.ElemType == types.I1 {
-			v := block.NewSelect(elem, libs.GlobalVar.TrueValue, libs.GlobalVar.FalseValue)
-			block.NewCall(libs.Printf.FuncPtr, formatStr, v)
+			v := block.NewSelect(
+				elem,
+				libs.GlobalConst.StringTrue,
+				libs.GlobalConst.StringFalse,
+			)
+			block.NewCall(libs.Cstd.Printf, formatStr, v)
 		} else {
-			block.NewCall(libs.Printf.FuncPtr, formatStr, elem)
+			block.NewCall(libs.Cstd.Printf, formatStr, elem)
 		}
 
 		if i < uint64(arrType.Len-1) {
-			block.NewCall(libs.Printf.FuncPtr, libs.GlobalVar.FormatComma)
-			block.NewCall(libs.Printf.FuncPtr, libs.GlobalVar.FormatSpace)
+			block.NewCall(libs.Cstd.Printf, libs.GlobalConst.StringComma)
+			block.NewCall(libs.Cstd.Printf, libs.GlobalConst.StringSpace)
 		}
 	}
 
-	block.NewCall(libs.Printf.FuncPtr, libs.GlobalVar.FormatBracketClose)
+	block.NewCall(libs.Cstd.Printf, libs.GlobalConst.StringBracketClose)
 }
 
 func prnStructVector(
@@ -88,16 +96,16 @@ func prnStructVector(
 	structPtrType, _ := v.Type().(*types.PointerType)
 	structType := structPtrType.ElemType.(*types.StructType)
 	var m1 = map[string]*types.StructType{
-		"prelude.vector.int":    ctx.prog.VectorType.TypeInt,
-		"prelude.vector.string": ctx.prog.VectorType.TypeString,
+		"prelude.vector.int":    ctx.prog.Prelude.Types.VectorInt,
+		"prelude.vector.string": ctx.prog.Prelude.Types.VectorString,
 	}
 	var m2 = map[string]types.Type{
 		"prelude.vector.int":    types.I32,
 		"prelude.vector.string": types.I8Ptr,
 	}
 	var m3 = map[string]*ir.Global{
-		"prelude.vector.int":    ctx.prog.BuiltinLibs.GlobalVar.FormatDigit,
-		"prelude.vector.string": ctx.prog.BuiltinLibs.GlobalVar.FormatStr,
+		"prelude.vector.int":    ctx.prog.Internal.GlobalConst.FormatDigit,
+		"prelude.vector.string": ctx.prog.Internal.GlobalConst.FormatStr,
 	}
 	ty := m1[structType.TypeName]
 	elemTy := m2[structType.TypeName]
@@ -118,8 +126,8 @@ func prnStructVector(
 	endBlock := ctx.function.NewBlock(n.GetBlockName("printf.end", ctx.function.Blocks))
 
 	ctx.block.NewCall(
-		ctx.prog.BuiltinLibs.Printf.FuncPtr,
-		ctx.prog.BuiltinLibs.GlobalVar.FormatBracketOpen,
+		ctx.prog.Internal.Cstd.Printf,
+		ctx.prog.Internal.GlobalConst.StringBracketOpen,
 	)
 	ctx.block.NewBr(loopBlock)
 
@@ -131,7 +139,7 @@ func prnStructVector(
 	elemPtr := loopBlock.NewGetElementPtr(elemTy, resultArrPtr, i)
 	elem := loopBlock.NewLoad(elemTy, elemPtr)
 	loopBlock.NewCall(
-		ctx.prog.BuiltinLibs.Printf.FuncPtr,
+		ctx.prog.Internal.Cstd.Printf,
 		formatStr,
 		elem,
 	)
@@ -141,12 +149,12 @@ func prnStructVector(
 	loopBlock.NewStore(nextI, idx)
 
 	continueBlock.NewCall(
-		ctx.prog.BuiltinLibs.Printf.FuncPtr,
-		ctx.prog.BuiltinLibs.GlobalVar.FormatComma,
+		ctx.prog.Internal.Cstd.Printf,
+		ctx.prog.Internal.GlobalConst.StringComma,
 	)
 	continueBlock.NewCall(
-		ctx.prog.BuiltinLibs.Printf.FuncPtr,
-		ctx.prog.BuiltinLibs.GlobalVar.FormatSpace,
+		ctx.prog.Internal.Cstd.Printf,
+		ctx.prog.Internal.GlobalConst.StringSpace,
 	)
 	continueBlock.NewBr(loopBlock)
 
@@ -155,8 +163,8 @@ func prnStructVector(
 	loopBlock.NewCondBr(cond, continueBlock, endBlock)
 	ctx.block = endBlock
 	ctx.block.NewCall(
-		ctx.prog.BuiltinLibs.Printf.FuncPtr,
-		ctx.prog.BuiltinLibs.GlobalVar.FormatBracketClose,
+		ctx.prog.Internal.Cstd.Printf,
+		ctx.prog.Internal.GlobalConst.StringBracketClose,
 	)
 
 }
@@ -168,7 +176,7 @@ func InvokePrn(
 
 	for n := node; n != nil; n = n.Next {
 		if mTypes.IsScalar(n.IRValue) {
-			prnScalar(ctx.prog.BuiltinLibs, ctx.block, n)
+			prnScalar(ctx.prog.Internal, ctx.block, n)
 
 		} else if _, ok := n.IRValue.Type().(*types.PointerType); ok {
 			prnStructVector(ctx, n)
@@ -182,11 +190,11 @@ func InvokePrn(
 
 		if n.Next == nil {
 			ctx.block.NewCall(
-				ctx.prog.BuiltinLibs.Printf.FuncPtr,
-				ctx.prog.BuiltinLibs.GlobalVar.FormatCR,
+				ctx.prog.Internal.Cstd.Printf,
+				ctx.prog.Internal.GlobalConst.StringCR,
 			)
 		} else {
-			ctx.block.NewCall(ctx.prog.BuiltinLibs.Printf.FuncPtr, ctx.prog.BuiltinLibs.GlobalVar.FormatSpace)
+			ctx.block.NewCall(ctx.prog.Internal.Cstd.Printf, ctx.prog.Internal.GlobalConst.StringSpace)
 		}
 	}
 

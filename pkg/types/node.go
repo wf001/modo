@@ -59,42 +59,45 @@ var RetType = map[string]ModoType{
 }
 
 type Program struct {
-	Declares    *Node
-	BuiltinLibs *BuiltinLibProp
-	VectorType  *VectorTypeProps
-	GlobalStr   []*ir.InstLoad
+	Declares          *Node
+	Prelude           *PreludeProps
+	DeclaredGlobalStr []*ir.InstLoad
+	Internal          *Internal
 }
 
-type VectorTypeProps struct {
-	TypeInt    *types.StructType
-	TypeString *types.StructType
+type PreludeProps struct {
+	Types PreludeTypeProps
 }
 
-type BuiltinLibProp struct {
-	GlobalVar *BuiltinGlobalVarsProp
-	Printf    *BuiltinProp
-	Malloc    *BuiltinProp
-	Memcpy    *BuiltinProp
-	Strcmp    *BuiltinProp
+type PreludeTypeProps struct {
+	VectorInt    *types.StructType
+	VectorString *types.StructType
+}
+
+type Internal struct {
+	Cstd        *Cstd
+	GlobalConst *GlobalConst
+}
+
+type Cstd struct {
+	Printf *ir.Func
+	Malloc *ir.Func
+	Memcpy *ir.Func
+	Strcmp *ir.Func
 }
 
 // HACK: should remove llir/ir reference from this namespace
-type BuiltinProp struct {
-	FuncPtr *ir.Func
-}
-
-// HACK: should remove llir/ir reference from this namespace
-type BuiltinGlobalVarsProp struct {
+type GlobalConst struct {
 	FormatDigit        *ir.Global
 	FormatStr          *ir.Global
-	FormatSpace        *ir.Global
-	FormatCR           *ir.Global
-	TrueValue          *ir.Global
-	FalseValue         *ir.Global
-	NilValue           *ir.Global
-	FormatBracketOpen  *ir.Global
-	FormatBracketClose *ir.Global
-	FormatComma        *ir.Global
+	StringSpace        *ir.Global
+	StringCR           *ir.Global
+	StringTrue         *ir.Global
+	StringFalse        *ir.Global
+	StringNil          *ir.Global
+	StringBracketOpen  *ir.Global
+	StringBracketClose *ir.Global
+	StringComma        *ir.Global
 }
 
 type Node struct {
@@ -195,11 +198,11 @@ func GetNodeSize(node *Node) uint64 {
 	return length
 
 }
-func GetLLVMTypeForVector(node *Node, arrTy *VectorTypeProps) (types.Type, bool) {
+func GetLLVMTypeForVector(node *Node, prelude *PreludeProps) (types.Type, bool) {
 
 	var typeMap = map[ModoType]types.Type{
-		TY_INT32: arrTy.TypeInt,
-		TY_STR:   arrTy.TypeString,
+		TY_INT32: prelude.Types.VectorInt,
+		TY_STR:   prelude.Types.VectorString,
 	}
 	if node.Type != TY_VECTOR {
 		return nil, true
@@ -298,7 +301,4 @@ func (prog *Program) Debug(depth int) {
 
 	// TODO: implement
 	// NOTE: is type of BuiltinLibs Node?
-	if prog.BuiltinLibs != nil {
-		log.DebugMessage("[BuiltinLib]")
-	}
 }

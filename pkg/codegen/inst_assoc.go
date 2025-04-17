@@ -10,7 +10,7 @@ import (
 	mTypes "github.com/wf001/modo/pkg/types"
 )
 
-func InvokeAssoc(block *ir.Block, libs *mTypes.BuiltinLibProp, node *mTypes.Node) value.Value {
+func InvokeAssoc(block *ir.Block, libs *mTypes.Internal, node *mTypes.Node) value.Value {
 	var oldArrType *types.ArrayType
 
 	var oldArrPtr value.Value
@@ -42,7 +42,7 @@ func InvokeAssoc(block *ir.Block, libs *mTypes.BuiltinLibProp, node *mTypes.Node
 
 	return newArrPtr
 }
-func InvokeAssocOld(block *ir.Block, libs *mTypes.BuiltinLibProp, node *mTypes.Node) value.Value {
+func InvokeAssocOld(block *ir.Block, libs *mTypes.Internal, node *mTypes.Node) value.Value {
 	oldArrPtr, ok := node.IRValue.(*ir.InstAlloca)
 	if !ok {
 		log.Panic("Array elements must be ir.InstAlloca: have %+v", oldArrPtr)

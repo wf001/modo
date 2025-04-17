@@ -61,7 +61,7 @@ func newStrGlobal(ctx *Context, n *mTypes.Node) *ir.InstLoad {
 	)
 	ctx.block.NewStore(strGEP, strPtr)
 	str := ctx.block.NewLoad(types.I8Ptr, strPtr)
-	ctx.prog.GlobalStr = append(ctx.prog.GlobalStr, str)
+	ctx.prog.DeclaredGlobalStr = append(ctx.prog.DeclaredGlobalStr, str)
 	return str
 }
 
@@ -70,7 +70,7 @@ func newStrHeap(ctx *Context, n *mTypes.Node) *ir.InstCall {
 	strLen := len(strVal)
 
 	mallocSize := constant.NewInt(types.I64, int64(strLen))
-	dest := ctx.block.NewCall(ctx.prog.BuiltinLibs.Malloc.FuncPtr, mallocSize)
+	dest := ctx.block.NewCall(ctx.prog.Internal.Cstd.Malloc, mallocSize)
 
 	strConst := constant.NewCharArrayFromString(strVal)
 	strConstType := strConst.Typ
@@ -87,7 +87,7 @@ func newStrHeap(ctx *Context, n *mTypes.Node) *ir.InstCall {
 	)
 
 	ctx.block.NewCall(
-		ctx.prog.BuiltinLibs.Memcpy.FuncPtr,
+		ctx.prog.Internal.Cstd.Memcpy,
 		dest,
 		srcPtr,
 		mallocSize,
@@ -224,13 +224,13 @@ func newVectorHeap(ctx *Context, n *mTypes.Node) value.Value {
 		arrLength++
 	}
 	elemType, _ := mTypes.GetLLVMType(n.ElemType)
-	structedArrType, _ := mTypes.GetLLVMTypeForVector(n, ctx.prog.VectorType)
+	structedArrType, _ := mTypes.GetLLVMTypeForVector(n, ctx.prog.Prelude)
 
 	typeSize := constant.NewInt(types.I64, int64(mTypes.GetBitWidth(elemType)))
 	arrSize := constant.NewInt(types.I64, int64(arrLength))
 	allocSize := ctx.block.NewMul(typeSize, arrSize)
 
-	allocatedPtr := ctx.block.NewCall(ctx.prog.BuiltinLibs.Malloc.FuncPtr, allocSize)
+	allocatedPtr := ctx.block.NewCall(ctx.prog.Internal.Cstd.Malloc, allocSize)
 	arrayPtr := ctx.block.NewBitCast(allocatedPtr, types.NewPointer(elemType))
 
 	for i, e := range arrContent {
@@ -285,11 +285,11 @@ func (ctx *Context) genVarDeclare(node *mTypes.Node) value.Value {
 
 		if !ok {
 			if node.Child.Kind == mTypes.ND_COLLECTION {
-				structType, _ := mTypes.GetLLVMTypeForVector(node.Child, ctx.prog.VectorType)
+				structType, _ := mTypes.GetLLVMTypeForVector(node.Child, ctx.prog.Prelude)
 				retType = types.NewPointer(structType)
 
 			} else {
-				structType, _ := mTypes.GetLLVMTypeForVector(node, ctx.prog.VectorType)
+				structType, _ := mTypes.GetLLVMTypeForVector(node, ctx.prog.Prelude)
 				retType = types.NewPointer(structType)
 			}
 		}
@@ -303,7 +303,7 @@ func (ctx *Context) genVarDeclare(node *mTypes.Node) value.Value {
 		for a := node.Child.Args; a != nil; a = a.Next {
 			ty, ok := mTypes.GetLLVMType(a.Type)
 			if !ok {
-				structTy, _ := mTypes.GetLLVMTypeForVector(a, ctx.prog.VectorType)
+				structTy, _ := mTypes.GetLLVMTypeForVector(a, ctx.prog.Prelude)
 				ty = types.NewPointer(structTy)
 			}
 
@@ -603,10 +603,12 @@ func (ctx *Context) gen(node *mTypes.Node) value.Value {
 
 func constructModule(prog *mTypes.Program) *ir.Module {
 	module := ir.NewModule()
-	prog.BuiltinLibs = &mTypes.BuiltinLibProp{}
-	DeclareBuiltin(module, prog.BuiltinLibs)
-	prog.VectorType = &mTypes.VectorTypeProps{}
-	DeclareType(module, prog.VectorType)
+	prog.Internal = &mTypes.Internal{}
+	prog.Internal.Cstd = &mTypes.Cstd{}
+	prog.Internal.GlobalConst = &mTypes.GlobalConst{}
+	declareInternal(module, prog.Internal)
+	prog.Prelude = &mTypes.PreludeProps{}
+	declarePrelude(module, prog.Prelude)
 
 	for declare := prog.Declares; declare != nil; declare = declare.Next {
 		c := &Context{

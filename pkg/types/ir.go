@@ -9,13 +9,13 @@ import (
 	"github.com/wf001/modo/pkg/log"
 )
 
-func GetPrintFormat(ty types.Type, libs *BuiltinLibProp) (*ir.Global, bool) {
+func GetPrintFormat(ty types.Type, libs *Internal) (*ir.Global, bool) {
 
 	formatMap := map[types.Type]*ir.Global{
-		types.I1:    libs.GlobalVar.FormatStr,
-		types.I8Ptr: libs.GlobalVar.FormatStr,
-		types.I32:   libs.GlobalVar.FormatDigit,
-		types.Void:  libs.GlobalVar.FormatStr,
+		types.I1:    libs.GlobalConst.FormatStr,
+		types.I8Ptr: libs.GlobalConst.FormatStr,
+		types.I32:   libs.GlobalConst.FormatDigit,
+		types.Void:  libs.GlobalConst.FormatStr,
 	}
 	if f, ok := formatMap[ty]; ok {
 		return f, true

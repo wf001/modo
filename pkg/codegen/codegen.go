@@ -509,6 +509,8 @@ func (ctx *Context) gen(node *mTypes.Node) value.Value {
 	} else if node.IsKind(mTypes.ND_VAR_DECLARE) {
 		return ctx.genVarDeclare(node)
 
+	} else if node.IsKind(mTypes.ND_TYPE_DECLARE) {
+
 	} else if node.IsKind(mTypes.ND_VAR_REFERENCE) {
 		return ctx.genVarReference(node)
 

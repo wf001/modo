@@ -156,7 +156,7 @@ func parseDeclare(tok *mTypes.Token, parentKind mTypes.NodeKind) (*mTypes.Token,
 	if tok.IsKindAndVal(mTypes.TK_PAREN, mTypes.PARREN_OPEN) {
 		tok = tok.Next
 
-		if tok.IsKind(mTypes.TK_DECLARE) {
+		if tok.IsKind(mTypes.TK_DECLARE_VAR) {
 			tok, head = parseDeclare(tok.Next, mTypes.ND_DECLARE)
 			// A child of ND_DECLARE must be either value(such as string, int, vector) or lambda
 			// In case of value, grant it as global scope variable
@@ -164,6 +164,55 @@ func parseDeclare(tok *mTypes.Token, parentKind mTypes.NodeKind) (*mTypes.Token,
 				head.Child.IsGlobal = true
 			}
 			head = newNodeParent(mTypes.ND_DECLARE, head, "")
+
+		} else if tok.IsKind(mTypes.TK_DECLARE_TYPE) {
+			tok = tok.Next
+			head.Kind = mTypes.ND_DECLARE
+			structName := tok.Val
+
+			tok = tok.Next
+			if !tok.IsKindAndVal(mTypes.TK_PAREN, mTypes.BRACE_OPEN) {
+				log.Panic("defschema must begin with { have: %#+v", tok)
+			}
+			varDeclare := &mTypes.Node{
+				Kind: mTypes.ND_TYPE_DECLARE,
+				Val:  structName,
+				Type: mTypes.TY_STRUCT,
+			}
+			head.Child = varDeclare
+
+			tok = tok.Next
+			childHead := &mTypes.Node{}
+			child := childHead
+
+			for {
+				structElmeName := tok.Val
+
+				tok = tok.Next
+				if !tok.IsKind(mTypes.TK_TYPE_SIG) {
+					log.Panic("type signature '::' required have: %#+v", tok)
+				}
+
+				tok = tok.Next
+				structElemType, _ := mTypes.GetModoType(tok.Kind)
+				// Note: Kind needed?
+				structTy := &mTypes.Node{
+					Val:  structElmeName,
+					Type: structElemType,
+				}
+				child.Next = structTy
+				child = child.Next
+				tok = tok.Next
+
+				if tok.IsKindAndVal(mTypes.TK_PAREN, mTypes.BRACE_CLOSE) {
+					tok = tok.Next
+					break
+				}
+				if tok == nil {
+					log.Panic("must be closed with }")
+				}
+			}
+			varDeclare.Child = childHead.Next
 
 		} else if tok.IsKind(mTypes.TK_LAMBDA) {
 			tok, head = parseLambda(tok, head)
@@ -278,7 +327,7 @@ func parseProgram(tok *mTypes.Token) *mTypes.Program {
 
 	for tok != nil && tok.IsKindAndVal(mTypes.TK_PAREN, mTypes.PARREN_OPEN) {
 
-		if !tok.Next.IsKind(mTypes.TK_DECLARE) {
+		if !tok.Next.IsKind(mTypes.TK_DECLARE_VAR) && !tok.Next.IsKind(mTypes.TK_DECLARE_TYPE) {
 			log.Panic("must be declare token: have %+v", tok.Next)
 		}
 

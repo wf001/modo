@@ -66,10 +66,17 @@ var (
 	SYMBOL_COND    = "cond"
 	BRANCH_REG_EXP = fmt.Sprintf("\\b(%s|%s)\\b", SYMBOL_IF, SYMBOL_COND)
 
-	SYMBOL_DEF      = "def" // NOTE: is core library in clojure
-	SYMBOL_FN       = "fn"
-	SYMBOL_LET      = "let"
-	DECLARE_REG_EXP = fmt.Sprintf("\\b(%s|%s|%s)\\b", SYMBOL_DEF, SYMBOL_LET, SYMBOL_FN)
+	SYMBOL_DEF       = "def" // NOTE: is core library in clojure
+	SYMBOL_DEFSCHEMA = "defschema"
+	SYMBOL_FN        = "fn"
+	SYMBOL_LET       = "let"
+	DECLARE_REG_EXP  = fmt.Sprintf(
+		"\\b(%s|%s|%s|%s)\\b",
+		SYMBOL_DEF,
+		SYMBOL_LET,
+		SYMBOL_FN,
+		SYMBOL_DEFSCHEMA,
+	)
 
 	// Core library
 	PRELUDE_PRN              = "prn"

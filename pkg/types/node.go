@@ -17,15 +17,17 @@ const (
 	ND_PROGRAM_ROOT = NodeKind("ND_PROGRAM_ROOT")
 
 	// reserved symbol
-	ND_VAR_DECLARE   = NodeKind("ND_VAR_DECLARE")   // variables and functions
-	ND_VAR_REFERENCE = NodeKind("ND_VAR_REFERENCE") // variables and functions
-	ND_DECLARE       = NodeKind("ND_DECLARE")       // def
-	ND_LAMBDA        = NodeKind("ND_LAMBDA")        // fn
-	ND_BIND          = NodeKind("ND_BIND")          // let
-	ND_EXPR          = NodeKind("ND_EXPR")          // set of functions
-	ND_IF            = NodeKind("ND_IF")            // if
-	ND_FUNCCALL      = NodeKind("ND_FUNCCALL")
-	ND_LIBCALL       = NodeKind("ND_LIBCALL")
+	ND_VAR_DECLARE    = NodeKind("ND_VAR_DECLARE")   // variables and functions
+	ND_VAR_REFERENCE  = NodeKind("ND_VAR_REFERENCE") // variables and functions
+	ND_TYPE_DECLARE   = NodeKind("ND_TYPE_DECLARE")
+	ND_TYPE_REFERENCE = NodeKind("ND_TYPE_REFERENCE")
+	ND_DECLARE        = NodeKind("ND_DECLARE") // def
+	ND_LAMBDA         = NodeKind("ND_LAMBDA")  // fn
+	ND_BIND           = NodeKind("ND_BIND")    // let
+	ND_EXPR           = NodeKind("ND_EXPR")    // set of functions
+	ND_IF             = NodeKind("ND_IF")      // if
+	ND_FUNCCALL       = NodeKind("ND_FUNCCALL")
+	ND_LIBCALL        = NodeKind("ND_LIBCALL")
 
 	// type
 	ND_SCALAR     = NodeKind("ND_SCALAR")     // int32, string, bool
@@ -41,6 +43,7 @@ const (
 	TY_NIL    = ModoType("TY_NIL")
 	TY_BOOL   = ModoType("TY_BOOL")
 	TY_VECTOR = ModoType("TY_VECTOR")
+	TY_STRUCT = ModoType("TY_STRUCT")
 )
 
 type Node struct {

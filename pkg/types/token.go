@@ -9,10 +9,11 @@ import (
 type TokenKind = string
 
 const (
-	TK_DECLARE = TokenKind("TK_DECLARE")
-	TK_LAMBDA  = TokenKind("TK_LAMBDA")
-	TK_BIND    = TokenKind("TK_BIND")
-	TK_IF      = TokenKind("TK_IF")
+	TK_DECLARE_VAR  = TokenKind("TK_DECLARE_VAR")
+	TK_DECLARE_TYPE = TokenKind("TK_DECLARE_TYPE")
+	TK_LAMBDA       = TokenKind("TK_LAMBDA")
+	TK_BIND         = TokenKind("TK_BIND")
+	TK_IF           = TokenKind("TK_IF")
 
 	TK_PAREN = TokenKind("TK_PAREN")
 

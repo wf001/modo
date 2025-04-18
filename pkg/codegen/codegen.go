@@ -16,7 +16,8 @@ import (
 )
 
 type assembler struct {
-	program *mTypes.Program
+	program  *mTypes.Program
+	internal *mTypes.Internal
 }
 
 type Context struct {
@@ -26,6 +27,7 @@ type Context struct {
 	prog     *mTypes.Program
 	scope    *mTypes.Node
 	argument *mTypes.Node
+	internal *mTypes.Internal
 }
 
 func newBool(s string) *constant.Int {
@@ -69,7 +71,7 @@ func newStrHeap(ctx *Context, n *mTypes.Node) *ir.InstCall {
 	strLen := len(strVal)
 
 	mallocSize := constant.NewInt(types.I64, int64(strLen))
-	dest := ctx.block.NewCall(ctx.prog.Internal.Cstd.Malloc, mallocSize)
+	dest := ctx.block.NewCall(ctx.internal.Cstd.Malloc, mallocSize)
 
 	strConst := constant.NewCharArrayFromString(strVal)
 	strConstType := strConst.Typ
@@ -86,7 +88,7 @@ func newStrHeap(ctx *Context, n *mTypes.Node) *ir.InstCall {
 	)
 
 	ctx.block.NewCall(
-		ctx.prog.Internal.Cstd.Memcpy,
+		ctx.internal.Cstd.Memcpy,
 		dest,
 		srcPtr,
 		mallocSize,
@@ -229,7 +231,7 @@ func newVectorHeap(ctx *Context, n *mTypes.Node) value.Value {
 	vecSize := constant.NewInt(types.I64, int64(vecLength))
 	allocSize := ctx.block.NewMul(typeSize, vecSize)
 
-	allocatedPtr := ctx.block.NewCall(ctx.prog.Internal.Cstd.Malloc, allocSize)
+	allocatedPtr := ctx.block.NewCall(ctx.internal.Cstd.Malloc, allocSize)
 	vecPtr := ctx.block.NewBitCast(allocatedPtr, types.NewPointer(elemType))
 
 	for i, e := range vecContent {
@@ -497,7 +499,7 @@ func (ctx *Context) gen(node *mTypes.Node) value.Value {
 		return ctx.gen(node.Child)
 
 	} else if node.IsKind(mTypes.ND_VAR_DECLARE) {
-		ctx.genVarDeclare(node)
+		return ctx.genVarDeclare(node)
 
 	} else if node.IsKind(mTypes.ND_VAR_REFERENCE) {
 		return ctx.genVarReference(node)
@@ -601,19 +603,19 @@ func (ctx *Context) gen(node *mTypes.Node) value.Value {
 	return nil
 }
 
-func constructModule(prog *mTypes.Program) *ir.Module {
+func constructModule(prog *mTypes.Program, internal *mTypes.Internal) *ir.Module {
 	module := ir.NewModule()
-	prog.Internal = &mTypes.Internal{}
-	prog.Internal.Cstd = &mTypes.Cstd{}
-	prog.Internal.GlobalConst = &mTypes.GlobalConst{}
-	declareInternal(module, prog.Internal)
+	internal.Cstd = &mTypes.Cstd{}
+	internal.GlobalConst = &mTypes.GlobalConst{}
+	declareInternal(module, internal)
 	prog.Prelude = &mTypes.PreludeProps{}
 	declarePrelude(module, prog.Prelude)
 
 	for declare := prog.Declares; declare != nil; declare = declare.Next {
 		c := &Context{
-			mod:  module,
-			prog: prog,
+			mod:      module,
+			prog:     prog,
+			internal: internal,
 		}
 		c.gen(declare)
 	}
@@ -623,13 +625,14 @@ func constructModule(prog *mTypes.Program) *ir.Module {
 
 func Construct(program *mTypes.Program) *assembler {
 	return &assembler{
-		program: program,
+		program:  program,
+		internal: &mTypes.Internal{},
 	}
 }
 
 func (a assembler) GenIntermediates(llName string, asmName string) {
 	log.DebugMessage("ir module constructing")
-	module := constructModule(a.program)
+	module := constructModule(a.program, a.internal)
 	log.DebugMessage("ir module constructed")
 	log.Debug("[IR]\n%s\n", module.String())
 

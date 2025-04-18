@@ -38,7 +38,7 @@ func PreludeConj(ctx *Context, n *mTypes.Node) value.Value {
 	newLen := ctx.block.NewAdd(oldLen, constant.NewInt(types.I64, 1))
 	newArrAllocSize := ctx.block.NewMul(elemSize, newLen)
 
-	newArrAllocPtr := ctx.block.NewCall(ctx.prog.Internal.Cstd.Malloc, newArrAllocSize)
+	newArrAllocPtr := ctx.block.NewCall(ctx.internal.Cstd.Malloc, newArrAllocSize)
 	newArrPtr := ctx.block.NewBitCast(newArrAllocPtr, types.NewPointer(elemType))
 
 	// もとの要素をコピー

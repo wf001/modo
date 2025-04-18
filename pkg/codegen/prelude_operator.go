@@ -56,13 +56,13 @@ func PreludeEq(ctx *Context, node *mTypes.Node) value.Value {
 		node = node.Next
 		snd := node.IRValue
 
-		cmpRes := ctx.block.NewCall(ctx.prog.Internal.Cstd.Strcmp, fst, snd)
+		cmpRes := ctx.block.NewCall(ctx.internal.Cstd.Strcmp, fst, snd)
 		isEq := ctx.block.NewICmp(enum.IPredEQ, cmpRes, constant.NewInt(types.I1, 0))
 		res := ctx.block.NewAnd(isEq, constant.NewInt(types.I1, 1))
 
 		for n := node.Next; n != nil; n = n.Next {
 			snd = n.IRValue
-			cmpRes = ctx.block.NewCall(ctx.prog.Internal.Cstd.Strcmp, fst, snd)
+			cmpRes = ctx.block.NewCall(ctx.internal.Cstd.Strcmp, fst, snd)
 			isEq = ctx.block.NewICmp(enum.IPredEQ, cmpRes, constant.NewInt(types.I1, 0))
 			res = ctx.block.NewAnd(res, isEq)
 		}

@@ -47,7 +47,6 @@ type Program struct {
 	Declares          *Node
 	Prelude           *PreludeProps
 	DeclaredGlobalVar []*ir.InstLoad
-	Internal          *Internal
 }
 
 type PreludeProps struct {

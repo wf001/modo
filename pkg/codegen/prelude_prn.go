@@ -31,24 +31,35 @@ func prnScalar(
 
 	} else if pointerElemTy, isPtr := rootTy.(*types.PointerType); isPtr {
 		if isStr := rootTy.Equal(types.I8Ptr); !isStr {
-			ptr := ctx.block.NewLoad(pointerElemTy, value)
-			_, isNull := value.(*constant.Null)
-			if !isNull {
-				value = ctx.block.NewGetElementPtr(
-					pointerElemTy.ElemType,
-					ptr,
-					constant.NewInt(types.I32, 0),
-				)
-				formatStr, _ = mTypes.GetPrintFormat(pointerElemTy.ElemType, ctx.internal)
-			} else {
-				value = ctx.internal.GlobalConst.StringNil
-				formatStr = ctx.internal.GlobalConst.FormatStr
+			isNull := ctx.block.NewICmp(
+				enum.IPredEQ,
+				value,
+				constant.NewNull(types.NewPointer(pointerElemTy)),
+			)
 
-			}
+			endBlock := ctx.function.NewBlock("end")
+
+			nullBlock := ctx.function.NewBlock("null")
+			nullBlock.NewCall(ctx.internal.Cstd.Printf, ctx.internal.GlobalConst.FormatStr, ctx.internal.GlobalConst.StringNil)
+			nullBlock.NewBr(endBlock)
+
+			nonNullBlock := ctx.function.NewBlock("nonull")
+			formatStr, _ = mTypes.GetPrintFormat(pointerElemTy.ElemType, ctx.internal)
+
+			ptr := nonNullBlock.NewLoad(pointerElemTy, value)
+			value = nonNullBlock.NewGetElementPtr(
+				pointerElemTy.ElemType,
+				ptr,
+				constant.NewInt(types.I32, 0),
+			)
+
+			nonNullBlock.NewCall(ctx.internal.Cstd.Printf, formatStr, value)
+			nonNullBlock.NewBr(endBlock)
+			ctx.block.NewCondBr(isNull, nullBlock, nonNullBlock)
+			ctx.block = endBlock
 		}
 	}
 
-	ctx.block.NewCall(ctx.internal.Cstd.Printf, formatStr, value)
 }
 
 // Note: NOT USED

@@ -5,6 +5,7 @@ import (
 
 	"github.com/llir/llvm/ir"
 	"github.com/llir/llvm/ir/constant"
+	"github.com/llir/llvm/ir/enum"
 	"github.com/llir/llvm/ir/types"
 	"github.com/llir/llvm/ir/value"
 
@@ -13,7 +14,6 @@ import (
 )
 
 func PreludeGet(ctx *Context, n *mTypes.Node) value.Value {
-
 	i, _ := strconv.ParseInt(n.Next.Val, 10, 32)
 	idx := constant.NewInt(types.I64, i)
 
@@ -22,24 +22,45 @@ func PreludeGet(ctx *Context, n *mTypes.Node) value.Value {
 	structType := structPtrType.ElemType.(*types.StructType)
 
 	structedVecType, elemType := GetLLVMTypeFromString(structType.TypeName, ctx.prog.Prelude)
-	newValue := ctx.block.NewAlloca(elemType)
+	nullPtr := constant.NewNull(types.NewPointer(elemType))
 
 	oldStructedVec := ctx.block.NewLoad(structedVecType, oldStructedVecPtr)
 	oldVecPtr := ctx.block.NewExtractValue(oldStructedVec, 0)
-	// oldLen := ctx.block.NewExtractValue(oldStructedVec, 1)
+	oldLen := ctx.block.NewExtractValue(oldStructedVec, 1)
+	maxIdx := ctx.block.NewSub(oldLen, constant.NewInt(types.I64, 1))
+
+	exceedMaxIdx := ctx.block.NewICmp(enum.IPredSGT, idx, maxIdx)
+
+	parent := ctx.block
+	fn := ctx.function
+
+	okBlock := fn.NewBlock("index.ok")
+	failBlock := fn.NewBlock("index.fail")
+	mergeBlock := fn.NewBlock("index.merge")
+
+	parent.NewCondBr(exceedMaxIdx, failBlock, okBlock)
+
+	// okBlock: 正常アクセス
+	ctx.block = okBlock
 	oldArrElemPtr := ctx.block.NewGetElementPtr(elemType, oldVecPtr, idx)
 	oldElem := ctx.block.NewLoad(elemType, oldArrElemPtr)
-	ctx.block.NewStore(oldElem, newValue)
-	// maxIdx := ctx.block.NewSub(oldLen, constant.NewInt(types.I64, 1))
-	// copyContinue := ctx.block.NewICmp(enum.IPredUGT, maxIdx, oldLen)
+	okPtr := ctx.block.NewAlloca(elemType)
+	ctx.block.NewStore(oldElem, okPtr)
+	ctx.block.NewBr(mergeBlock)
 
-	//v := ctx.block.NewSelect(
-	//	copyContinue,
-	//	newValue,
-	//
-	//)
-	return newValue
+	// failBlock: 範囲外 → null
+	ctx.block = failBlock
+	ctx.block.NewBr(mergeBlock)
 
+	// mergeBlock: φノードでブロックごとの戻り値を選択
+	ctx.block = mergeBlock
+	incs := []*ir.Incoming{
+		ir.NewIncoming(okPtr, okBlock),
+		ir.NewIncoming(nullPtr, failBlock),
+	}
+	result := ctx.block.NewPhi(incs...)
+
+	return result
 }
 
 // Note: remain here until it will be defined the strategy of memory lifecycle

@@ -65,13 +65,13 @@ func IsScalar(v value.Value) bool {
 // conversion llir/llvm properties to other properties
 // ==============
 
-func GetPrintFormat(ty types.Type, libs *Internal) (*ir.Global, bool) {
+func GetPrintFormat(ty types.Type, internal *Internal) (*ir.Global, bool) {
 
 	formatMap := map[types.Type]*ir.Global{
-		types.I1:    libs.GlobalConst.FormatStr,
-		types.I8Ptr: libs.GlobalConst.FormatStr,
-		types.I32:   libs.GlobalConst.FormatDigit,
-		types.Void:  libs.GlobalConst.FormatStr,
+		types.I1:    internal.GlobalConst.FormatStr,
+		types.I8Ptr: internal.GlobalConst.FormatStr,
+		types.I32:   internal.GlobalConst.FormatDigit,
+		types.Void:  internal.GlobalConst.FormatStr,
 	}
 	if f, ok := formatMap[ty]; ok {
 		return f, true

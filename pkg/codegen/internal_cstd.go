@@ -23,14 +23,14 @@ func declarePrintf(
 }
 func declareMalloc(
 	module *ir.Module,
-	libs *mTypes.Internal,
+	internal *mTypes.Internal,
 ) {
 	mallocFunc := module.NewFunc(
 		"malloc",
 		types.I8Ptr,
 	)
 
-	libs.Cstd.Malloc = mallocFunc
+	internal.Cstd.Malloc = mallocFunc
 
 }
 func declareMemcpy(

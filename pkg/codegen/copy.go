@@ -4,35 +4,7 @@ import (
 	"github.com/llir/llvm/ir"
 	"github.com/llir/llvm/ir/constant"
 	"github.com/llir/llvm/ir/types"
-	"github.com/llir/llvm/ir/value"
-
-	mTypes "github.com/wf001/modo/pkg/types"
 )
-
-func CopyArray(
-	block *ir.Block,
-	internal *mTypes.Internal,
-	allocSize *ir.InstMul, // The number of bytes to allocate
-	oldArrType *types.ArrayType,
-	oldArrPtr value.Value,
-	newArrType *types.ArrayType,
-) *ir.InstBitCast {
-	allocatedPtr := block.NewCall(internal.Cstd.Malloc, allocSize)
-
-	newArrPtr := block.NewBitCast(allocatedPtr, types.NewPointer(newArrType))
-
-	for i := uint64(0); i < oldArrType.Len; i++ {
-		elem := mTypes.LoadArrElem(block, oldArrPtr, oldArrType, i)
-		destPtr := block.NewGetElementPtr(
-			newArrType,
-			newArrPtr,
-			constant.NewInt(types.I32, 0),
-			constant.NewInt(types.I32, int64(i)),
-		)
-		block.NewStore(elem, destPtr)
-	}
-	return newArrPtr
-}
 
 // Note: remain here until it will be defined the strategy of memory lifecycle
 func CopyArrayOld(

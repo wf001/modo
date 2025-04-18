@@ -2,7 +2,6 @@ package codegen
 
 import (
 	"github.com/llir/llvm/ir"
-	"github.com/llir/llvm/ir/constant"
 	"github.com/llir/llvm/ir/types"
 	"github.com/llir/llvm/ir/value"
 
@@ -11,26 +10,7 @@ import (
 )
 
 func PreludePop(block *ir.Block, internal *mTypes.Internal, node *mTypes.Node) value.Value {
-	var oldArrType *types.ArrayType
-
-	var oldArrPtr value.Value
-
-	switch v := node.IRValue.(type) {
-	case *ir.InstCall, *ir.InstBitCast:
-		oldArrType, _ = mTypes.AssertArrType(v)
-		oldArrPtr = v
-
-	default:
-		log.Panic("Unsupported IRValue type: %#+v", node.IRValue)
-	}
-
-	typeSize := constant.NewInt(types.I64, int64(mTypes.GetBitWidth(oldArrType.ElemType)))
-	newArrSize := constant.NewInt(types.I64, int64(oldArrType.Len-1))
-	allocSize := block.NewMul(typeSize, newArrSize)
-	newArrType := types.NewArray(oldArrType.Len-1, oldArrType.ElemType)
-	newArrPtr := CopyArray(block, internal, allocSize, oldArrType, oldArrPtr, newArrType)
-
-	return newArrPtr
+	return nil
 }
 
 // Note: remain here until it will be defined the strategy of memory lifecycle

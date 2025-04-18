@@ -11,36 +11,7 @@ import (
 )
 
 func PreludeAssoc(block *ir.Block, internal *mTypes.Internal, node *mTypes.Node) value.Value {
-	var oldArrType *types.ArrayType
-
-	var oldArrPtr value.Value
-
-	switch v := node.IRValue.(type) {
-	case *ir.InstCall, *ir.InstBitCast:
-		oldArrType, _ = mTypes.AssertArrType(v)
-		oldArrPtr = v
-
-	default:
-		log.Panic("Unsupported IRValue type: %#+v", node.IRValue)
-	}
-
-	pos, newValue := node.Next.IRValue, node.Next.Next.IRValue
-
-	typeSize := constant.NewInt(types.I64, int64(mTypes.GetBitWidth(oldArrType.ElemType)))
-	newArrSize := constant.NewInt(types.I64, int64(oldArrType.Len))
-	allocSize := block.NewMul(typeSize, newArrSize)
-	newArrType := types.NewArray(oldArrType.Len, oldArrType.ElemType)
-	newArrPtr := CopyArray(block, internal, allocSize, oldArrType, oldArrPtr, newArrType)
-
-	destPtr := block.NewGetElementPtr(
-		newArrType,
-		newArrPtr,
-		constant.NewInt(types.I32, 0),
-		pos,
-	)
-	block.NewStore(newValue, destPtr)
-
-	return newArrPtr
+	return nil
 }
 func PreludeAssocOld(block *ir.Block, internal *mTypes.Internal, node *mTypes.Node) value.Value {
 	oldArrPtr, ok := node.IRValue.(*ir.InstAlloca)

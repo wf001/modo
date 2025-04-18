@@ -74,12 +74,11 @@ func (n *Node) String() string {
 	)
 }
 
-// pred kind
+// predicate
 func (node *Node) IsKind(kind NodeKind) bool {
 	return node.Kind == kind
 }
 
-// pred type
 func (node *Node) IsType(ty ModoType) bool {
 	return node.Type == ty
 }
@@ -117,6 +116,15 @@ func (node *Node) GetLastNode() *Node {
 	return lastNode
 }
 
+func (node *Node) GetNodeSize() uint64 {
+	var size uint64 = 0
+	for n := node.Child; n != nil; n = n.Next {
+		size++
+	}
+	return size
+
+}
+
 // Get LLVM type from corresponding custom type
 func GetLLVMType(ty ModoType) (types.Type, bool) {
 
@@ -132,14 +140,7 @@ func GetLLVMType(ty ModoType) (types.Type, bool) {
 	}
 	return nil, false
 }
-func GetNodeSize(node *Node) uint64 {
-	var length uint64 = 0
-	for n := node.Child; n != nil; n = n.Next {
-		length++
-	}
-	return length
 
-}
 func GetLLVMTypeForVector(node *Node, prelude *PreludeProps) (types.Type, bool) {
 
 	var typeMap = map[ModoType]types.Type{
@@ -153,6 +154,7 @@ func GetLLVMTypeForVector(node *Node, prelude *PreludeProps) (types.Type, bool) 
 	if t, ok := typeMap[node.ElemType]; ok {
 		return t, true
 	}
+	log.Debug("unresolved type: have %#+v", node)
 	return nil, true
 }
 
@@ -235,6 +237,7 @@ func (node *Node) Debug(depth int) {
 		node.Next.Debug(depth)
 	}
 }
+
 func (prog *Program) Debug(depth int) {
 	if prog.Declares != nil {
 		log.DebugMessage("[Declares]")

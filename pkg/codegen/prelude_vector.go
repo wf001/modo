@@ -21,3 +21,16 @@ func declareVectorType(ir *ir.Module, Prelude *mTypes.PreludeProps) {
 	Prelude.Types.VectorString = vectorStringType
 
 }
+
+func GetLLVMTypeFromString(typeName string, prelude *mTypes.PreludeProps) (types.Type, types.Type) {
+
+	switch typeName {
+
+	case "prelude.vector.int":
+		return prelude.Types.VectorInt, types.I32
+	case "prelude.vector.string":
+		return prelude.Types.VectorString, types.I8Ptr
+	}
+	return nil, nil
+
+}

@@ -17,17 +17,8 @@ func PreludeConj(ctx *Context, n *mTypes.Node) value.Value {
 	structPtrType := oldStructedVecPtr.Type().(*types.PointerType)
 	structType := structPtrType.ElemType.(*types.StructType)
 
-	var m1 = map[string]*types.StructType{
-		"prelude.vector.int":    ctx.prog.Prelude.Types.VectorInt,
-		"prelude.vector.string": ctx.prog.Prelude.Types.VectorString,
-	}
-	var m2 = map[string]types.Type{
-		"prelude.vector.int":    types.I32,
-		"prelude.vector.string": types.I8Ptr,
-	}
 	// array type の情報を取得
-	structedVecType := m1[structType.TypeName]
-	elemType := m2[structType.TypeName]
+	structedVecType, elemType := GetLLVMTypeFromString(structType.TypeName, ctx.prog.Prelude)
 
 	oldStructedVec := ctx.block.NewLoad(structedVecType, oldStructedVecPtr)
 	oldVecPtr := ctx.block.NewExtractValue(oldStructedVec, 0)

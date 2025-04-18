@@ -25,9 +25,11 @@ func prnScalar(
 			ctx.internal.GlobalConst.StringTrue,
 			ctx.internal.GlobalConst.StringFalse,
 		)
+		ctx.block.NewCall(ctx.internal.Cstd.Printf, formatStr, value)
 
 	} else if rootTy.Equal(types.Void) {
 		value = ctx.internal.GlobalConst.StringNil
+		ctx.block.NewCall(ctx.internal.Cstd.Printf, formatStr, value)
 
 	} else if pointerElemTy, isPtr := rootTy.(*types.PointerType); isPtr {
 		if isStr := rootTy.Equal(types.I8Ptr); !isStr {
@@ -37,11 +39,8 @@ func prnScalar(
 				constant.NewNull(types.NewPointer(pointerElemTy)),
 			)
 
-			endBlock := ctx.function.NewBlock("end")
-
 			nullBlock := ctx.function.NewBlock("null")
 			nullBlock.NewCall(ctx.internal.Cstd.Printf, ctx.internal.GlobalConst.FormatStr, ctx.internal.GlobalConst.StringNil)
-			nullBlock.NewBr(endBlock)
 
 			nonNullBlock := ctx.function.NewBlock("nonull")
 			formatStr, _ = mTypes.GetPrintFormat(pointerElemTy.ElemType, ctx.internal)
@@ -54,10 +53,17 @@ func prnScalar(
 			)
 
 			nonNullBlock.NewCall(ctx.internal.Cstd.Printf, formatStr, value)
+			endBlock := ctx.function.NewBlock("end")
+			nullBlock.NewBr(endBlock)
 			nonNullBlock.NewBr(endBlock)
 			ctx.block.NewCondBr(isNull, nullBlock, nonNullBlock)
 			ctx.block = endBlock
+		} else {
+
+			ctx.block.NewCall(ctx.internal.Cstd.Printf, formatStr, value)
 		}
+	} else {
+		ctx.block.NewCall(ctx.internal.Cstd.Printf, formatStr, value)
 	}
 
 }
@@ -194,8 +200,8 @@ func PreludePrn(
 		if mTypes.IsScalar(n.IRValue) {
 			prnScalar(ctx, n)
 
-		} else if _, ok := n.IRValue.Type().(*types.PointerType); ok {
-			if _, ok := n.IRValue.Type().(*types.StructType); ok {
+		} else if p, ok := n.IRValue.Type().(*types.PointerType); ok {
+			if _, ok := p.ElemType.(*types.StructType); ok {
 				prnStructVector(ctx, n)
 			} else {
 				prnScalar(ctx, n)

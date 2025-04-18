@@ -14,6 +14,12 @@ func declareVectorType(ir *ir.Module, Prelude *mTypes.PreludeProps) {
 	ir.NewTypeDef("prelude.vector.int", vectorIntType)
 	Prelude.Types.VectorInt = vectorIntType
 
+	// 型: struct { i1* %arrElm, i64 %len}
+	vectorBoolType := types.NewStruct(types.NewPointer(types.I1), types.I64)
+	vectorBoolType.SetName("prelude.vector.bool")
+	ir.NewTypeDef("prelude.vector.bool", vectorBoolType)
+	Prelude.Types.VectorBool = vectorBoolType
+
 	// 型: struct { i8** %arrElm, i64 %len}
 	vectorStringType := types.NewStruct(types.NewPointer(types.I8Ptr), types.I64)
 	vectorStringType.SetName("prelude.vector.string")
@@ -30,6 +36,8 @@ func GetLLVMTypeFromString(typeName string, prelude *mTypes.PreludeProps) (types
 		return prelude.Types.VectorInt, types.I32
 	case "prelude.vector.string":
 		return prelude.Types.VectorString, types.I8Ptr
+	case "prelude.vector.bool":
+		return prelude.Types.VectorBool, types.I1
 	}
 	return nil, nil
 

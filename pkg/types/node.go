@@ -159,6 +159,7 @@ func GetLLVMType(node *Node, prelude *PreludeProps) (types.Type, types.Type, boo
 	var collTypeMap = map[ModoType]types.Type{
 		TY_INT32: prelude.Types.VectorInt,
 		TY_STR:   prelude.Types.VectorString,
+		TY_BOOL:  prelude.Types.VectorBool,
 	}
 
 	collTy, isRootColl := collTypeMap[node.ElemType]

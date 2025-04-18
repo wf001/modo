@@ -22,6 +22,7 @@ type PreludeProps struct {
 type PreludeTypeProps struct {
 	VectorInt    *types.StructType
 	VectorString *types.StructType
+	VectorBool   *types.StructType
 }
 
 type Internal struct {

@@ -126,11 +126,22 @@ func prnStructVector(
 	// 配列の各要素を取り出して表示
 	elemPtr := loopBlock.NewGetElementPtr(elemTy, resultArrPtr, i)
 	elem := loopBlock.NewLoad(elemTy, elemPtr)
-	loopBlock.NewCall(
-		ctx.internal.Cstd.Printf,
-		formatStr,
-		elem,
-	)
+
+	if elem.ElemType == types.I1 {
+		boolValueStr := loopBlock.NewSelect(
+			elem,
+			ctx.internal.GlobalConst.StringTrue,
+			ctx.internal.GlobalConst.StringFalse,
+		)
+		loopBlock.NewCall(ctx.internal.Cstd.Printf, formatStr, boolValueStr)
+	} else {
+		loopBlock.NewCall(
+			ctx.internal.Cstd.Printf,
+			formatStr,
+			elem,
+		)
+
+	}
 
 	// i++
 	nextI := loopBlock.NewAdd(i, constant.NewInt(types.I64, 1))

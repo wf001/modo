@@ -36,7 +36,6 @@ type Cstd struct {
 	Strcmp *ir.Func
 }
 
-// HACK: should remove llir/ir reference from this namespace
 type GlobalConst struct {
 	FormatDigit        *ir.Global
 	FormatStr          *ir.Global
@@ -64,6 +63,29 @@ func GetPrintFormat(ty types.Type, libs *Internal) (*ir.Global, bool) {
 
 	log.Debug("unresolved type: have %+v", ty)
 	return nil, false
+}
+
+func GetBitWidth(t types.Type) uint64 {
+	switch typ := t.(type) {
+	case *types.IntType:
+		return typ.BitSize
+	case *types.FloatType:
+		switch typ.Kind {
+		case types.FloatKindHalf:
+			return 16
+		case types.FloatKindFloat:
+			return 32
+		case types.FloatKindDouble:
+			return 64
+		default:
+			return 0
+		}
+	case *types.PointerType:
+		// 通常は64bitだが、プラットフォームによって異なる
+		return 64
+	default:
+		return 0 // 未対応型など
+	}
 }
 
 func IsScalar(v value.Value) bool {

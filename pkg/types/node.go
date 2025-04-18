@@ -127,7 +127,6 @@ func (node *Node) GetNodeSize() uint64 {
 
 // Get LLVM type from corresponding custom type
 func GetLLVMType(node *Node, prelude *PreludeProps) (types.Type, types.Type, bool) {
-	var collTy types.Type
 	var scalarTy types.Type
 
 	var scalarTypeMap = map[ModoType]types.Type{
@@ -142,6 +141,7 @@ func GetLLVMType(node *Node, prelude *PreludeProps) (types.Type, types.Type, boo
 		return nil, scalarTy, true
 	}
 
+	var collTy types.Type
 	var collTypeMap = map[ModoType]types.Type{
 		TY_INT32: prelude.Types.VectorInt,
 		TY_STR:   prelude.Types.VectorString,
@@ -157,29 +157,6 @@ func GetLLVMType(node *Node, prelude *PreludeProps) (types.Type, types.Type, boo
 	}
 
 	return nil, nil, false
-}
-
-func GetBitWidth(t types.Type) uint64 {
-	switch typ := t.(type) {
-	case *types.IntType:
-		return typ.BitSize
-	case *types.FloatType:
-		switch typ.Kind {
-		case types.FloatKindHalf:
-			return 16
-		case types.FloatKindFloat:
-			return 32
-		case types.FloatKindDouble:
-			return 64
-		default:
-			return 0
-		}
-	case *types.PointerType:
-		// 通常は64bitだが、プラットフォームによって異なる
-		return 64
-	default:
-		return 0 // 未対応型など
-	}
 }
 
 // debug

@@ -301,8 +301,8 @@ func (ctx *Context) genVarDeclare(node *mTypes.Node) value.Value {
 
 		funcName := node.GetFuncName()
 
-		var arg []value.Value
-		var argp []*ir.Param
+		var argValue []value.Value
+		var argParam []*ir.Param
 
 		// define arguments type of function
 		for a := node.Child.Args; a != nil; a = a.Next {
@@ -315,14 +315,15 @@ func (ctx *Context) genVarDeclare(node *mTypes.Node) value.Value {
 				ty = types.NewPointer(collType)
 			}
 
-			arg = append(arg, ir.NewParam(a.Val, ty))
-			argp = append(argp, ir.NewParam(a.Val, ty))
+			p := ir.NewParam(a.Val, ty)
+			argValue = append(argValue, p)
+			argParam = append(argParam, p)
 		}
 
 		fnc := ctx.mod.NewFunc(
 			funcName,
 			retType,
-			argp...,
+			argParam...,
 		)
 		entryBlock := fnc.NewBlock("")
 
@@ -333,7 +334,7 @@ func (ctx *Context) genVarDeclare(node *mTypes.Node) value.Value {
 		node.FuncPtr = fnc
 
 		if node.Child.IsKind(mTypes.ND_LAMBDA) {
-			lambda := entryBlock.NewCall(child, arg...)
+			lambda := entryBlock.NewCall(child, argValue...)
 
 			if lambda.Type().Equal(types.Void) {
 				entryBlock.NewRet(nil)

@@ -51,6 +51,10 @@ func (t *Token) String() string {
 	)
 }
 
+// ==============
+// predication
+// ==============
+
 func (tok *Token) IsKindAndVal(kind string, val string) bool {
 	return tok != nil && tok.IsKind(kind) && tok.Val == val
 }
@@ -68,6 +72,10 @@ func (tok *Token) IsKindType() bool {
 		tok.IsKind(TK_TYPE_VECTOR)
 }
 
+// ==============
+// conversion llir/llvm properties to other properties
+// ==============
+
 func GetModoType(k TokenKind) (ModoType, bool) {
 	var typeMap = map[string]ModoType{
 		TK_TYPE_INT:    TY_INT32,
@@ -83,6 +91,10 @@ func GetModoType(k TokenKind) (ModoType, bool) {
 
 	return "", false
 }
+
+// ==============
+// The following is for developement purposes
+// ==============
 
 func (tok *Token) DebugTokens() {
 	log.Debug(log.BLUE("[token]"))

@@ -74,7 +74,10 @@ func (n *Node) String() string {
 	)
 }
 
-// predicate
+// ==============
+// predication
+// ==============
+
 func (node *Node) IsKind(kind NodeKind) bool {
 	return node.Kind == kind
 }
@@ -90,7 +93,10 @@ func (node *Node) IsScalar() bool {
 		node.IsType(TY_NIL)
 }
 
+// ==============
 // naming
+// ==============
+
 func (node *Node) GetUnnamedFuncName() string {
 	return fmt.Sprintf("fn.%s.%p", "unnamed", node)
 }
@@ -106,6 +112,10 @@ func (node *Node) GetBlockName(s string, blks []*ir.Block) string {
 func (node *Node) GetVarName(s string, insts []ir.Instruction) string {
 	return fmt.Sprintf("%s.%p", s, node)
 }
+
+// ==============
+// knowing the properties of Node
+// ==============
 
 // Returns the last node of the linked list.
 func (node *Node) GetLastNode() *Node {
@@ -125,7 +135,11 @@ func (node *Node) GetNodeSize() uint64 {
 
 }
 
-// Get LLVM type from corresponding custom type
+// ==============
+// conversion Node properties to other properties
+// ==============
+
+// Get LLVM type from corresponding Node Type
 func GetLLVMType(node *Node, prelude *PreludeProps) (types.Type, types.Type, bool) {
 	var scalarTy types.Type
 
@@ -159,7 +173,10 @@ func GetLLVMType(node *Node, prelude *PreludeProps) (types.Type, types.Type, boo
 	return nil, nil, false
 }
 
-// debug
+// ==============
+// The following is for developement purposes
+// ==============
+
 func indicate(s string, depth int) {
 	log.Debug(
 		log.YELLOW(
@@ -172,7 +189,7 @@ func indicate(s string, depth int) {
 
 }
 
-func (node *Node) Debug(depth int) {
+func (node *Node) debugRecursive(depth int) {
 	if node == nil {
 		return
 	}
@@ -189,39 +206,37 @@ func (node *Node) Debug(depth int) {
 	switch node.Kind {
 	case ND_BIND:
 		indicate(".Bind", depth+1)
-		node.Bind.Debug(depth + 1)
+		node.Bind.debugRecursive(depth + 1)
 
 		indicate(".Child", depth+1)
-		node.Child.Debug(depth + 1)
+		node.Child.debugRecursive(depth + 1)
 	case ND_LAMBDA:
 		indicate(".Args", depth+1)
-		node.Args.Debug(depth + 1)
+		node.Args.debugRecursive(depth + 1)
 
 		indicate(".Child", depth+1)
-		node.Child.Debug(depth + 1)
+		node.Child.debugRecursive(depth + 1)
 	case ND_IF:
 		indicate(".Cond", depth+1)
-		node.Cond.Debug(depth + 1)
+		node.Cond.debugRecursive(depth + 1)
 
 		indicate(".Then", depth+1)
-		node.Then.Debug(depth + 1)
+		node.Then.debugRecursive(depth + 1)
 
 		indicate(".Else", depth+1)
-		node.Else.Debug(depth + 1)
+		node.Else.debugRecursive(depth + 1)
 	default:
-		node.Child.Debug(depth + 1)
+		node.Child.debugRecursive(depth + 1)
 	}
 	if node.Next != nil {
-		node.Next.Debug(depth)
+		node.Next.debugRecursive(depth)
 	}
 }
 
 func (prog *Program) Debug(depth int) {
 	if prog.Declares != nil {
 		log.DebugMessage("[Declares]")
-		prog.Declares.Debug(0)
+		prog.Declares.debugRecursive(0)
 	}
 
-	// TODO: implement
-	// NOTE: is type of BuiltinLibs Node?
 }

@@ -49,6 +49,21 @@ type GlobalConst struct {
 	StringComma        *ir.Global
 }
 
+// ==============
+// predication
+// ==============
+
+func IsScalar(v value.Value) bool {
+	return v.Type().Equal(types.I1) ||
+		v.Type().Equal(types.I8Ptr) ||
+		v.Type().Equal(types.I32) ||
+		v.Type().Equal(types.Void)
+}
+
+// ==============
+// conversion llir/llvm properties to other properties
+// ==============
+
 func GetPrintFormat(ty types.Type, libs *Internal) (*ir.Global, bool) {
 
 	formatMap := map[types.Type]*ir.Global{
@@ -86,13 +101,6 @@ func GetBitWidth(t types.Type) uint64 {
 	default:
 		return 0 // 未対応型など
 	}
-}
-
-func IsScalar(v value.Value) bool {
-	return v.Type().Equal(types.I1) ||
-		v.Type().Equal(types.I8Ptr) ||
-		v.Type().Equal(types.I32) ||
-		v.Type().Equal(types.Void)
 }
 
 // Note: remain here until it will be defined the strategy of memory lifecycle

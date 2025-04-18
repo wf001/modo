@@ -24,39 +24,42 @@ func PreludeGet(ctx *Context, n *mTypes.Node) value.Value {
 	structedVecType, elemType := GetLLVMTypeFromString(structType.TypeName, ctx.prog.Prelude)
 	nullPtr := constant.NewNull(types.NewPointer(elemType))
 
+	if i < 0 {
+		return nullPtr
+	}
+
 	oldStructedVec := ctx.block.NewLoad(structedVecType, oldStructedVecPtr)
 	oldVecPtr := ctx.block.NewExtractValue(oldStructedVec, 0)
 	oldLen := ctx.block.NewExtractValue(oldStructedVec, 1)
 	maxIdx := ctx.block.NewSub(oldLen, constant.NewInt(types.I64, 1))
 
-	exceedMaxIdx := ctx.block.NewICmp(enum.IPredSGT, idx, maxIdx)
+	isIdxOutOfRange := ctx.block.NewICmp(enum.IPredSGT, idx, maxIdx)
+	isIdxOutOfRange.SetName(n.GetVarName("is.idx.out.of.range", ctx.block.Insts))
 
-	parent := ctx.block
-	fn := ctx.function
+	inRangeBlock := ctx.function.NewBlock(n.GetBlockName("idx.in.range", ctx.function.Blocks))
+	outOfRangeBlock := ctx.function.NewBlock(
+		n.GetBlockName("idx.out.of.range", ctx.function.Blocks),
+	)
+	mergeBlock := ctx.function.NewBlock(n.GetBlockName("idx.merge", ctx.function.Blocks))
 
-	okBlock := fn.NewBlock("index.ok")
-	failBlock := fn.NewBlock("index.fail")
-	mergeBlock := fn.NewBlock("index.merge")
+	ctx.block.NewCondBr(isIdxOutOfRange, outOfRangeBlock, inRangeBlock)
 
-	parent.NewCondBr(exceedMaxIdx, failBlock, okBlock)
-
-	// okBlock: 正常アクセス
-	ctx.block = okBlock
+	// branched when specified index is in range
+	ctx.block = inRangeBlock
 	oldArrElemPtr := ctx.block.NewGetElementPtr(elemType, oldVecPtr, idx)
 	oldElem := ctx.block.NewLoad(elemType, oldArrElemPtr)
 	okPtr := ctx.block.NewAlloca(elemType)
 	ctx.block.NewStore(oldElem, okPtr)
 	ctx.block.NewBr(mergeBlock)
 
-	// failBlock: 範囲外 → null
-	ctx.block = failBlock
+	// branched when specified index is out of range
+	ctx.block = outOfRangeBlock
 	ctx.block.NewBr(mergeBlock)
 
-	// mergeBlock: φノードでブロックごとの戻り値を選択
 	ctx.block = mergeBlock
 	incs := []*ir.Incoming{
-		ir.NewIncoming(okPtr, okBlock),
-		ir.NewIncoming(nullPtr, failBlock),
+		ir.NewIncoming(okPtr, inRangeBlock),
+		ir.NewIncoming(nullPtr, outOfRangeBlock),
 	}
 	result := ctx.block.NewPhi(incs...)
 

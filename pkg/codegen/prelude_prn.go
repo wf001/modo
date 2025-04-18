@@ -39,10 +39,12 @@ func prnScalar(
 				constant.NewNull(types.NewPointer(pointerElemTy)),
 			)
 
-			nullBlock := ctx.function.NewBlock("null")
+			// if value is null ptr
+			nullBlock := ctx.function.NewBlock(n.GetBlockName("print.null.ptr", ctx.function.Blocks))
 			nullBlock.NewCall(ctx.internal.Cstd.Printf, ctx.internal.GlobalConst.FormatStr, ctx.internal.GlobalConst.StringNil)
 
-			nonNullBlock := ctx.function.NewBlock("nonull")
+			// if value is null ptr
+			nonNullBlock := ctx.function.NewBlock(n.GetBlockName("print.non.null", ctx.function.Blocks))
 			formatStr, _ = mTypes.GetPrintFormat(pointerElemTy.ElemType, ctx.internal)
 
 			ptr := nonNullBlock.NewLoad(pointerElemTy, value)
@@ -53,16 +55,19 @@ func prnScalar(
 			)
 
 			nonNullBlock.NewCall(ctx.internal.Cstd.Printf, formatStr, value)
-			endBlock := ctx.function.NewBlock("end")
+
+			endBlock := ctx.function.NewBlock(n.GetBlockName("print.end", ctx.function.Blocks))
 			nullBlock.NewBr(endBlock)
 			nonNullBlock.NewBr(endBlock)
+
 			ctx.block.NewCondBr(isNull, nullBlock, nonNullBlock)
 			ctx.block = endBlock
 		} else {
-
+			// string
 			ctx.block.NewCall(ctx.internal.Cstd.Printf, formatStr, value)
 		}
 	} else {
+		// Except string, bool, nil, pointer type value
 		ctx.block.NewCall(ctx.internal.Cstd.Printf, formatStr, value)
 	}
 

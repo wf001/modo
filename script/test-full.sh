@@ -189,6 +189,7 @@ testexec(){
   # get
   # assertexec '(def main :: int (fn [] (let [vec :: [int] [41, 28, 239]] (prn (get vec 1)))))'  "28\\\n"
   # assertexec '(def v :: [int] [233, 842]) (def main :: int (fn [] (prn (get v 0))))' "233\\\n"
+  assertexec '(def main :: int (fn [] (let [vec :: [int] [423, 83, 90]] (prn (get vec -1)) (prn (get vec 2)) (prn (get vec 3)) )))' "nil\\\n90\\\nnil\\\n"
   # conj
   assertexec '(def main :: int (fn [] (let [vec :: [int] [423, 83, 90]] (prn (conj vec 27)) (prn vec))))' "[423, 83, 90, 27]\\\n[423, 83, 90]\\\n"
   assertexec '(def v :: [int] [233, 842]) (def main :: int (fn [] (prn (conj v 569))))' "[233, 842, 569]\\\n"

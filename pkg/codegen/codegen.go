@@ -406,10 +406,10 @@ func (ctx *Context) genLambda(node *mTypes.Node) value.Value {
 			types.Void,
 			ctx.function.Params...,
 		)
-		llBlock := funcFn.NewBlock(node.GetBlockName(fnEntryBlockName, ctx.function.Blocks))
+		entryBlock := funcFn.NewBlock(node.GetBlockName(fnEntryBlockName, ctx.function.Blocks))
 
 		ctx.function = funcFn
-		ctx.block = llBlock
+		ctx.block = entryBlock
 
 		ctx.gen(node.Child)
 
@@ -423,10 +423,10 @@ func (ctx *Context) genLambda(node *mTypes.Node) value.Value {
 			ctx.function.Sig.RetType,
 			ctx.function.Params...,
 		)
-		llBlock := funcFn.NewBlock(node.GetBlockName(fnEntryBlockName, ctx.function.Blocks))
+		entryBlock := funcFn.NewBlock(node.GetBlockName(fnEntryBlockName, ctx.function.Blocks))
 
 		ctx.function = funcFn
-		ctx.block = llBlock
+		ctx.block = entryBlock
 
 		res := ctx.gen(node.Child)
 

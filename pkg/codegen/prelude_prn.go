@@ -12,37 +12,43 @@ import (
 )
 
 func prnScalar(
-	internal *mTypes.Internal,
-	block *ir.Block,
+	ctx *Context,
 	n *mTypes.Node,
 ) {
 	value := n.IRValue
 	rootTy := value.Type()
-	formatStr, _ := mTypes.GetPrintFormat(rootTy, internal)
+	formatStr, _ := mTypes.GetPrintFormat(rootTy, ctx.internal)
 
 	if rootTy.Equal(types.I1) {
-		value = block.NewSelect(
+		value = ctx.block.NewSelect(
 			value,
-			internal.GlobalConst.StringTrue,
-			internal.GlobalConst.StringFalse,
+			ctx.internal.GlobalConst.StringTrue,
+			ctx.internal.GlobalConst.StringFalse,
 		)
 
 	} else if rootTy.Equal(types.Void) {
-		value = internal.GlobalConst.StringNil
+		value = ctx.internal.GlobalConst.StringNil
 
 	} else if pointerElemTy, isPtr := rootTy.(*types.PointerType); isPtr {
 		if isStr := rootTy.Equal(types.I8Ptr); !isStr {
-			ptr := block.NewLoad(pointerElemTy, value)
-			value = block.NewGetElementPtr(
-				pointerElemTy,
-				ptr,
-				constant.NewInt(types.I32, 0),
-			)
-			formatStr, _ = mTypes.GetPrintFormat(pointerElemTy.ElemType, internal)
+			ptr := ctx.block.NewLoad(pointerElemTy, value)
+			_, isNull := value.(*constant.Null)
+			if !isNull {
+				value = ctx.block.NewGetElementPtr(
+					pointerElemTy.ElemType,
+					ptr,
+					constant.NewInt(types.I32, 0),
+				)
+				formatStr, _ = mTypes.GetPrintFormat(pointerElemTy.ElemType, ctx.internal)
+			} else {
+				value = ctx.internal.GlobalConst.StringNil
+				formatStr = ctx.internal.GlobalConst.FormatStr
+
+			}
 		}
 	}
 
-	block.NewCall(internal.Cstd.Printf, formatStr, value)
+	ctx.block.NewCall(ctx.internal.Cstd.Printf, formatStr, value)
 }
 
 // Note: NOT USED
@@ -175,11 +181,14 @@ func PreludePrn(
 
 	for n := node; n != nil; n = n.Next {
 		if mTypes.IsScalar(n.IRValue) {
-			prnScalar(ctx.internal, ctx.block, n)
+			prnScalar(ctx, n)
 
 		} else if _, ok := n.IRValue.Type().(*types.PointerType); ok {
-			prnStructVector(ctx, n)
-
+			if _, ok := n.IRValue.Type().(*types.StructType); ok {
+				prnStructVector(ctx, n)
+			} else {
+				prnScalar(ctx, n)
+			}
 		} else if _, ok := n.IRValue.Type().(*types.StructType); ok {
 			prnStructVector(ctx, n)
 

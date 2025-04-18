@@ -12,31 +12,34 @@ import (
 	mTypes "github.com/wf001/modo/pkg/types"
 )
 
-func PreludeGet(block *ir.Block, internal *mTypes.Internal, node *mTypes.Node) value.Value {
-	var oldArrType *types.ArrayType
+func PreludeGet(ctx *Context, n *mTypes.Node) value.Value {
 
-	var oldArrPtr value.Value
+	i, _ := strconv.ParseInt(n.Next.Val, 10, 32)
+	idx := constant.NewInt(types.I64, i)
 
-	switch v := node.IRValue.(type) {
-	case *ir.InstCall, *ir.InstBitCast:
-		oldArrType, _ = mTypes.AssertArrType(v)
-		oldArrPtr = v
+	oldStructedVecPtr := n.IRValue
+	structPtrType := oldStructedVecPtr.Type().(*types.PointerType)
+	structType := structPtrType.ElemType.(*types.StructType)
 
-	default:
-		log.Panic("Unsupported IRValue type: %#+v", node.IRValue)
-	}
+	structedVecType, elemType := GetLLVMTypeFromString(structType.TypeName, ctx.prog.Prelude)
+	newValue := ctx.block.NewAlloca(elemType)
 
-	i, _ := strconv.ParseInt(node.Next.Val, 10, 32)
-	if i >= int64(oldArrType.Len) {
-		log.Panic("Array index out of range: have %d but array length %d", i, node.Len)
-	}
+	oldStructedVec := ctx.block.NewLoad(structedVecType, oldStructedVecPtr)
+	oldVecPtr := ctx.block.NewExtractValue(oldStructedVec, 0)
+	// oldLen := ctx.block.NewExtractValue(oldStructedVec, 1)
+	oldArrElemPtr := ctx.block.NewGetElementPtr(elemType, oldVecPtr, idx)
+	oldElem := ctx.block.NewLoad(elemType, oldArrElemPtr)
+	ctx.block.NewStore(oldElem, newValue)
+	// maxIdx := ctx.block.NewSub(oldLen, constant.NewInt(types.I64, 1))
+	// copyContinue := ctx.block.NewICmp(enum.IPredUGT, maxIdx, oldLen)
 
-	newValue := block.NewAlloca(oldArrType.ElemType)
-
-	loadedValue := mTypes.LoadArrElem(block, oldArrPtr, oldArrType, uint64(i))
-	block.NewStore(loadedValue, newValue)
-
+	//v := ctx.block.NewSelect(
+	//	copyContinue,
+	//	newValue,
+	//
+	//)
 	return newValue
+
 }
 
 // Note: remain here until it will be defined the strategy of memory lifecycle

@@ -99,7 +99,7 @@ func newStrHeap(ctx *Context, n *mTypes.Node) *ir.InstCall {
 
 // Note: remain here until it will be defined the strategy of memory lifecycle
 func newVectorOld(ctx *Context, n *mTypes.Node) value.Value {
-	elemType, _ := mTypes.GetLLVMType(n.ElemType)
+	_, elemType, _ := mTypes.GetLLVMType(n, ctx.prog.Prelude)
 
 	var arrLength uint64 = 0
 	var arr value.Value
@@ -163,7 +163,7 @@ func newVectorOld(ctx *Context, n *mTypes.Node) value.Value {
 // this logic may be reused. So, the decision to delete this function will be postponed until it is
 // determined whether fixed-size arrays will be supported.
 func newVectorGlobal(ctx *Context, n *mTypes.Node) value.Value {
-	elemType, _ := mTypes.GetLLVMType(n.ElemType)
+	_, elemType, _ := mTypes.GetLLVMType(n, ctx.prog.Prelude)
 
 	var arrContent []constant.Constant
 	arrLength := 0
@@ -224,8 +224,7 @@ func newVectorHeap(ctx *Context, n *mTypes.Node) value.Value {
 		vecContent = append(vecContent, e.IRValue)
 		vecLength++
 	}
-	elemType, _ := mTypes.GetLLVMType(n.ElemType)
-	structedArrType, _ := mTypes.GetLLVMTypeForVector(n, ctx.prog.Prelude)
+	structedArrType, elemType, _ := mTypes.GetLLVMType(n, ctx.prog.Prelude)
 
 	typeSize := constant.NewInt(types.I64, int64(mTypes.GetBitWidth(elemType)))
 	vecSize := constant.NewInt(types.I64, int64(vecLength))
@@ -282,17 +281,22 @@ func (ctx *Context) genVarDeclare(node *mTypes.Node) value.Value {
 		// means declaring global variable or function named except main
 
 		// define function return type
-		retType, ok := mTypes.GetLLVMType(node.Type)
 
-		if !ok {
-			if node.Child.Kind == mTypes.ND_COLLECTION {
-				structType, _ := mTypes.GetLLVMTypeForVector(node.Child, ctx.prog.Prelude)
-				retType = types.NewPointer(structType)
+		var retType types.Type
+		var n *mTypes.Node
 
-			} else {
-				structType, _ := mTypes.GetLLVMTypeForVector(node, ctx.prog.Prelude)
-				retType = types.NewPointer(structType)
-			}
+		if node.Child.Kind == mTypes.ND_COLLECTION {
+			n = node.Child
+		} else {
+			n = node
+		}
+
+		collType, scalarType, _ := mTypes.GetLLVMType(n, ctx.prog.Prelude)
+
+		if collType == nil {
+			retType = scalarType
+		} else {
+			retType = types.NewPointer(collType)
 		}
 
 		funcName := node.GetFuncName()
@@ -302,10 +306,13 @@ func (ctx *Context) genVarDeclare(node *mTypes.Node) value.Value {
 
 		// define arguments type of function
 		for a := node.Child.Args; a != nil; a = a.Next {
-			ty, ok := mTypes.GetLLVMType(a.Type)
-			if !ok {
-				structTy, _ := mTypes.GetLLVMTypeForVector(a, ctx.prog.Prelude)
-				ty = types.NewPointer(structTy)
+			var ty types.Type
+			collType, scalarType, _ := mTypes.GetLLVMType(a, ctx.prog.Prelude)
+
+			if collType == nil {
+				ty = scalarType
+			} else {
+				ty = types.NewPointer(collType)
 			}
 
 			arg = append(arg, ir.NewParam(a.Val, ty))

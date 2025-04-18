@@ -126,36 +126,37 @@ func (node *Node) GetNodeSize() uint64 {
 }
 
 // Get LLVM type from corresponding custom type
-func GetLLVMType(ty ModoType) (types.Type, bool) {
+func GetLLVMType(node *Node, prelude *PreludeProps) (types.Type, types.Type, bool) {
+	var collTy types.Type
+	var scalarTy types.Type
 
-	var typeMap = map[ModoType]types.Type{
+	var scalarTypeMap = map[ModoType]types.Type{
 		TY_INT32: types.I32,
 		TY_BOOL:  types.I1,
 		TY_STR:   types.I8Ptr,
 		TY_NIL:   types.Void,
 	}
 
-	if t, ok := typeMap[ty]; ok {
-		return t, true
+	scalarTy, isRootScalar := scalarTypeMap[node.Type]
+	if isRootScalar {
+		return nil, scalarTy, true
 	}
-	return nil, false
-}
 
-func GetLLVMTypeForVector(node *Node, prelude *PreludeProps) (types.Type, bool) {
-
-	var typeMap = map[ModoType]types.Type{
+	var collTypeMap = map[ModoType]types.Type{
 		TY_INT32: prelude.Types.VectorInt,
 		TY_STR:   prelude.Types.VectorString,
 	}
-	if node.Type != TY_VECTOR {
-		return nil, true
+
+	collTy, isRootColl := collTypeMap[node.ElemType]
+	scalarTy, isElemScalar := scalarTypeMap[node.ElemType]
+
+	if node.Type == TY_VECTOR {
+		if isRootColl && isElemScalar {
+			return collTy, scalarTy, true
+		}
 	}
 
-	if t, ok := typeMap[node.ElemType]; ok {
-		return t, true
-	}
-	log.Debug("unresolved type: have %#+v", node)
-	return nil, true
+	return nil, nil, false
 }
 
 func GetBitWidth(t types.Type) uint64 {

@@ -43,47 +43,6 @@ const (
 	TY_VECTOR = ModoType("TY_VECTOR")
 )
 
-type Program struct {
-	Declares          *Node
-	Prelude           *PreludeProps
-	DeclaredGlobalVar []*ir.InstLoad
-}
-
-type PreludeProps struct {
-	Types PreludeTypeProps
-}
-
-type PreludeTypeProps struct {
-	VectorInt    *types.StructType
-	VectorString *types.StructType
-}
-
-type Internal struct {
-	Cstd        *Cstd
-	GlobalConst *GlobalConst
-}
-
-type Cstd struct {
-	Printf *ir.Func
-	Malloc *ir.Func
-	Memcpy *ir.Func
-	Strcmp *ir.Func
-}
-
-// HACK: should remove llir/ir reference from this namespace
-type GlobalConst struct {
-	FormatDigit        *ir.Global
-	FormatStr          *ir.Global
-	StringSpace        *ir.Global
-	StringCR           *ir.Global
-	StringTrue         *ir.Global
-	StringFalse        *ir.Global
-	StringNil          *ir.Global
-	StringBracketOpen  *ir.Global
-	StringBracketClose *ir.Global
-	StringComma        *ir.Global
-}
-
 type Node struct {
 	Kind     NodeKind
 	Next     *Node

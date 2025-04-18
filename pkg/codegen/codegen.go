@@ -317,24 +317,24 @@ func (ctx *Context) genVarDeclare(node *mTypes.Node) value.Value {
 			retType,
 			argp...,
 		)
-		llBlock := fnc.NewBlock("")
+		entryBlock := fnc.NewBlock("")
 
 		ctx.function = fnc
 		ctx.argument = node.Child.Args
-		ctx.block = llBlock
+		ctx.block = entryBlock
 		child := ctx.gen(node.Child)
 		node.FuncPtr = fnc
 
 		if node.Child.IsKind(mTypes.ND_LAMBDA) {
-			lambda := llBlock.NewCall(child, arg...)
+			lambda := entryBlock.NewCall(child, arg...)
 
 			if lambda.Type().Equal(types.Void) {
-				llBlock.NewRet(nil)
+				entryBlock.NewRet(nil)
 			} else {
-				llBlock.NewRet(lambda)
+				entryBlock.NewRet(lambda)
 			}
 		} else {
-			llBlock.NewRet(child)
+			entryBlock.NewRet(child)
 		}
 
 	}

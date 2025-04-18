@@ -13,8 +13,8 @@ import (
 
 func PreludeConj(ctx *Context, n *mTypes.Node) value.Value {
 	// もとのベクターの構造体をロード
-	oldStructedArrPtr := n.IRValue
-	structPtrType := oldStructedArrPtr.Type().(*types.PointerType)
+	oldStructedVecPtr := n.IRValue
+	structPtrType := oldStructedVecPtr.Type().(*types.PointerType)
 	structType := structPtrType.ElemType.(*types.StructType)
 
 	var m1 = map[string]*types.StructType{
@@ -26,20 +26,20 @@ func PreludeConj(ctx *Context, n *mTypes.Node) value.Value {
 		"prelude.vector.string": types.I8Ptr,
 	}
 	// array type の情報を取得
-	structedArrType := m1[structType.TypeName]
+	structedVecType := m1[structType.TypeName]
 	elemType := m2[structType.TypeName]
 
-	oldStructedArr := ctx.block.NewLoad(structedArrType, oldStructedArrPtr)
-	oldArrPtr := ctx.block.NewExtractValue(oldStructedArr, 0)
-	oldLen := ctx.block.NewExtractValue(oldStructedArr, 1)
+	oldStructedVec := ctx.block.NewLoad(structedVecType, oldStructedVecPtr)
+	oldVecPtr := ctx.block.NewExtractValue(oldStructedVec, 0)
+	oldLen := ctx.block.NewExtractValue(oldStructedVec, 1)
 
 	// 長さ +1 の新しい vector を確保
 	elemSize := constant.NewInt(types.I64, int64(mTypes.GetBitWidth(elemType)))
 	newLen := ctx.block.NewAdd(oldLen, constant.NewInt(types.I64, 1))
-	newArrAllocSize := ctx.block.NewMul(elemSize, newLen)
+	newVecAllocSize := ctx.block.NewMul(elemSize, newLen)
 
-	newArrAllocPtr := ctx.block.NewCall(ctx.internal.Cstd.Malloc, newArrAllocSize)
-	newArrPtr := ctx.block.NewBitCast(newArrAllocPtr, types.NewPointer(elemType))
+	newVecAllocPtr := ctx.block.NewCall(ctx.internal.Cstd.Malloc, newVecAllocSize)
+	newVecPtr := ctx.block.NewBitCast(newVecAllocPtr, types.NewPointer(elemType))
 
 	// もとの要素をコピー
 	loopIndex := ctx.block.NewAlloca(types.I64)
@@ -57,10 +57,10 @@ func PreludeConj(ctx *Context, n *mTypes.Node) value.Value {
 	condBlock.NewCondBr(copyContinue, loopBlock, endBlock)
 
 	// コピー処理ブロック
-	oldArrElemPtr := loopBlock.NewGetElementPtr(elemType, oldArrPtr, idx)
+	oldArrElemPtr := loopBlock.NewGetElementPtr(elemType, oldVecPtr, idx)
 	oldElem := loopBlock.NewLoad(elemType, oldArrElemPtr)
-	newArrElemPtr := loopBlock.NewGetElementPtr(elemType, newArrPtr, idx)
-	loopBlock.NewStore(oldElem, newArrElemPtr)
+	newVecElemPtr := loopBlock.NewGetElementPtr(elemType, newVecPtr, idx)
+	loopBlock.NewStore(oldElem, newVecElemPtr)
 
 	incI := loopBlock.NewAdd(idx, constant.NewInt(types.I64, 1))
 	loopBlock.NewStore(incI, loopIndex)
@@ -68,22 +68,22 @@ func PreludeConj(ctx *Context, n *mTypes.Node) value.Value {
 
 	// end: 追加要素を挿入
 	ctx.block = endBlock
-	newArrElemPtr = ctx.block.NewGetElementPtr(elemType, newArrPtr, oldLen)
-	ctx.block.NewStore(n.Next.IRValue, newArrElemPtr)
+	newVecElemPtr = ctx.block.NewGetElementPtr(elemType, newVecPtr, oldLen)
+	ctx.block.NewStore(n.Next.IRValue, newVecElemPtr)
 
 	// 新しい構造体を返す
-	newStructAlloca := ctx.block.NewAlloca(structedArrType)
+	newStructAlloca := ctx.block.NewAlloca(structedVecType)
 
-	newArrField := ctx.block.NewGetElementPtr(
-		structedArrType,
+	newVecField := ctx.block.NewGetElementPtr(
+		structedVecType,
 		newStructAlloca,
 		newI32("0"),
 		newI32("0"),
 	)
-	ctx.block.NewStore(newArrPtr, newArrField)
+	ctx.block.NewStore(newVecPtr, newVecField)
 
 	newLenField := ctx.block.NewGetElementPtr(
-		structedArrType,
+		structedVecType,
 		newStructAlloca,
 		newI32("0"),
 		newI32("1"),

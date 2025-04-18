@@ -9,6 +9,47 @@ import (
 	"github.com/wf001/modo/pkg/log"
 )
 
+type Program struct {
+	Declares          *Node
+	Prelude           *PreludeProps
+	DeclaredGlobalVar []*ir.InstLoad
+}
+
+type PreludeProps struct {
+	Types PreludeTypeProps
+}
+
+type PreludeTypeProps struct {
+	VectorInt    *types.StructType
+	VectorString *types.StructType
+}
+
+type Internal struct {
+	Cstd        *Cstd
+	GlobalConst *GlobalConst
+}
+
+type Cstd struct {
+	Printf *ir.Func
+	Malloc *ir.Func
+	Memcpy *ir.Func
+	Strcmp *ir.Func
+}
+
+// HACK: should remove llir/ir reference from this namespace
+type GlobalConst struct {
+	FormatDigit        *ir.Global
+	FormatStr          *ir.Global
+	StringSpace        *ir.Global
+	StringCR           *ir.Global
+	StringTrue         *ir.Global
+	StringFalse        *ir.Global
+	StringNil          *ir.Global
+	StringBracketOpen  *ir.Global
+	StringBracketClose *ir.Global
+	StringComma        *ir.Global
+}
+
 func GetPrintFormat(ty types.Type, libs *Internal) (*ir.Global, bool) {
 
 	formatMap := map[types.Type]*ir.Global{
@@ -45,6 +86,7 @@ func LoadArrElem(block *ir.Block, src value.Value, ty *types.ArrayType, i uint64
 
 }
 
+// Note: remain here until it will be defined the strategy of memory lifecycle
 func AssertArrType(v value.Value) (*types.ArrayType, bool) {
 	ptrElemType, ok := v.Type().(*types.PointerType)
 

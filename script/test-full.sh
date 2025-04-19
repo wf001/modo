@@ -208,6 +208,10 @@ testexec(){
   assertexec "(def f :: [int] => [int] (fn [v] (conj v 81))) (def main :: int (fn [] (let [v :: [int] [42, 64, 90]] (prn (f v)))))" "[42, 64, 90, 81]\\\n"
 
 
+  # struct
+  echo "== struct ==="
+  assertexec '(defschema Person {:name :: string :age :: int :isMale :: bool})(def main :: int (fn [] (let [node :: Person {:age 20 :name "richard" :isMale true}] (prn (get node :name)) (prn (get node :age)) (prn (get node :isMale)) (prn (get node :A)))))' "richard\\\n20\\\ntrue\\\nnil\\\n"
+
 }
 
 build-compiler

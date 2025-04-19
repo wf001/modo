@@ -456,7 +456,7 @@ func (ctx *Context) genVarReference(node *mTypes.Node) value.Value {
 		}
 	}
 
-	log.Panic("unresolved symbol: '%s'", node.Val)
+	log.Debug("unresolved symbol, treated as struct field: '%s'", node.Val)
 
 	return nil
 }

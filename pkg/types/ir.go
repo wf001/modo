@@ -65,7 +65,6 @@ type GlobalConst struct {
 
 type PreludeStruct struct {
 	Name  string                         // defined with type declaration
-	Ptr   *ir.InstBitCast                // defined with value definition
 	Field map[string]PreludeStructFields // defined with type declaration
 	Types *types.StructType              // defined with type declaration
 }

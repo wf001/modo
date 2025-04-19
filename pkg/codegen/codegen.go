@@ -306,18 +306,15 @@ func newStruct(
 	for n := node.Child; n != nil; n = n.Next.Next {
 		key := n
 		value := n.Next
-		f := structCtx.Field[key.Val]
-		f.Value = ctx.gen(value)
-		structCtx.Field[key.Val] = f
-		structCtx.Ptr = personPtr
 
 		namePtr := ctx.block.NewGetElementPtr(
 			structCtx.Types,
-			structCtx.Ptr,
+			personPtr,
 			constant.NewInt(types.I32, 0), // first element
 			constant.NewInt(types.I32, int64(structCtx.Field[key.Val].Pos)), // name field
 		)
-		ctx.block.NewStore(structCtx.Field[key.Val].Value, namePtr)
+		v := ctx.gen(value)
+		ctx.block.NewStore(v, namePtr)
 		setPointer(key.Val, namePtr)
 
 	}

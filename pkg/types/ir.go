@@ -70,9 +70,8 @@ type PreludeStruct struct {
 }
 
 type PreludeStructFields struct {
-	Pos     uint64      // defined with type declaration
-	Value   value.Value // defined with value definition
-	Pointer value.Value // defined with value definition
+	Pos  uint64 // defined with type declaration
+	Type types.Type
 }
 
 // ==============

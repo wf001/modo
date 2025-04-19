@@ -65,57 +65,27 @@ func getVec(ctx *Context, n *mTypes.Node) value.Value {
 
 	return result
 }
+
 func getStruct(ctx *Context, n *mTypes.Node) value.Value {
-	i, _ := strconv.ParseInt(n.Next.Val, 10, 32)
-	idx := constant.NewInt(types.I64, i)
+	tyPtr, _ := n.IRValue.Type().(*types.PointerType)
+	tyStr, _ := tyPtr.ElemType.(*types.StructType)
 
-	oldStructedVecPtr := n.IRValue
-	structPtrType := oldStructedVecPtr.Type().(*types.PointerType)
-	structType := structPtrType.ElemType.(*types.StructType)
+	specifiedFields := ctx.prog.DeclaredType[tyStr.TypeName].Field[n.Next.Val]
+	i := specifiedFields.Pos
+	structeType, elemType := ctx.prog.DeclaredType[tyStr.TypeName].Types, specifiedFields.Type
 
-	structedVecType, elemType := GetLLVMTypeFromString(structType.TypeName, ctx.prog.Prelude)
+	targetStructPtr := n.IRValue
+
 	nullPtr := constant.NewNull(types.NewPointer(elemType))
 
-	if i < 0 {
+	if false {
 		return nullPtr
 	}
 
-	oldStructedVec := ctx.block.NewLoad(structedVecType, oldStructedVecPtr)
-	oldVecPtr := ctx.block.NewExtractValue(oldStructedVec, 0)
-	oldLen := ctx.block.NewExtractValue(oldStructedVec, 1)
-	maxIdx := ctx.block.NewSub(oldLen, constant.NewInt(types.I64, 1))
+	oldStruct := ctx.block.NewLoad(structeType, targetStructPtr)
+	elemPtr := ctx.block.NewExtractValue(oldStruct, i)
 
-	isIdxOutOfRange := ctx.block.NewICmp(enum.IPredSGT, idx, maxIdx)
-	isIdxOutOfRange.SetName(n.GetVarName("is.idx.out.of.range", ctx.block.Insts))
-
-	inRangeBlock := ctx.function.NewBlock(n.GetBlockName("idx.in.range", ctx.function.Blocks))
-	outOfRangeBlock := ctx.function.NewBlock(
-		n.GetBlockName("idx.out.of.range", ctx.function.Blocks),
-	)
-	mergeBlock := ctx.function.NewBlock(n.GetBlockName("idx.merge", ctx.function.Blocks))
-
-	ctx.block.NewCondBr(isIdxOutOfRange, outOfRangeBlock, inRangeBlock)
-
-	// branched when specified index is in range
-	ctx.block = inRangeBlock
-	oldArrElemPtr := ctx.block.NewGetElementPtr(elemType, oldVecPtr, idx)
-	oldElem := ctx.block.NewLoad(elemType, oldArrElemPtr)
-	okPtr := ctx.block.NewAlloca(elemType)
-	ctx.block.NewStore(oldElem, okPtr)
-	ctx.block.NewBr(mergeBlock)
-
-	// branched when specified index is out of range
-	ctx.block = outOfRangeBlock
-	ctx.block.NewBr(mergeBlock)
-
-	ctx.block = mergeBlock
-	incs := []*ir.Incoming{
-		ir.NewIncoming(okPtr, inRangeBlock),
-		ir.NewIncoming(nullPtr, outOfRangeBlock),
-	}
-	result := ctx.block.NewPhi(incs...)
-
-	return result
+	return elemPtr
 }
 
 func PreludeGet(ctx *Context, n *mTypes.Node) value.Value {
@@ -128,7 +98,6 @@ func PreludeGet(ctx *Context, n *mTypes.Node) value.Value {
 				return getStruct(ctx, n)
 			}
 		}
-		log.Panic("")
 	}
 	return getVec(ctx, n)
 }

@@ -297,12 +297,6 @@ func newStruct(
 	// bitcast i8* → %struct*
 	personPtr := ctx.block.NewBitCast(rawPtr, types.NewPointer(structCtx.Types))
 
-	var setPointer = func(key string, v value.Value) {
-		f := structCtx.Field[key]
-		f.Pointer = v
-		structCtx.Field[key] = f
-	}
-
 	for n := node.Child; n != nil; n = n.Next.Next {
 		key := n
 		value := n.Next
@@ -315,7 +309,6 @@ func newStruct(
 		)
 		v := ctx.gen(value)
 		ctx.block.NewStore(v, namePtr)
-		setPointer(key.Val, namePtr)
 
 	}
 	return personPtr
@@ -571,10 +564,12 @@ func (ctx *Context) genDeclareStructType(
 	var pos uint64 = 0
 
 	for n := node.Child; n != nil; n = n.Next {
+		// Note: is NOT TRUE
 		_, scalarTy, _ := mTypes.GetLLVMType(n, ctx.prog.Prelude)
 		typsArr = append(typsArr, scalarTy)
 		f := structField[n.Val]
 		f.Pos = pos
+		f.Type = scalarTy
 		structField[n.Val] = f
 		pos++
 	}

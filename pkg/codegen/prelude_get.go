@@ -76,10 +76,9 @@ func getStruct(ctx *Context, n *mTypes.Node) value.Value {
 
 	targetStructPtr := n.IRValue
 
-	nullPtr := constant.NewNull(types.NewPointer(elemType))
-
-	if false {
-		return nullPtr
+	if structeType == nil || elemType == nil {
+		// Note: is it ok returing i32* anytime?
+		return constant.NewNull(types.NewPointer(types.I32))
 	}
 
 	oldStruct := ctx.block.NewLoad(structeType, targetStructPtr)

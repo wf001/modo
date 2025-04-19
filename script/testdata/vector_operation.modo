@@ -2,9 +2,6 @@
   (fn []
     (let [vec :: [int] [423, 83, 90]]
       (prn (get 
-             (conj 
-               (pop 
-                 (assoc vec 1 7)) 
-               54)
-             2))
+             (conj vec 54)
+             3))
       (prn vec))))

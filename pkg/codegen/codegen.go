@@ -261,33 +261,41 @@ func newVectorHeap(ctx *Context, n *mTypes.Node) value.Value {
 
 }
 
+func getExtendedType(ctx *Context, node *mTypes.Node) *mTypes.PreludeStruct {
+	for k, v := range ctx.prog.DeclaredType {
+		if k == node.TypeExtended {
+			return v
+		}
+	}
+	return nil
+}
+
 func newStruct(
-	mod *ir.Module,
-	block *ir.Block,
-	declaredValue map[string]value.Value,
-	structCtx *mTypes.PreludeStruct,
-) {
+	ctx *Context,
+	node *mTypes.Node,
+) value.Value {
+
+	structCtx := getExtendedType(ctx, node)
 
 	// null pointer to struct: %struct* null
 	nullStructPtr := constant.NewNull(types.NewPointer(structCtx.Types))
 
 	// gep: getelementptr %struct, %struct* null, 1
-	gepEndPtr := block.NewGetElementPtr(
+	gepEndPtr := ctx.block.NewGetElementPtr(
 		structCtx.Types,
 		nullStructPtr,
 		constant.NewInt(types.I32, 1),
 	)
 
 	// ptrtoint: i64 (size in bytes)
-	mallocSize := block.NewPtrToInt(gepEndPtr, types.I64)
+	mallocSize := ctx.block.NewPtrToInt(gepEndPtr, types.I64)
 
 	// malloc 呼び出し（事前に @malloc を宣言しておくこと）
 
-	malloc := mod.NewFunc("malloc", types.I8Ptr)
-	rawPtr := block.NewCall(malloc, mallocSize)
+	rawPtr := ctx.block.NewCall(ctx.internal.Cstd.Malloc, mallocSize)
 
 	// bitcast i8* → %struct*
-	personPtr := block.NewBitCast(rawPtr, types.NewPointer(structCtx.Types))
+	personPtr := ctx.block.NewBitCast(rawPtr, types.NewPointer(structCtx.Types))
 
 	var setPointer = func(key string, v value.Value) {
 		f := structCtx.Field[key]
@@ -295,21 +303,25 @@ func newStruct(
 		structCtx.Field[key] = f
 	}
 
-	for key, value := range declaredValue {
-		f := structCtx.Field[key]
-		f.Value = value
-		structCtx.Field[key] = f
+	for n := node.Child; n != nil; n = n.Next.Next {
+		key := n
+		value := n.Next
+		f := structCtx.Field[key.Val]
+		f.Value = ctx.gen(value)
+		structCtx.Field[key.Val] = f
 		structCtx.Ptr = personPtr
 
-		namePtr := block.NewGetElementPtr(
+		namePtr := ctx.block.NewGetElementPtr(
 			structCtx.Types,
 			structCtx.Ptr,
 			constant.NewInt(types.I32, 0), // first element
-			constant.NewInt(types.I32, int64(structCtx.Field[key].Pos)), // name field
+			constant.NewInt(types.I32, int64(structCtx.Field[key.Val].Pos)), // name field
 		)
-		block.NewStore(structCtx.Field[key].Value, namePtr)
-		setPointer(key, namePtr)
+		ctx.block.NewStore(structCtx.Field[key.Val].Value, namePtr)
+		setPointer(key.Val, namePtr)
+
 	}
+	return personPtr
 
 }
 func (ctx *Context) genVarDeclare(node *mTypes.Node) value.Value {
@@ -426,6 +438,9 @@ func (ctx *Context) genVarReference(node *mTypes.Node) value.Value {
 			} else if scope.Child.IsKind(mTypes.ND_LIBCALL) {
 				return scope.IRValue
 			} else if scope.Child.IsType(mTypes.TY_VECTOR) {
+				return scope.IRValue
+
+			} else if scope.Child.IsType(mTypes.TY_EXTENDED) {
 				return scope.IRValue
 
 			} else {
@@ -576,6 +591,7 @@ func (ctx *Context) genDeclareStructType(
 	}
 
 	ctx.prog.DeclaredType[node.Val] = &mTypes.PreludeStruct{
+		Name:  node.Val,
 		Field: structField,
 		Types: structType,
 	}
@@ -622,6 +638,9 @@ func (ctx *Context) gen(node *mTypes.Node) value.Value {
 				bind.IRValue = child
 
 			} else if bind.IsType(mTypes.TY_VECTOR) {
+				bind.IRValue = child
+
+			} else if bind.IsType(mTypes.TY_EXTENDED) {
 				bind.IRValue = child
 
 			} else {
@@ -688,8 +707,12 @@ func (ctx *Context) gen(node *mTypes.Node) value.Value {
 		} else {
 			log.Panic("unresolved Scalar: have %+v", node)
 		}
-	} else if node.IsKind(mTypes.ND_COLLECTION) {
+	} else if node.IsKind(mTypes.ND_COLLECTION) && node.IsType(mTypes.TY_VECTOR) {
 		return newVectorHeap(ctx, node)
+
+	} else if node.IsKind(mTypes.ND_COLLECTION) && node.IsType(mTypes.TY_EXTENDED) {
+		return newStruct(ctx, node)
+
 	} else {
 		log.Panic("unresolved Nodekind: have %+v", node)
 	}

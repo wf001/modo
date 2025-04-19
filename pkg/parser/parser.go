@@ -73,6 +73,9 @@ func parseIdent(
 				}
 				ty, _ := mTypes.GetModoType(tok.Kind)
 				typeCur.Type = ty
+				if typeCur.Type == mTypes.TY_EXTENDED {
+					typeCur.TypeExtended = tok.Val
+				}
 				typeCur.ElemType, _ = mTypes.GetModoType(tok.ChildKind)
 				typeCur.Next = &mTypes.Node{}
 				typeCur = typeCur.Next
@@ -104,9 +107,11 @@ func parseIdent(
 		child.Type = typeHead.Type
 		// HACK: seems buggy
 		child.ElemType = typeHead.ElemType
+		child.TypeExtended = typeHead.TypeExtended
 		if child.Child.Kind == mTypes.ND_COLLECTION {
 			child.Child.Type = typeHead.Type
 			child.Child.ElemType = typeHead.ElemType
+			child.Child.TypeExtended = typeHead.TypeExtended
 		}
 		return tok, child
 
@@ -175,6 +180,7 @@ func parseDeclare(tok *mTypes.Token, parentKind mTypes.NodeKind) (*mTypes.Token,
 			if !tok.IsKindAndVal(mTypes.TK_PAREN, mTypes.BRACE_OPEN) {
 				log.Panic("defschema must begin with { have: %#+v", tok)
 			}
+			// Note: prefer to be TY_TYPE_STRUCT
 			varDeclare := &mTypes.Node{
 				Kind: mTypes.ND_TYPE_DECLARE,
 				Val:  structName,

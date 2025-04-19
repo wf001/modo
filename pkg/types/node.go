@@ -48,31 +48,33 @@ const (
 )
 
 type Node struct {
-	Kind     NodeKind
-	Next     *Node
-	Type     ModoType
-	ElemType ModoType
-	Child    *Node
-	Cond     *Node
-	CondRet  *ir.InstAlloca
-	Then     *Node
-	Else     *Node
-	Val      string
-	Len      uint64 // the number of bytes, used with string type
-	Bind     *Node
-	Args     *Node
-	IsGlobal bool
-	FuncPtr  *ir.Func    // declared function, library function
-	IRValue  value.Value //
+	Kind         NodeKind
+	Next         *Node
+	Type         ModoType
+	TypeExtended string
+	ElemType     ModoType
+	Child        *Node
+	Cond         *Node
+	CondRet      *ir.InstAlloca
+	Then         *Node
+	Else         *Node
+	Val          string
+	Len          uint64 // the number of bytes, used with string type
+	Bind         *Node
+	Args         *Node
+	IsGlobal     bool
+	FuncPtr      *ir.Func    // declared function, library function
+	IRValue      value.Value //
 }
 
 func (n *Node) String() string {
 
 	return fmt.Sprintf(
-		"{Kind:%#+v, Val:%#+v, Type:%#+v, Len:%d, ElemType:%#+v}",
+		"{Kind:%#+v, Val:%#+v, Type:%#+v, TypeExtended:%#+v, Len:%d, ElemType:%#+v}",
 		n.Kind,
 		n.Val,
 		n.Type,
+		n.TypeExtended,
 		n.Len,
 		n.ElemType,
 	)

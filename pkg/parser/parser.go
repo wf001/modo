@@ -52,6 +52,7 @@ func parseBody(
 	return nextToken, rootNode
 }
 
+// TODO: refactoring
 func parseIdent(
 	tok *mTypes.Token,
 	head *mTypes.Node,
@@ -303,6 +304,15 @@ func parseDeclare(tok *mTypes.Token, parentKind mTypes.NodeKind) (*mTypes.Token,
 		strNode := newNodeScalar(mTypes.TY_STR, tok.Val)
 		strNode.Len = uint64(len(tok.Val))
 		return tok.Next, strNode
+
+		// means struct value
+	} else if tok.IsKindAndVal(mTypes.TK_PAREN, mTypes.BRACE_OPEN) {
+		tok, rootNode := parseBody(tok, mTypes.ND_COLLECTION, "")
+		if !tok.IsKindAndVal(mTypes.TK_PAREN, mTypes.BRACE_CLOSE) {
+			log.Panic("struct must be closed with brace :have %+v", tok)
+		}
+		tok = tok.Next
+		return tok, rootNode
 
 		// means vector value
 	} else if tok.IsKindAndVal(mTypes.TK_PAREN, mTypes.BRACKET_OPEN) {

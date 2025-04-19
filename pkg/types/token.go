@@ -20,14 +20,16 @@ const (
 	TK_LIBCALL = TokenKind("TK_LIBCALL")
 	TK_IDENT   = TokenKind("TK_IDENT")
 
-	TK_TYPE_SIG    = TokenKind("TK_TYPE_SIG")
-	TK_TYPE_ARROW  = TokenKind("TK_TYPE_ARROW")
-	TK_TYPE_INT    = TokenKind("TK_TYPE_INT")
-	TK_TYPE_FLOAT  = TokenKind("TK_TYPE_FLOAT")
-	TK_TYPE_STR    = TokenKind("TK_TYPE_STR")
-	TK_TYPE_BOOL   = TokenKind("TK_TYPE_BOOL")
-	TK_TYPE_NIL    = TokenKind("TK_TYPE_NIL")
-	TK_TYPE_VECTOR = TokenKind("TK_TYPE_VECTOR")
+	TK_TYPE_SIG      = TokenKind("TK_TYPE_SIG")
+	TK_TYPE_ARROW    = TokenKind("TK_TYPE_ARROW")
+	TK_TYPE_INT      = TokenKind("TK_TYPE_INT")
+	TK_TYPE_FLOAT    = TokenKind("TK_TYPE_FLOAT")
+	TK_TYPE_STR      = TokenKind("TK_TYPE_STR")
+	TK_TYPE_BOOL     = TokenKind("TK_TYPE_BOOL")
+	TK_TYPE_NIL      = TokenKind("TK_TYPE_NIL")
+	TK_TYPE_VECTOR   = TokenKind("TK_TYPE_VECTOR")
+	TK_TYPE_STRUCT   = TokenKind("TK_TYPE_STRUCT")
+	TK_TYPE_EXTENDED = TokenKind("TK_TYPE_EXTENDED")
 
 	TK_INT   = TokenKind("TK_INT")
 	TK_FLOAT = TokenKind("TK_FLOAT")
@@ -70,7 +72,8 @@ func (tok *Token) IsKindType() bool {
 		tok.IsKind(TK_TYPE_STR) ||
 		tok.IsKind(TK_TYPE_NIL) ||
 		tok.IsKind(TK_TYPE_BOOL) ||
-		tok.IsKind(TK_TYPE_VECTOR)
+		tok.IsKind(TK_TYPE_VECTOR) ||
+		tok.IsKind(TK_TYPE_EXTENDED)
 }
 
 // ==============
@@ -79,11 +82,13 @@ func (tok *Token) IsKindType() bool {
 
 func GetModoType(k TokenKind) (ModoType, bool) {
 	var typeMap = map[string]ModoType{
-		TK_TYPE_INT:    TY_INT32,
-		TK_TYPE_STR:    TY_STR,
-		TK_TYPE_NIL:    TY_NIL,
-		TK_TYPE_BOOL:   TY_BOOL,
-		TK_TYPE_VECTOR: TY_VECTOR,
+		TK_TYPE_INT:      TY_INT32,
+		TK_TYPE_STR:      TY_STR,
+		TK_TYPE_NIL:      TY_NIL,
+		TK_TYPE_BOOL:     TY_BOOL,
+		TK_TYPE_VECTOR:   TY_VECTOR,
+		TK_TYPE_STRUCT:   TY_STRUCT,
+		TK_TYPE_EXTENDED: TY_EXTENDED,
 	}
 
 	if kind, exists := typeMap[k]; exists {

@@ -101,6 +101,18 @@ func accurateNilType(head *mTypes.Token) {
 		}
 	}
 }
+func accurateStructType(head *mTypes.Token) {
+	for t := head.Next; t.Next != nil; t = t.Next {
+		// The token following defschema is treated as TK_TYPE_EXTENDED not TK_IDENT
+		if t.IsKind(mTypes.TK_DECLARE_TYPE) && t.Next.IsKind(mTypes.TK_IDENT) {
+			t.Next.Kind = mTypes.TK_TYPE_STRUCT
+		}
+		if t.IsKind(mTypes.TK_TYPE_SIG) && t.Next.IsKind(mTypes.TK_IDENT) {
+			t.Next.Kind = mTypes.TK_TYPE_EXTENDED
+		}
+	}
+
+}
 
 func splitString(expr string) []string {
 	re := regexp.MustCompile(mTypes.STRING_REG_EXP)
@@ -152,6 +164,7 @@ func doLexicalAnalyse(splittedString []string) *mTypes.Token {
 					}
 				}
 			}
+
 		} else {
 			log.Debug("regard '%+v' as variable declaration or reference symbol", p)
 			prev = newToken(mTypes.TK_IDENT, prev, p)
@@ -159,6 +172,7 @@ func doLexicalAnalyse(splittedString []string) *mTypes.Token {
 	}
 	trimQuote(head)
 	accurateNilType(head)
+	accurateStructType(head)
 
 	head = head.Next
 	head.DebugTokens()

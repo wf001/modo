@@ -10,9 +10,22 @@ import (
 )
 
 type Program struct {
-	Declares          *Node
+	Declares          *Node // Note: separate local, global, type(either struct-type or types.Type)
 	Prelude           *PreludeProps
 	DeclaredGlobalVar []*ir.InstLoad
+	DeclaredType      map[string]*PreludeStruct
+}
+
+// currently NOT USED
+type declare struct {
+	Func *Node
+	Var  []*ir.InstLoad
+	Type *Types
+}
+
+type Types struct {
+	Struct map[string]*PreludeStruct
+	LLVM   map[string]*types.Type
 }
 
 type PreludeProps struct {
@@ -48,6 +61,19 @@ type GlobalConst struct {
 	StringBracketOpen  *ir.Global
 	StringBracketClose *ir.Global
 	StringComma        *ir.Global
+}
+
+type PreludeStruct struct {
+	Name  string                         // defined with type declaration
+	Ptr   *ir.InstBitCast                // defined with value definition
+	Field map[string]PreludeStructFields // defined with type declaration
+	Types *types.StructType              // defined with type declaration
+}
+
+type PreludeStructFields struct {
+	Pos     uint64      // defined with type declaration
+	Value   value.Value // defined with value definition
+	Pointer value.Value // defined with value definition
 }
 
 // ==============

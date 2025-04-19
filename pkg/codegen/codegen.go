@@ -261,6 +261,57 @@ func newVectorHeap(ctx *Context, n *mTypes.Node) value.Value {
 
 }
 
+func newStruct(
+	mod *ir.Module,
+	block *ir.Block,
+	declaredValue map[string]value.Value,
+	structCtx *mTypes.PreludeStruct,
+) {
+
+	// null pointer to struct: %struct* null
+	nullStructPtr := constant.NewNull(types.NewPointer(structCtx.Types))
+
+	// gep: getelementptr %struct, %struct* null, 1
+	gepEndPtr := block.NewGetElementPtr(
+		structCtx.Types,
+		nullStructPtr,
+		constant.NewInt(types.I32, 1),
+	)
+
+	// ptrtoint: i64 (size in bytes)
+	mallocSize := block.NewPtrToInt(gepEndPtr, types.I64)
+
+	// malloc 呼び出し（事前に @malloc を宣言しておくこと）
+
+	malloc := mod.NewFunc("malloc", types.I8Ptr)
+	rawPtr := block.NewCall(malloc, mallocSize)
+
+	// bitcast i8* → %struct*
+	personPtr := block.NewBitCast(rawPtr, types.NewPointer(structCtx.Types))
+
+	var setPointer = func(key string, v value.Value) {
+		f := structCtx.Field[key]
+		f.Pointer = v
+		structCtx.Field[key] = f
+	}
+
+	for key, value := range declaredValue {
+		f := structCtx.Field[key]
+		f.Value = value
+		structCtx.Field[key] = f
+		structCtx.Ptr = personPtr
+
+		namePtr := block.NewGetElementPtr(
+			structCtx.Types,
+			structCtx.Ptr,
+			constant.NewInt(types.I32, 0), // first element
+			constant.NewInt(types.I32, int64(structCtx.Field[key].Pos)), // name field
+		)
+		block.NewStore(structCtx.Field[key].Value, namePtr)
+		setPointer(key, namePtr)
+	}
+
+}
 func (ctx *Context) genVarDeclare(node *mTypes.Node) value.Value {
 	if node.Val == "main" {
 		// means declaring main function regarded as entrypoint
@@ -500,6 +551,37 @@ func (ctx *Context) genCondition(node *mTypes.Node) {
 	ctx.block = exitBlock
 }
 
+func (ctx *Context) genDeclareStructType(
+	node *mTypes.Node,
+) {
+	var typsArr []types.Type
+	structField := map[string]mTypes.PreludeStructFields{}
+	var pos uint64 = 0
+
+	for n := node.Child; n != nil; n = n.Next {
+		_, scalarTy, _ := mTypes.GetLLVMType(n, ctx.prog.Prelude)
+		typsArr = append(typsArr, scalarTy)
+		f := structField[n.Val]
+		f.Pos = pos
+		structField[n.Val] = f
+		pos++
+	}
+
+	structType := types.NewStruct(typsArr...)
+	structType.SetName(node.Val)
+	ctx.mod.NewTypeDef(node.Val, structType)
+
+	if ctx.prog.DeclaredType == nil {
+		ctx.prog.DeclaredType = map[string]*mTypes.PreludeStruct{}
+	}
+
+	ctx.prog.DeclaredType[node.Val] = &mTypes.PreludeStruct{
+		Field: structField,
+		Types: structType,
+	}
+
+}
+
 func (ctx *Context) gen(node *mTypes.Node) value.Value {
 	// Note: no more need?
 	// log.DebugNoLine(log.GREEN(fmt.Sprintf("%+v \"%+v\"", node.Kind, node.Val)))
@@ -510,6 +592,7 @@ func (ctx *Context) gen(node *mTypes.Node) value.Value {
 		return ctx.genVarDeclare(node)
 
 	} else if node.IsKind(mTypes.ND_TYPE_DECLARE) {
+		ctx.genDeclareStructType(node)
 
 	} else if node.IsKind(mTypes.ND_VAR_REFERENCE) {
 		return ctx.genVarReference(node)

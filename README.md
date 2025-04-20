@@ -1,6 +1,16 @@
-# modo
+<div align="center">
+<picture align="center">
+  <!-- ダークテーマ用 -->
+  <source srcset="https://github.com/wf001/mkdirp.com/blob/dev/project/modo/static/logo_large_dark.png" media="(prefers-color-scheme: dark)" />
+  
+  <!-- ライトテーマ用（デフォルト） -->
+  <img src="https://github.com/wf001/mkdirp.com/blob/dev/project/modo/static/logo_large_light.png" alt="Logo" />
+</picture>
+</div>
 
-**modo** (pronounced the same as "mode") is a statically typed, functional programming language inspired by Clojure and Haskell. 
+# modo, Programming language
+
+**modo** is a statically typed, functional programming language inspired by Clojure and Haskell. 
 
 Designed with simplicity and clarity in mind, it embraces the principles that,
 - Explicit is better than implicit 
@@ -46,11 +56,6 @@ To install modo, follow these steps:
 
 ## 📚 Documentation
 (TBD)
-
-## 🚧 TODO
- - [ ] Support for Float type
- - [ ] Support for Vectors (flexible-length arrays)
- - [ ] Support for Structs (custom compound types)
  
 ## 🤝 Contributing
 (TBD)

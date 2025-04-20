@@ -263,7 +263,7 @@ func newVectorHeap(ctx *Context, n *mTypes.Node) value.Value {
 
 func getExtendedType(ctx *Context, node *mTypes.Node) *mTypes.PreludeStruct {
 	for k, v := range ctx.prog.Declare.Type.Struct {
-		if k == node.TypeExtended {
+		if k == node.ExtendName {
 			return v
 		}
 	}
@@ -400,6 +400,42 @@ func (ctx *Context) genVarDeclare(node *mTypes.Node) value.Value {
 
 	}
 	return nil
+}
+
+func (ctx *Context) genStructTypeDeclare(node *mTypes.Node) {
+	var typsArr []types.Type
+	structField := map[string]mTypes.PreludeStructFields{}
+	var pos uint64 = 0
+
+	for n := node.Child; n != nil; n = n.Next {
+		// Note: is NOT TRUE
+		_, scalarTy, _ := mTypes.GetLLVMType(n, ctx.prog.Prelude)
+		typsArr = append(typsArr, scalarTy)
+		f := structField[n.Val]
+		f.Pos = pos
+		f.Type = scalarTy
+		structField[n.Val] = f
+		pos++
+	}
+
+	structType := types.NewStruct(typsArr...)
+	structType.SetName(node.Val)
+	ctx.mod.NewTypeDef(node.Val, structType)
+
+	if ctx.prog.Declare.Type == nil {
+		ctx.prog.Declare.Type = &mTypes.ExtendedTypes{}
+	}
+
+	if ctx.prog.Declare.Type.Struct == nil {
+		ctx.prog.Declare.Type.Struct = map[string]*mTypes.PreludeStruct{}
+	}
+
+	ctx.prog.Declare.Type.Struct[node.Val] = &mTypes.PreludeStruct{
+		Name:  node.Val,
+		Field: structField,
+		Types: structType,
+	}
+
 }
 
 func (ctx *Context) genVarReference(node *mTypes.Node) value.Value {
@@ -556,44 +592,6 @@ func (ctx *Context) genCondition(node *mTypes.Node) {
 	ctx.block = exitBlock
 }
 
-func (ctx *Context) genDeclareStructType(
-	node *mTypes.Node,
-) {
-	var typsArr []types.Type
-	structField := map[string]mTypes.PreludeStructFields{}
-	var pos uint64 = 0
-
-	for n := node.Child; n != nil; n = n.Next {
-		// Note: is NOT TRUE
-		_, scalarTy, _ := mTypes.GetLLVMType(n, ctx.prog.Prelude)
-		typsArr = append(typsArr, scalarTy)
-		f := structField[n.Val]
-		f.Pos = pos
-		f.Type = scalarTy
-		structField[n.Val] = f
-		pos++
-	}
-
-	structType := types.NewStruct(typsArr...)
-	structType.SetName(node.Val)
-	ctx.mod.NewTypeDef(node.Val, structType)
-
-	if ctx.prog.Declare.Type == nil {
-		ctx.prog.Declare.Type = &mTypes.ExtendedTypes{}
-	}
-
-	if ctx.prog.Declare.Type.Struct == nil {
-		ctx.prog.Declare.Type.Struct = map[string]*mTypes.PreludeStruct{}
-	}
-
-	ctx.prog.Declare.Type.Struct[node.Val] = &mTypes.PreludeStruct{
-		Name:  node.Val,
-		Field: structField,
-		Types: structType,
-	}
-
-}
-
 func (ctx *Context) gen(node *mTypes.Node) value.Value {
 	// Note: no more need?
 	// log.DebugNoLine(log.GREEN(fmt.Sprintf("%+v \"%+v\"", node.Kind, node.Val)))
@@ -604,7 +602,7 @@ func (ctx *Context) gen(node *mTypes.Node) value.Value {
 		return ctx.genVarDeclare(node)
 
 	} else if node.IsKind(mTypes.ND_TYPE_DECLARE) {
-		ctx.genDeclareStructType(node)
+		ctx.genStructTypeDeclare(node)
 
 	} else if node.IsKind(mTypes.ND_VAR_REFERENCE) {
 		return ctx.genVarReference(node)

@@ -74,7 +74,7 @@ func parseIdent(
 				ty, _ := mTypes.GetModoType(tok.Kind)
 				typeCur.Type = ty
 				if typeCur.Type == mTypes.TY_EXTENDED {
-					typeCur.TypeExtended = tok.Val
+					typeCur.ExtendName = tok.Val
 				}
 				typeCur.ElemType, _ = mTypes.GetModoType(tok.ChildKind)
 				typeCur.Next = &mTypes.Node{}
@@ -107,11 +107,11 @@ func parseIdent(
 		child.Type = typeHead.Type
 		// HACK: seems buggy
 		child.ElemType = typeHead.ElemType
-		child.TypeExtended = typeHead.TypeExtended
+		child.ExtendName = typeHead.ExtendName
 		if child.Child.Kind == mTypes.ND_COLLECTION {
 			child.Child.Type = typeHead.Type
 			child.Child.ElemType = typeHead.ElemType
-			child.Child.TypeExtended = typeHead.TypeExtended
+			child.Child.ExtendName = typeHead.ExtendName
 		}
 		return tok, child
 

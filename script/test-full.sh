@@ -211,6 +211,7 @@ testexec(){
   # struct
   echo "== struct ==="
   assertexec '(defschema Person {:name :: string :age :: int :isMale :: bool})(def main :: int (fn [] (let [node :: Person {:age 20 :name "richard" :isMale true}] (prn (get node :name)) (prn (get node :age)) (prn (get node :isMale)) (prn (get node :A)))))' "richard\\\n20\\\ntrue\\\nnil\\\n"
+  assertexec '(defschema Person {:name :: string :age :: int :isMale :: bool}) (def f :: Person (fn [] (let [node :: Person {:age 20 :name "richard" :isMale true}] node))) (def main :: int (fn [] (prn (get f :age))))' "20\\\n"
 
 }
 

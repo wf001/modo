@@ -346,10 +346,16 @@ func (ctx *Context) genVarDeclare(node *mTypes.Node) value.Value {
 
 		collType, scalarType, _ := mTypes.GetLLVMType(n, ctx.prog.Prelude)
 
-		if collType == nil {
-			retType = scalarType
-		} else {
+		if collType != nil {
 			retType = types.NewPointer(collType)
+		} else if scalarType != nil {
+			retType = scalarType
+		} else if ctx.prog.Declare.Type != nil && ctx.prog.Declare.Type.Struct != nil {
+			// Note: also get struct type from getLLVMType?
+			structType := getExtendedType(ctx, node)
+			retType = types.NewPointer(structType.Types)
+		} else {
+			log.Panic(":have %#+v", node)
 		}
 
 		funcName := node.GetFuncName()
@@ -362,10 +368,15 @@ func (ctx *Context) genVarDeclare(node *mTypes.Node) value.Value {
 			var ty types.Type
 			collType, scalarType, _ := mTypes.GetLLVMType(a, ctx.prog.Prelude)
 
-			if collType == nil {
-				ty = scalarType
-			} else {
+			if collType != nil {
 				ty = types.NewPointer(collType)
+			} else if scalarType != nil {
+				ty = scalarType
+			} else if ctx.prog.Declare.Type != nil && ctx.prog.Declare.Type.Struct != nil {
+				structType := getExtendedType(ctx, a)
+				ty = structType.Types
+			} else {
+				log.Panic(":have %#+v", a)
 			}
 
 			p := ir.NewParam(a.Val, ty)
@@ -406,6 +417,8 @@ func (ctx *Context) genStructTypeDeclare(node *mTypes.Node) {
 	var typsArr []types.Type
 	structField := map[string]mTypes.PreludeStructFields{}
 	var pos uint64 = 0
+	structType := types.NewStruct()
+	structType.SetName(node.Val)
 
 	for n := node.Child; n != nil; n = n.Next {
 		// Note: is NOT TRUE
@@ -418,8 +431,7 @@ func (ctx *Context) genStructTypeDeclare(node *mTypes.Node) {
 		pos++
 	}
 
-	structType := types.NewStruct(typsArr...)
-	structType.SetName(node.Val)
+	structType.Fields = typsArr
 	ctx.mod.NewTypeDef(node.Val, structType)
 
 	if ctx.prog.Declare.Type == nil {

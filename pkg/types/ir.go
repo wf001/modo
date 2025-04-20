@@ -21,7 +21,7 @@ type DeclareProps struct {
 }
 
 type ExtendedTypes struct {
-	Struct map[string]*PreludeStruct
+	Struct map[string]*StructType
 	LLVM   map[string]*types.Type
 }
 
@@ -60,13 +60,13 @@ type GlobalConst struct {
 	StringComma        *ir.Global
 }
 
-type PreludeStruct struct {
+type StructType struct {
 	Name  string
-	Field map[string]PreludeStructFields
+	Field map[string]StructTypeField
 	Types *types.StructType
 }
 
-type PreludeStructFields struct {
+type StructTypeField struct {
 	Pos  uint64
 	Type types.Type
 }

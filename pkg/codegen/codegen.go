@@ -261,15 +261,6 @@ func newVectorHeap(ctx *Context, n *mTypes.Node) value.Value {
 
 }
 
-func getExtendedType(ctx *Context, node *mTypes.Node) *mTypes.PreludeStruct {
-	for k, v := range ctx.prog.Declare.Type.Struct {
-		if k == node.ExtendName {
-			return v
-		}
-	}
-	return nil
-}
-
 func newStruct(
 	ctx *Context,
 	node *mTypes.Node,
@@ -314,6 +305,16 @@ func newStruct(
 	return structPtr
 
 }
+
+func getExtendedType(ctx *Context, node *mTypes.Node) *mTypes.StructType {
+	for k, v := range ctx.prog.Declare.Type.Struct {
+		if k == node.ExtendName {
+			return v
+		}
+	}
+	return nil
+}
+
 func (ctx *Context) genVarDeclare(node *mTypes.Node) value.Value {
 	if node.Val == "main" {
 		// means declaring main function regarded as entrypoint
@@ -415,7 +416,7 @@ func (ctx *Context) genVarDeclare(node *mTypes.Node) value.Value {
 
 func (ctx *Context) genStructTypeDeclare(node *mTypes.Node) {
 	var typsArr []types.Type
-	structField := map[string]mTypes.PreludeStructFields{}
+	structField := map[string]mTypes.StructTypeField{}
 	var pos uint64 = 0
 	structType := types.NewStruct()
 	structType.SetName(node.Val)
@@ -439,10 +440,10 @@ func (ctx *Context) genStructTypeDeclare(node *mTypes.Node) {
 	}
 
 	if ctx.prog.Declare.Type.Struct == nil {
-		ctx.prog.Declare.Type.Struct = map[string]*mTypes.PreludeStruct{}
+		ctx.prog.Declare.Type.Struct = map[string]*mTypes.StructType{}
 	}
 
-	ctx.prog.Declare.Type.Struct[node.Val] = &mTypes.PreludeStruct{
+	ctx.prog.Declare.Type.Struct[node.Val] = &mTypes.StructType{
 		Name:  node.Val,
 		Field: structField,
 		Types: structType,
@@ -730,6 +731,9 @@ func constructModule(prog *mTypes.Program, internal *mTypes.Internal) *ir.Module
 	declareInternal(module, internal)
 	prog.Prelude = &mTypes.PreludeProps{}
 	declarePrelude(module, prog.Prelude)
+	prog.Declare.Type = &mTypes.ExtendedTypes{}
+	prog.Declare.Type.Struct = map[string]*mTypes.StructType{}
+	prog.Declare.Type.LLVM = map[string]*types.Type{}
 
 	for declare := prog.Declare.Func; declare != nil; declare = declare.Next {
 		c := &Context{

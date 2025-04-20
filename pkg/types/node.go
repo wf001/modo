@@ -241,9 +241,9 @@ func (node *Node) debugRecursive(depth int) {
 }
 
 func (prog *Program) Debug(depth int) {
-	if prog.Declares != nil {
+	if prog.Declare.Func != nil {
 		log.DebugMessage("[Declares]")
-		prog.Declares.debugRecursive(0)
+		prog.Declare.Func.debugRecursive(0)
 	}
 
 }

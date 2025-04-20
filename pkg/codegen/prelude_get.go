@@ -70,9 +70,9 @@ func getStruct(ctx *Context, n *mTypes.Node) value.Value {
 	tyPtr, _ := n.IRValue.Type().(*types.PointerType)
 	tyStr, _ := tyPtr.ElemType.(*types.StructType)
 
-	specifiedFields := ctx.prog.DeclaredType[tyStr.TypeName].Field[n.Next.Val]
+	specifiedFields := ctx.prog.Declare.Type.Struct[tyStr.TypeName].Field[n.Next.Val]
 	i := specifiedFields.Pos
-	structeType, elemType := ctx.prog.DeclaredType[tyStr.TypeName].Types, specifiedFields.Type
+	structeType, elemType := ctx.prog.Declare.Type.Struct[tyStr.TypeName].Types, specifiedFields.Type
 
 	targetStructPtr := n.IRValue
 
@@ -91,8 +91,11 @@ func PreludeGet(ctx *Context, n *mTypes.Node) value.Value {
 	tyPtr, okPtr := n.IRValue.Type().(*types.PointerType)
 	tyStr, okStr := tyPtr.ElemType.(*types.StructType)
 
-	if okPtr && okStr {
-		for k := range ctx.prog.DeclaredType {
+	if okPtr &&
+		okStr &&
+		ctx.prog.Declare.Type != nil &&
+		ctx.prog.Declare.Type.Struct != nil {
+		for k := range ctx.prog.Declare.Type.Struct {
 			if k == tyStr.TypeName {
 				return getStruct(ctx, n)
 			}

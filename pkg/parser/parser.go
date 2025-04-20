@@ -339,7 +339,7 @@ func parseDeclare(tok *mTypes.Token, parentKind mTypes.NodeKind) (*mTypes.Token,
 
 func parseProgram(tok *mTypes.Token) *mTypes.Program {
 	p := &mTypes.Program{}
-	prevDeclare := p.Declares
+	prevDeclare := p.Declare.Func
 
 	for tok != nil && tok.IsKindAndVal(mTypes.TK_PAREN, mTypes.PARREN_OPEN) {
 
@@ -348,8 +348,8 @@ func parseProgram(tok *mTypes.Token) *mTypes.Program {
 		}
 
 		if prevDeclare == nil {
-			tok, p.Declares = parseDeclare(tok, mTypes.ND_PROGRAM_ROOT)
-			prevDeclare = p.Declares
+			tok, p.Declare.Func = parseDeclare(tok, mTypes.ND_PROGRAM_ROOT)
+			prevDeclare = p.Declare.Func
 		} else {
 			tok, prevDeclare.Next = parseDeclare(tok, mTypes.ND_PROGRAM_ROOT)
 			prevDeclare = prevDeclare.Next

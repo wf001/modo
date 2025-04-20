@@ -62,7 +62,7 @@ func newStrGlobal(ctx *Context, n *mTypes.Node) *ir.InstLoad {
 	)
 	ctx.block.NewStore(strGEP, strPtr)
 	str := ctx.block.NewLoad(types.I8Ptr, strPtr)
-	ctx.prog.DeclaredGlobalVar = append(ctx.prog.DeclaredGlobalVar, str)
+	ctx.prog.Declare.GlobalVar = append(ctx.prog.Declare.GlobalVar, str)
 	return str
 }
 
@@ -262,7 +262,7 @@ func newVectorHeap(ctx *Context, n *mTypes.Node) value.Value {
 }
 
 func getExtendedType(ctx *Context, node *mTypes.Node) *mTypes.PreludeStruct {
-	for k, v := range ctx.prog.DeclaredType {
+	for k, v := range ctx.prog.Declare.Type.Struct {
 		if k == node.TypeExtended {
 			return v
 		}
@@ -440,7 +440,7 @@ func (ctx *Context) genVarReference(node *mTypes.Node) value.Value {
 	}
 
 	// find in global variable which is declared with def
-	for declare := ctx.prog.Declares; declare != nil; declare = declare.Next {
+	for declare := ctx.prog.Declare.Func; declare != nil; declare = declare.Next {
 		if declare.Child.Val == node.Val {
 			return ctx.block.NewCall(declare.Child.FuncPtr)
 		}
@@ -578,11 +578,15 @@ func (ctx *Context) genDeclareStructType(
 	structType.SetName(node.Val)
 	ctx.mod.NewTypeDef(node.Val, structType)
 
-	if ctx.prog.DeclaredType == nil {
-		ctx.prog.DeclaredType = map[string]*mTypes.PreludeStruct{}
+	if ctx.prog.Declare.Type == nil {
+		ctx.prog.Declare.Type = &mTypes.ExtendedTypes{}
 	}
 
-	ctx.prog.DeclaredType[node.Val] = &mTypes.PreludeStruct{
+	if ctx.prog.Declare.Type.Struct == nil {
+		ctx.prog.Declare.Type.Struct = map[string]*mTypes.PreludeStruct{}
+	}
+
+	ctx.prog.Declare.Type.Struct[node.Val] = &mTypes.PreludeStruct{
 		Name:  node.Val,
 		Field: structField,
 		Types: structType,
@@ -719,7 +723,7 @@ func constructModule(prog *mTypes.Program, internal *mTypes.Internal) *ir.Module
 	prog.Prelude = &mTypes.PreludeProps{}
 	declarePrelude(module, prog.Prelude)
 
-	for declare := prog.Declares; declare != nil; declare = declare.Next {
+	for declare := prog.Declare.Func; declare != nil; declare = declare.Next {
 		c := &Context{
 			mod:      module,
 			prog:     prog,

@@ -10,20 +10,17 @@ import (
 )
 
 type Program struct {
-	Declares          *Node // Note: separate local, global, type(either struct-type or types.Type)
-	Prelude           *PreludeProps
-	DeclaredGlobalVar []*ir.InstLoad
-	DeclaredType      map[string]*PreludeStruct
+	Declare DeclareProps
+	Prelude *PreludeProps
 }
 
-// currently NOT USED
-type declare struct {
-	Func *Node
-	Var  []*ir.InstLoad
-	Type *Types
+type DeclareProps struct {
+	Func      *Node
+	GlobalVar []*ir.InstLoad
+	Type      *ExtendedTypes
 }
 
-type Types struct {
+type ExtendedTypes struct {
 	Struct map[string]*PreludeStruct
 	LLVM   map[string]*types.Type
 }
@@ -64,13 +61,13 @@ type GlobalConst struct {
 }
 
 type PreludeStruct struct {
-	Name  string                         // defined with type declaration
-	Field map[string]PreludeStructFields // defined with type declaration
-	Types *types.StructType              // defined with type declaration
+	Name  string
+	Field map[string]PreludeStructFields
+	Types *types.StructType
 }
 
 type PreludeStructFields struct {
-	Pos  uint64 // defined with type declaration
+	Pos  uint64
 	Type types.Type
 }
 

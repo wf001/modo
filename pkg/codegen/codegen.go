@@ -295,23 +295,23 @@ func newStruct(
 	rawPtr := ctx.block.NewCall(ctx.internal.Cstd.Malloc, mallocSize)
 
 	// bitcast i8* → %struct*
-	personPtr := ctx.block.NewBitCast(rawPtr, types.NewPointer(structCtx.Types))
+	structPtr := ctx.block.NewBitCast(rawPtr, types.NewPointer(structCtx.Types))
 
 	for n := node.Child; n != nil; n = n.Next.Next {
-		key := n
+		field := n
 		value := n.Next
 
 		namePtr := ctx.block.NewGetElementPtr(
 			structCtx.Types,
-			personPtr,
+			structPtr,
 			constant.NewInt(types.I32, 0), // first element
-			constant.NewInt(types.I32, int64(structCtx.Field[key.Val].Pos)), // name field
+			constant.NewInt(types.I32, int64(structCtx.Field[field.Val].Pos)), // name field
 		)
 		v := ctx.gen(value)
 		ctx.block.NewStore(v, namePtr)
 
 	}
-	return personPtr
+	return structPtr
 
 }
 func (ctx *Context) genVarDeclare(node *mTypes.Node) value.Value {

@@ -63,8 +63,9 @@ func parseIdent(
 
 		identName := tok.Val
 		typeCur := &mTypes.Node{}
-		typeHead := typeCur
+		typeList := typeCur
 
+		// create linked-list(typeHead) which have TYPE and ElemType
 		if tok.Next.IsKind(mTypes.TK_TYPE_SIG) {
 			tok = tok.Next.Next
 			for {
@@ -89,31 +90,34 @@ func parseIdent(
 			log.Panic("must be :: :have %+v", tok)
 		}
 
+		// this parseDeclare which parse all of child expression  may return node which have Args
 		tok, head = parseDeclare(tok, mTypes.ND_VAR_DECLARE)
 		if head.Args != nil {
-			for a := head.Args; a != nil; a = a.Next {
-				if typeHead.Type == "" {
-					log.Panic("type required :have %+v, %+v", typeCur, a)
+			for nodeArg := head.Args; nodeArg != nil; nodeArg = nodeArg.Next {
+				if typeList.Type == "" {
+					log.Panic("type required :have %+v, %+v", typeCur, nodeArg)
 				}
-				// Note: so buggy what's a and typeHead?
-				a.Type = typeHead.Type
-				a.ElemType = typeHead.ElemType
-				typeHead = typeHead.Next
+				// set Args.Type with correspond linked-list Type
+				nodeArg.Type = typeList.Type
+				nodeArg.ElemType = typeList.ElemType
+				typeList = typeList.Next
 			}
 
 		}
 
-		child := newNodeParent(mTypes.ND_VAR_DECLARE, head, identName)
-		child.Type = typeHead.Type
+		// wrap ND_LAMBDA by ND_VAR_DECLARE
+		lambdaNode := newNodeParent(mTypes.ND_VAR_DECLARE, head, identName)
 		// HACK: seems buggy
-		child.ElemType = typeHead.ElemType
-		child.ExtendName = typeHead.ExtendName
-		if child.Child.Kind == mTypes.ND_COLLECTION {
-			child.Child.Type = typeHead.Type
-			child.Child.ElemType = typeHead.ElemType
-			child.Child.ExtendName = typeHead.ExtendName
+		// the last element of typeList must be return type of function
+		lambdaNode.Type = typeList.Type
+		lambdaNode.ElemType = typeList.ElemType
+		lambdaNode.ExtendName = typeList.ExtendName
+		if lambdaNode.Child.Kind == mTypes.ND_COLLECTION {
+			lambdaNode.Child.Type = typeList.Type
+			lambdaNode.Child.ElemType = typeList.ElemType
+			lambdaNode.Child.ExtendName = typeList.ExtendName
 		}
-		return tok, child
+		return tok, lambdaNode
 
 	} else {
 		log.DebugValueColored("is Variable reference :have %+v", tok)
@@ -155,8 +159,6 @@ func parseLambda(tok *mTypes.Token, head *mTypes.Node) (*mTypes.Token, *mTypes.N
 
 // NOTE: typed at here: ND_SCALAR, ND_VAR_DECLARE, ND_VAR_REFERENCE(Args), ND_EQ, ND_ADD
 func parseDeclare(tok *mTypes.Token, parentKind mTypes.NodeKind) (*mTypes.Token, *mTypes.Node) {
-	// Note: no need
-	//log.Debug(log.GREEN(fmt.Sprintf("%+v", tok)))
 	head := &mTypes.Node{}
 
 	if tok.IsKindAndVal(mTypes.TK_PAREN, mTypes.PARREN_OPEN) {
@@ -165,7 +167,7 @@ func parseDeclare(tok *mTypes.Token, parentKind mTypes.NodeKind) (*mTypes.Token,
 		if tok.IsKind(mTypes.TK_DECLARE_VAR) {
 			tok, head = parseDeclare(tok.Next, mTypes.ND_DECLARE)
 			// A child of ND_DECLARE must be either value(such as string, int, vector) or lambda
-			// In case of value, grant it as global scope variable
+			// In case of value, treat it as global scope variable
 			if head.Kind == mTypes.ND_VAR_DECLARE && head.Child.Kind != mTypes.ND_LAMBDA {
 				head.Child.IsGlobal = true
 			}

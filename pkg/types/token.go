@@ -98,19 +98,26 @@ func (tok *Token) IsKindType() bool {
 // conversion llir/llvm properties to other properties
 // ==============
 
-func GetModoType(k SyntaxRole) (*NodeType, bool) {
-	var typeMap = map[string]ModoType{
+func GetModoType(tkkind *TokenKind) (*NodeType, bool) {
+	var scalarType = map[string]ModoType{
 		TK_TYPE_INT:      TY_INT32,
 		TK_TYPE_STR:      TY_STR,
 		TK_TYPE_NIL:      TY_NIL,
 		TK_TYPE_BOOL:     TY_BOOL,
-		TK_TYPE_VECTOR:   TY_VECTOR,
-		TK_TYPE_STRUCT:   TY_STRUCT,
 		TK_TYPE_EXTENDED: TY_EXTENDED,
 	}
+	var collType = map[string]ModoType{
+		TK_TYPE_VECTOR: TY_VECTOR,
+		TK_TYPE_STRUCT: TY_STRUCT,
+	}
 
-	if kind, exists := typeMap[k]; exists {
+	if kind, isScalar := scalarType[tkkind.Value]; isScalar {
 		return &NodeType{Value: kind}, true
+	}
+
+	if parentKind, isColl := collType[tkkind.Value]; isColl {
+		childType, _ := GetModoType(tkkind.Child)
+		return &NodeType{Value: parentKind, Child: childType}, true
 	}
 
 	return &NodeType{Value: ""}, false

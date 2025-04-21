@@ -56,7 +56,7 @@ func (n *NodeType) String() string {
 
 	if n.Child != nil {
 		return fmt.Sprintf(
-			"{Value: %s, ExtendName: %s, Child: %s}",
+			"{Value: '%s', ExtendName: '%s', Child: '%s'}",
 			n.Value,
 			n.ExtendName,
 			n.Child,
@@ -64,7 +64,7 @@ func (n *NodeType) String() string {
 	}
 
 	return fmt.Sprintf(
-		"{Value: %s, ExtendName: %s}",
+		"{Value: '%s', ExtendName: '%s'}",
 		n.Value,
 		n.ExtendName,
 	)
@@ -188,6 +188,11 @@ func GetLLVMType(node *Node, prelude *PreludeProps) (types.Type, types.Type, boo
 		TY_INT32: prelude.Types.VectorInt,
 		TY_STR:   prelude.Types.VectorString,
 		TY_BOOL:  prelude.Types.VectorBool,
+	}
+
+	// if extende type including struct type
+	if node.Type.Child == nil {
+		return nil, nil, false
 	}
 
 	collTy, isRootColl := collTypeMap[node.Type.Child.Value]

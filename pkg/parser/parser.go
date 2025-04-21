@@ -79,7 +79,9 @@ func parseIdent(
 				if typeCur.Type.Value == mTypes.TY_EXTENDED {
 					typeCur.Type.ExtendName = tok.Val
 				}
-				typeCur.Type.Child, _ = mTypes.GetModoType(tok.ChildKind)
+				if tok.ChildKind != "" {
+					typeCur.Type.Child, _ = mTypes.GetModoType(tok.ChildKind)
+				}
 				typeCur.Next = &mTypes.Node{}
 				typeCur = typeCur.Next
 
@@ -111,9 +113,7 @@ func parseIdent(
 		// HACK: seems buggy
 		// the last element of typeList must be return type of function
 		lambdaNode.Type = typeList.Type
-		lambdaNode.Type = typeList.Type
 		if lambdaNode.Child.Kind == mTypes.ND_COLLECTION {
-			lambdaNode.Child.Type = typeList.Type
 			lambdaNode.Child.Type = typeList.Type
 		}
 		return tok, lambdaNode

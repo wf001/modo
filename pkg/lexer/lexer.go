@@ -71,9 +71,9 @@ func newTokenPattern() *tokenPattern {
 	return head
 }
 
-func newToken(kind mTypes.TokenKind, prev *mTypes.Token, val string) *mTypes.Token {
+func newToken(kind mTypes.SyntaxRole, prev *mTypes.Token, val string) *mTypes.Token {
 	tok := &mTypes.Token{
-		Kind: kind,
+		Kind: &mTypes.TokenKind{Value: kind},
 		Val:  val,
 	}
 	prev.Next = tok
@@ -97,7 +97,7 @@ func accurateNilType(head *mTypes.Token) {
 	for t := head.Next; t.Next != nil; t = t.Next {
 		if !(t.IsKind(mTypes.TK_TYPE_ARROW) || t.IsKind(mTypes.TK_TYPE_SIG)) &&
 			t.Next.IsKind(mTypes.TK_TYPE_NIL) {
-			t.Next.Kind = mTypes.TK_NIL
+			t.Next.Kind = &mTypes.TokenKind{Value: mTypes.TK_NIL}
 		}
 	}
 }
@@ -105,10 +105,10 @@ func accurateStructType(head *mTypes.Token) {
 	for t := head.Next; t.Next != nil; t = t.Next {
 		// The token following defschema is treated as TK_TYPE_EXTENDED not TK_IDENT
 		if t.IsKind(mTypes.TK_DECLARE_TYPE) && t.Next.IsKind(mTypes.TK_IDENT) {
-			t.Next.Kind = mTypes.TK_TYPE_STRUCT
+			t.Next.Kind = &mTypes.TokenKind{Value: mTypes.TK_TYPE_STRUCT}
 		}
 		if t.IsKind(mTypes.TK_TYPE_SIG) && t.Next.IsKind(mTypes.TK_IDENT) {
-			t.Next.Kind = mTypes.TK_TYPE_EXTENDED
+			t.Next.Kind = &mTypes.TokenKind{Value: mTypes.TK_TYPE_EXTENDED}
 		}
 	}
 
@@ -149,7 +149,7 @@ func doLexicalAnalyse(splittedString []string) *mTypes.Token {
 				isNumber := numRe.MatchString(p)
 				if !isNumber {
 					log.Debug(log.YELLOW("change token kind to TY_IDENT: %#+v"), prev)
-					prev.Kind = mTypes.TK_IDENT
+					prev.Kind = &mTypes.TokenKind{Value: mTypes.TK_IDENT}
 				}
 
 			}
@@ -160,7 +160,7 @@ func doLexicalAnalyse(splittedString []string) *mTypes.Token {
 
 				for _, match := range matches {
 					if tokenType, matched := tokenMap.matchTokenType(match[1]); matched {
-						prev.ChildKind = tokenType
+						prev.Kind.Child = &mTypes.TokenKind{Value: tokenType}
 					}
 				}
 			}

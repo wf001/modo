@@ -74,13 +74,13 @@ func parseIdent(
 				if !tok.IsKindType() {
 					break
 				}
-				ty, _ := mTypes.GetModoType(tok.Kind)
+				ty, _ := mTypes.GetModoType(tok.Kind.Value)
 				typeCur.Type = ty
 				if typeCur.Type.Value == mTypes.TY_EXTENDED {
 					typeCur.Type.ExtendName = tok.Val
 				}
-				if tok.ChildKind != "" {
-					typeCur.Type.Child, _ = mTypes.GetModoType(tok.ChildKind)
+				if tok.Kind.Child != nil {
+					typeCur.Type.Child, _ = mTypes.GetModoType(tok.Kind.Child.Value)
 				}
 				typeCur.Next = &mTypes.Node{}
 				typeCur = typeCur.Next
@@ -202,7 +202,7 @@ func parseDeclare(tok *mTypes.Token, parentKind mTypes.NodeKind) (*mTypes.Token,
 				}
 
 				tok = tok.Next
-				structElemType, _ := mTypes.GetModoType(tok.Kind)
+				structElemType, _ := mTypes.GetModoType(tok.Kind.Value)
 				// Note: Kind needed?
 				structTy := &mTypes.Node{
 					Val:  structElmeName,

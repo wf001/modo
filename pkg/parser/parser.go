@@ -68,6 +68,7 @@ func parseIdent(
 		log.DebugValueColored("is Variable declaration :have %s", tok)
 
 		identName := tok.Val
+		// HACK: change other local struct
 		typeCur := &mTypes.Node{}
 		typeList := typeCur
 
@@ -112,15 +113,26 @@ func parseIdent(
 
 		}
 
-		// wrap ND_LAMBDA by ND_VAR_DECLARE
-		lambdaNode := newNodeParent(mTypes.ND_VAR_DECLARE, head, identName)
+		// wrap ND_LAMBDA/ND_VAR_REFERENCE by ND_VAR_DECLARE
+		varDeclareNode := newNodeParent(mTypes.ND_VAR_DECLARE, head, identName)
 		// HACK: seems buggy
 		// the last element of typeList must be return type of function
-		lambdaNode.Type = typeList.Type
-		if lambdaNode.Child.Kind == mTypes.ND_COLLECTION {
-			lambdaNode.Child.Type = typeList.Type
+		varDeclareNode.Type = typeList.Type
+
+		varDecChild := varDeclareNode.Child
+		tlType := typeList.Type
+
+		// type ND_COLLECTION recursively
+		for varDecChild.Kind == mTypes.ND_COLLECTION {
+			varDecChild.Type = tlType
+			if varDecChild.Next == nil {
+				tlType = tlType.Child
+				varDecChild = varDecChild.Child
+			} else {
+				varDecChild = varDecChild.Next
+			}
 		}
-		return tok, lambdaNode
+		return tok, varDeclareNode
 
 	} else {
 		log.DebugValueColored("is Variable reference :have %+v", tok)

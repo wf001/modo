@@ -327,7 +327,8 @@ func parseDeclare(tok *mTypes.Token, parentKind mTypes.NodeKind) (*mTypes.Token,
 
 		// means vector value
 	} else if tok.IsKindAndVal(mTypes.TK_PAREN, mTypes.BRACKET_OPEN) {
-		tok, rootNode := parseBody(tok, mTypes.ND_COLLECTION, "")
+		t, rootNode := parseBody(tok, mTypes.ND_COLLECTION, "")
+		tok = t
 		if !tok.IsKindAndVal(mTypes.TK_PAREN, mTypes.BRACKET_CLOSE) {
 			log.Panic("vector must be closed with bracket :have %+v", tok)
 		}

@@ -59,7 +59,7 @@ func (n *NodeType) String() string {
 			"{Value: \"%s\", ExtendName: \"%s\", Child: \"%s\" }",
 			n.Value,
 			n.ExtendName,
-			n.Child,
+			n.Child.String(),
 		)
 	}
 

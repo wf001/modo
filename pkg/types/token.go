@@ -48,7 +48,7 @@ func (t *TokenKind) String() string {
 		return fmt.Sprintf(
 			"{Value:\"%s\", Child: \"%s\" }",
 			t.Value,
-			t.Child.Value,
+			t.Child.String(),
 		)
 
 	}

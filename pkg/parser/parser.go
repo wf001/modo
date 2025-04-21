@@ -28,15 +28,19 @@ func parseExprs(
 	exprKind mTypes.NodeKind,
 ) (*mTypes.Token, *mTypes.Node) {
 
+	var isScalarOrFunc = func(token *mTypes.Token) bool {
+		return token.IsKind(mTypes.TK_INT) ||
+			token.IsKind(mTypes.TK_STR) ||
+			token.IsKind(mTypes.TK_BOOL) ||
+			token.IsKind(mTypes.TK_IDENT) ||
+			token.IsKindAndVal(mTypes.TK_PAREN, mTypes.PARREN_OPEN) ||
+			token.IsKindAndVal(mTypes.TK_PAREN, mTypes.BRACKET_OPEN)
+	}
+
 	nextToken, argHead := parseDeclare(rootToken, exprKind)
 	prevNode := argHead
 	// NOTE: what means?
-	for nextToken.IsKind(mTypes.TK_INT) ||
-		nextToken.IsKind(mTypes.TK_STR) ||
-		nextToken.IsKind(mTypes.TK_BOOL) ||
-		nextToken.IsKind(mTypes.TK_IDENT) ||
-		nextToken.IsKindAndVal(mTypes.TK_PAREN, mTypes.PARREN_OPEN) {
-
+	for isScalarOrFunc(nextToken) {
 		nextToken, prevNode.Next = parseDeclare(nextToken, exprKind)
 		prevNode = prevNode.Next
 	}

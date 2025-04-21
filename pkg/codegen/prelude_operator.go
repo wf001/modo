@@ -50,7 +50,7 @@ func PreludeMod(ctx *Context, node *mTypes.Node) value.Value {
 func PreludeEq(ctx *Context, node *mTypes.Node) value.Value {
 	// In case of comparing InstCall, compare the value itself by strcmp, not the address.
 	_, ok := node.IRValue.(*ir.InstCall)
-	if ok && node.Type == mTypes.TY_STR {
+	if ok && node.Type != nil && node.Type.Value == mTypes.TY_STR {
 		fst := node.IRValue
 
 		node = node.Next

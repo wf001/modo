@@ -99,10 +99,13 @@ func (node *Node) IsKind(kind NodeKind) bool {
 }
 
 func (node *Node) IsType(ty ModoType) bool {
-	return node.Type == ty
+	return node.Type.Value == ty
 }
 
 func (node *Node) IsScalar() bool {
+	if node.Type == nil {
+		return false
+	}
 	return node.IsType(TY_INT32) ||
 		node.IsType(TY_BOOL) ||
 		node.IsType(TY_STR) ||
@@ -166,7 +169,7 @@ func GetLLVMType(node *Node, prelude *PreludeProps) (types.Type, types.Type, boo
 		TY_NIL:   types.Void,
 	}
 
-	scalarTy, isRootScalar := scalarTypeMap[node.Type]
+	scalarTy, isRootScalar := scalarTypeMap[node.Type.Value]
 	if isRootScalar {
 		return nil, scalarTy, true
 	}
@@ -178,10 +181,10 @@ func GetLLVMType(node *Node, prelude *PreludeProps) (types.Type, types.Type, boo
 		TY_BOOL:  prelude.Types.VectorBool,
 	}
 
-	collTy, isRootColl := collTypeMap[node.ElemType]
-	scalarTy, isElemScalar := scalarTypeMap[node.ElemType]
+	collTy, isRootColl := collTypeMap[node.Type.Value]
+	scalarTy, isElemScalar := scalarTypeMap[node.Type.Value]
 
-	if node.Type == TY_VECTOR {
+	if node.Type.Value == TY_VECTOR {
 		if isRootColl && isElemScalar {
 			return collTy, scalarTy, true
 		}

@@ -16,8 +16,10 @@ func newNodeParent(kind mTypes.NodeKind, child *mTypes.Node, val string) *mTypes
 func newNodeScalar(ty mTypes.ModoType, val string) *mTypes.Node {
 	return &mTypes.Node{
 		Kind: mTypes.ND_SCALAR,
-		Type: ty,
-		Val:  val,
+		Type: &mTypes.NodeType{
+			Value: ty,
+		},
+		Val: val,
 	}
 }
 
@@ -74,10 +76,9 @@ func parseIdent(
 				}
 				ty, _ := mTypes.GetModoType(tok.Kind)
 				typeCur.Type = ty
-				if typeCur.Type == mTypes.TY_EXTENDED {
-					typeCur.ExtendName = tok.Val
+				if typeCur.Type.Value == mTypes.TY_EXTENDED {
+					typeCur.Type.ExtendName = tok.Val
 				}
-				typeCur.ElemType, _ = mTypes.GetModoType(tok.ChildKind)
 				typeCur.Next = &mTypes.Node{}
 				typeCur = typeCur.Next
 
@@ -94,12 +95,11 @@ func parseIdent(
 		tok, head = parseDeclare(tok, mTypes.ND_VAR_DECLARE)
 		if head.Args != nil {
 			for nodeArg := head.Args; nodeArg != nil; nodeArg = nodeArg.Next {
-				if typeList.Type == "" {
+				if typeList.Type == nil {
 					log.Panic("type required :have %+v, %+v", typeCur, nodeArg)
 				}
 				// set Args.Type with correspond linked-list Type
 				nodeArg.Type = typeList.Type
-				nodeArg.ElemType = typeList.ElemType
 				typeList = typeList.Next
 			}
 
@@ -110,12 +110,10 @@ func parseIdent(
 		// HACK: seems buggy
 		// the last element of typeList must be return type of function
 		lambdaNode.Type = typeList.Type
-		lambdaNode.ElemType = typeList.ElemType
-		lambdaNode.ExtendName = typeList.ExtendName
+		lambdaNode.Type = typeList.Type
 		if lambdaNode.Child.Kind == mTypes.ND_COLLECTION {
 			lambdaNode.Child.Type = typeList.Type
-			lambdaNode.Child.ElemType = typeList.ElemType
-			lambdaNode.Child.ExtendName = typeList.ExtendName
+			lambdaNode.Child.Type = typeList.Type
 		}
 		return tok, lambdaNode
 
@@ -186,7 +184,7 @@ func parseDeclare(tok *mTypes.Token, parentKind mTypes.NodeKind) (*mTypes.Token,
 			varDeclare := &mTypes.Node{
 				Kind: mTypes.ND_TYPE_DECLARE,
 				Val:  structName,
-				Type: mTypes.TY_STRUCT,
+				Type: &mTypes.NodeType{Value: mTypes.TY_STRUCT},
 			}
 			head.Child = varDeclare
 

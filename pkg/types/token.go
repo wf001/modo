@@ -80,7 +80,7 @@ func (tok *Token) IsKindType() bool {
 // conversion llir/llvm properties to other properties
 // ==============
 
-func GetModoType(k TokenKind) (ModoType, bool) {
+func GetModoType(k TokenKind) (*NodeType, bool) {
 	var typeMap = map[string]ModoType{
 		TK_TYPE_INT:      TY_INT32,
 		TK_TYPE_STR:      TY_STR,
@@ -92,10 +92,10 @@ func GetModoType(k TokenKind) (ModoType, bool) {
 	}
 
 	if kind, exists := typeMap[k]; exists {
-		return kind, true
+		return &NodeType{Value: kind}, true
 	}
 
-	return "", false
+	return &NodeType{Value: ""}, false
 }
 
 // ==============

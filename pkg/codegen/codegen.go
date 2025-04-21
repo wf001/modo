@@ -308,7 +308,7 @@ func newStruct(
 
 func getExtendedType(ctx *Context, node *mTypes.Node) *mTypes.StructType {
 	for k, v := range ctx.prog.Declare.Type.Struct {
-		if k == node.ExtendName {
+		if k == node.Type.ExtendName {
 			return v
 		}
 	}

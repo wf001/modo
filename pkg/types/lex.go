@@ -108,7 +108,7 @@ var (
 		SYMBOL_TYPE_NIL,
 		SYMBOL_TYPE_BOOL,
 	)
-	SYMBOL_TYPE_VECTOR = `\[+(\w+)\]+`
+	SYMBOL_TYPE_VECTOR = fmt.Sprintf(`\[+(%s)\]+`, SYMBOL_TYPE_SCALAR)
 
 	TYPE_REG_EXP = fmt.Sprintf(
 		"(%s|%s|%s|%s)",

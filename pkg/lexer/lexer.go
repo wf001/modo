@@ -155,24 +155,23 @@ func doLexicalAnalyse(splittedString []string) *mTypes.Token {
 			}
 			// when token is vector, set element type of the vector
 			if prev.IsKind(mTypes.TK_TYPE_VECTOR) {
-				// [[int]] のような文字列にマッチする
 				vecRe := regexp.MustCompile(`^\[+(\w+)\]+$`)
 				matches := vecRe.FindStringSubmatch(prev.Val)
 
 				if len(matches) == 2 {
-					baseType := matches[1] // 例: "int"
-					openBrackets := strings.Count(prev.Val, "[")
+					baseType := matches[1] // eg. "int"
+					openBracketsCount := strings.Count(prev.Val, "[")
 					tokenType, matched := tokenMap.matchTokenType(baseType)
 					if matched {
-						// 最も内側のTokenKindから構築していく
+						// Build from the innermost TokenKind
 						child := &mTypes.TokenKind{Value: tokenType}
-						for i := 0; i < openBrackets; i++ {
+						for i := 0; i < openBracketsCount; i++ {
 							child = &mTypes.TokenKind{
 								Value: mTypes.TK_TYPE_VECTOR,
 								Child: child,
 							}
 						}
-						prev.Kind.Child = child.Child // prev はすでに vector なので、Child に設定
+						prev.Kind.Child = child.Child
 					}
 				}
 			}

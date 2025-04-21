@@ -56,7 +56,7 @@ func (n *NodeType) String() string {
 
 	if n.Child != nil {
 		return fmt.Sprintf(
-			"{Value: '%s', ExtendName: '%s', Child: '%s'}",
+			"{Value: \"%s\", ExtendName: \"%s\", Child: \"%s\" }",
 			n.Value,
 			n.ExtendName,
 			n.Child,
@@ -64,7 +64,7 @@ func (n *NodeType) String() string {
 	}
 
 	return fmt.Sprintf(
-		"{Value: '%s', ExtendName: '%s'}",
+		"{Value: \"%s\", ExtendName: \"%s\" }",
 		n.Value,
 		n.ExtendName,
 	)

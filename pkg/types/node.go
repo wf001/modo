@@ -54,6 +54,15 @@ type NodeType struct {
 
 func (n *NodeType) String() string {
 
+	if n.Child != nil {
+		return fmt.Sprintf(
+			"{Value: %s, ExtendName: %s, Child: %s}",
+			n.Value,
+			n.ExtendName,
+			n.Child,
+		)
+	}
+
 	return fmt.Sprintf(
 		"{Value: %s, ExtendName: %s}",
 		n.Value,
@@ -181,8 +190,8 @@ func GetLLVMType(node *Node, prelude *PreludeProps) (types.Type, types.Type, boo
 		TY_BOOL:  prelude.Types.VectorBool,
 	}
 
-	collTy, isRootColl := collTypeMap[node.Type.Value]
-	scalarTy, isElemScalar := scalarTypeMap[node.Type.Value]
+	collTy, isRootColl := collTypeMap[node.Type.Child.Value]
+	scalarTy, isElemScalar := scalarTypeMap[node.Type.Child.Value]
 
 	if node.Type.Value == TY_VECTOR {
 		if isRootColl && isElemScalar {

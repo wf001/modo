@@ -79,6 +79,7 @@ func parseIdent(
 				if typeCur.Type.Value == mTypes.TY_EXTENDED {
 					typeCur.Type.ExtendName = tok.Val
 				}
+				typeCur.Type.Child, _ = mTypes.GetModoType(tok.ChildKind)
 				typeCur.Next = &mTypes.Node{}
 				typeCur = typeCur.Next
 

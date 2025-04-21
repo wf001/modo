@@ -1,10 +1,10 @@
 <div align="center">
 <picture align="center">
   <!-- ダークテーマ用 -->
-  <source srcset="https://github.com/wf001/mkdirp.com/blob/dev/project/modo/static/logo_large_dark.png" media="(prefers-color-scheme: dark)" />
+  <source srcset="https://raw.githubusercontent.com/wf001/mkdirp.com/refs/heads/dev/project/modo/static/logo_large_light.svg" width="70%" media="(prefers-color-scheme: dark)" />
   
   <!-- ライトテーマ用（デフォルト） -->
-  <img src="https://github.com/wf001/mkdirp.com/blob/dev/project/modo/static/logo_large_light.png" alt="Logo" />
+  <img src="https://raw.githubusercontent.com/wf001/mkdirp.com/refs/heads/dev/project/modo/static/logo_large_dark.svg" width="70%" alt="Logo" />
 </picture>
 </div>
 

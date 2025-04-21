@@ -46,36 +46,47 @@ const (
 	TY_EXTENDED = ModoType("TY_EXTENDED")
 )
 
-type Node struct {
-	Kind       NodeKind
-	Next       *Node
-	Type       ModoType
+type NodeType struct {
+	Value      ModoType
 	ExtendName string
-	ElemType   ModoType
-	Child      *Node
-	Cond       *Node
-	CondRet    *ir.InstAlloca
-	Then       *Node
-	Else       *Node
-	Val        string
-	Len        uint64 // the number of bytes, used with string type
-	Bind       *Node
-	Args       *Node
-	IsGlobal   bool
-	FuncPtr    *ir.Func    // declared function, library function
-	IRValue    value.Value //
+	Child      *NodeType
+}
+
+func (n *NodeType) String() string {
+
+	return fmt.Sprintf(
+		"{Value: %s, ExtendName: %s}",
+		n.Value,
+		n.ExtendName,
+	)
+}
+
+type Node struct {
+	Kind     NodeKind
+	Next     *Node
+	Type     *NodeType
+	Child    *Node
+	Cond     *Node
+	CondRet  *ir.InstAlloca
+	Then     *Node
+	Else     *Node
+	Val      string
+	Len      uint64 // the number of bytes, used with string type
+	Bind     *Node
+	Args     *Node
+	IsGlobal bool
+	FuncPtr  *ir.Func    // declared function, library function
+	IRValue  value.Value //
 }
 
 func (n *Node) String() string {
 
 	return fmt.Sprintf(
-		"{Kind:%#+v, Val:%#+v, Type:%#+v, ExtendName:%#+v, Len:%d, ElemType:%#+v}",
+		"{Kind:%#+v, Val:%#+v, Type:%s,  Len:%d}",
 		n.Kind,
 		n.Val,
 		n.Type,
-		n.ExtendName,
 		n.Len,
-		n.ElemType,
 	)
 }
 

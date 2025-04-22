@@ -224,7 +224,8 @@ func newVectorHeap(ctx *Context, n *mTypes.Node) value.Value {
 		vecContent = append(vecContent, e.IRValue)
 		vecLength++
 	}
-	structedArrType, elemType, _ := mTypes.GetLLVMType(n, ctx.prog.Prelude)
+	structedArrType, elemType, _ := mTypes.GetLLVMTypeRec(ctx.mod, n.Type, ctx.prog.Prelude)
+	//structedArrType, elemType, _ := mTypes.GetLLVMType(n, ctx.prog.Prelude)
 
 	typeSize := constant.NewInt(types.I64, int64(mTypes.GetBitWidth(elemType)))
 	vecSize := constant.NewInt(types.I64, int64(vecLength))

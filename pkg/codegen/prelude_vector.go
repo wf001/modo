@@ -38,7 +38,6 @@ func declareVectorType(ir *ir.Module, Prelude *mTypes.PreludeProps) {
 
 }
 
-// TODO: stop to use
 func GetLLVMTypeFromString(typeName string, prelude *mTypes.PreludeProps) (types.Type, types.Type) {
 
 	switch typeName {

@@ -125,6 +125,10 @@ func (node *Node) IsScalar() bool {
 // naming
 // ==============
 
+func GetGlobalVarName(s string, m *ir.Module, ndtype *NodeType) string {
+	return fmt.Sprintf(".%s.%d.%p", s, len(m.Globals), ndtype)
+}
+
 func (node *Node) GetUnnamedFuncName() string {
 	return fmt.Sprintf("fn.%s.%p", "unnamed", node)
 }
@@ -167,7 +171,16 @@ func (node *Node) GetNodeSize() uint64 {
 // conversion Node properties to other properties
 // ==============
 
-// Get LLVM type from corresponding Node Type
+func declareVectorType(ir *ir.Module, ty types.Type, ndtype *NodeType) types.Type {
+	// i32 type vector
+	// 型: struct { i32* %arrElm, i64 %len}
+	vectorIntType := types.NewStruct(types.NewPointer(ty), types.I64)
+	typeName := GetGlobalVarName("vec", ir, ndtype)
+	vectorIntType.SetName(typeName)
+	ir.NewTypeDef(typeName, vectorIntType)
+	return vectorIntType
+
+}
 func GetLLVMType(node *Node, prelude *PreludeProps) (types.Type, types.Type, bool) {
 	var scalarTy types.Type
 
@@ -202,6 +215,37 @@ func GetLLVMType(node *Node, prelude *PreludeProps) (types.Type, types.Type, boo
 		if isRootColl && isElemScalar {
 			return collTy, scalarTy, true
 		}
+	}
+
+	return nil, nil, false
+}
+
+// Get LLVM type from corresponding Node Type
+func GetLLVMTypeRec(
+	m *ir.Module,
+	ndtype *NodeType,
+	prelude *PreludeProps,
+) (types.Type, types.Type, bool) {
+	var scalarTy types.Type
+
+	var scalarTypeMap = map[ModoType]types.Type{
+		TY_INT32: types.I32,
+		TY_BOOL:  types.I1,
+		TY_STR:   types.I8Ptr,
+		TY_NIL:   types.Void,
+	}
+
+	scalarTy, isRootScalar := scalarTypeMap[ndtype.Value]
+	if isRootScalar {
+		return scalarTy, nil, true
+	} else if ndtype.Child == nil {
+		return nil, nil, false
+	}
+
+	if ndtype.Value == TY_VECTOR {
+		chidType, _, _ := GetLLVMTypeRec(m, ndtype.Child, prelude)
+		ret := declareVectorType(m, chidType, ndtype)
+		return ret, chidType, true
 	}
 
 	return nil, nil, false

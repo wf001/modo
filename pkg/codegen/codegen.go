@@ -235,11 +235,14 @@ func newVectorHeap(ctx *Context, n *mTypes.Node) value.Value {
 	vecPtr := ctx.block.NewBitCast(allocatedPtr, types.NewPointer(elemType))
 
 	for i, e := range vecContent {
-		if _, ok := elemType.(*types.StructType); ok {
-			elemType = types.NewPointer(elemType)
-		}
 		ptr := ctx.block.NewGetElementPtr(elemType, vecPtr, constant.NewInt(types.I32, int64(i)))
-		ctx.block.NewStore(e, ptr)
+		if _, ok := elemType.(*types.StructType); ok {
+			v := ctx.block.NewLoad(elemType, e)
+			ctx.block.NewStore(v, ptr)
+		} else {
+			ctx.block.NewStore(e, ptr)
+
+		}
 	}
 	vecIntAlloca := ctx.block.NewAlloca(structedArrType)
 

@@ -122,12 +122,12 @@ func prnStructVector(
 	n *mTypes.Node,
 ) {
 	v := n.IRValue
-	structPtrType, _ := v.Type().(*types.PointerType)
-	structType := structPtrType.ElemType.(*types.StructType)
 
-	ty, elemTy := GetLLVMTypeFromString(structType.TypeName, ctx.prog.Prelude)
+	ty := getStructTypeFromPtr(v)
+	elemTy := ty.Fields[0].(*types.PointerType).ElemType
 	formatStr, _ := mTypes.GetPrintFormat(elemTy, ctx.internal)
 	loaded := ctx.block.NewLoad(ty, n.IRValue)
+	loaded.SetName("prn.loaded")
 
 	// 構造体のフィールドから arrPtr と len を取り出す
 	resultArrPtr := ctx.block.NewExtractValue(loaded, 0)

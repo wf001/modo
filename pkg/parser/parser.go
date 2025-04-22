@@ -58,6 +58,19 @@ func parseBody(
 	return nextToken, rootNode
 }
 
+func typeCollectionNode(dec *mTypes.Node, tl *mTypes.NodeType) {
+	if dec.Kind != mTypes.ND_COLLECTION {
+		return
+	}
+
+	for d := dec; d != nil; d = d.Next {
+		d.Type = tl
+		if d.Child != nil {
+			typeCollectionNode(d.Child, tl.Child)
+		}
+	}
+}
+
 // TODO: refactoring
 func parseIdent(
 	tok *mTypes.Token,
@@ -119,19 +132,10 @@ func parseIdent(
 		// the last element of typeList must be return type of function
 		varDeclareNode.Type = typeList.Type
 
+		// type ND_COLLECTION recursively
 		varDecChild := varDeclareNode.Child
 		tlType := typeList.Type
-
-		// type ND_COLLECTION recursively
-		for varDecChild.Kind == mTypes.ND_COLLECTION {
-			varDecChild.Type = tlType
-			if varDecChild.Next == nil {
-				tlType = tlType.Child
-				varDecChild = varDecChild.Child
-			} else {
-				varDecChild = varDecChild.Next
-			}
-		}
+		typeCollectionNode(varDecChild, tlType)
 		return tok, varDeclareNode
 
 	} else {

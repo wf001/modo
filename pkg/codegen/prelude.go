@@ -1,10 +1,8 @@
 package codegen
 
 import (
-	"github.com/llir/llvm/ir"
 	"github.com/llir/llvm/ir/value"
 
-	"github.com/wf001/modo/pkg/log"
 	mTypes "github.com/wf001/modo/pkg/types"
 )
 
@@ -26,9 +24,4 @@ var PreludeFunction = map[string]func(*Context, *mTypes.Node) value.Value{
 	mTypes.OPERATOR_OR:  PreludeOr,
 	// binary
 	mTypes.OPERATOR_MOD: PreludeMod,
-}
-
-func declarePrelude(ir *ir.Module, prelude *mTypes.PreludeProps) {
-
-	log.DebugMessage("vector types declared")
 }

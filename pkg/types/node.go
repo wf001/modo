@@ -221,6 +221,14 @@ func GetLLVMTypeRec(
 
 	return nil, nil, false
 }
+func GetExtendedType(declare DeclareProps, node *Node) *StructType {
+	for k, v := range declare.Type.Struct {
+		if k == node.Type.ExtendName {
+			return v
+		}
+	}
+	return nil
+}
 
 // ==============
 // The following is for developement purposes

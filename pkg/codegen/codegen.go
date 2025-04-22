@@ -155,7 +155,7 @@ func newStruct(
 	node *mTypes.Node,
 ) value.Value {
 
-	structCtx := getExtendedType(ctx, node)
+	structCtx := mTypes.GetExtendedType(ctx.prog.Declare, node)
 
 	// null pointer to struct: %struct* null
 	nullStructPtr := constant.NewNull(types.NewPointer(structCtx.Types))
@@ -193,15 +193,6 @@ func newStruct(
 	}
 	return structPtr
 
-}
-
-func getExtendedType(ctx *Context, node *mTypes.Node) *mTypes.StructType {
-	for k, v := range ctx.prog.Declare.Type.Struct {
-		if k == node.Type.ExtendName {
-			return v
-		}
-	}
-	return nil
 }
 
 func (ctx *Context) genVarDeclare(node *mTypes.Node) value.Value {
@@ -242,7 +233,7 @@ func (ctx *Context) genVarDeclare(node *mTypes.Node) value.Value {
 			retType = rootTy
 		} else if ctx.prog.Declare.Type != nil && ctx.prog.Declare.Type.Struct != nil {
 			// Note: also get struct type from getLLVMType?
-			structType := getExtendedType(ctx, node)
+			structType := mTypes.GetExtendedType(ctx.prog.Declare, node)
 			retType = types.NewPointer(structType.Types)
 		} else {
 			log.Panic(":have %#+v", node)
@@ -263,7 +254,7 @@ func (ctx *Context) genVarDeclare(node *mTypes.Node) value.Value {
 			} else if rootTy != nil {
 				ty = rootTy
 			} else if ctx.prog.Declare.Type != nil && ctx.prog.Declare.Type.Struct != nil {
-				structType := getExtendedType(ctx, a)
+				structType := mTypes.GetExtendedType(ctx.prog.Declare, a)
 				ty = structType.Types
 			} else {
 				log.Panic(":have %#+v", a)
@@ -618,8 +609,6 @@ func constructModule(prog *mTypes.Program, internal *mTypes.Internal) *ir.Module
 	internal.Cstd = &mTypes.Cstd{}
 	internal.GlobalConst = &mTypes.GlobalConst{}
 	declareInternal(module, internal)
-	prog.Prelude = &mTypes.PreludeProps{}
-	declarePrelude(module, prog.Prelude)
 	prog.Declare.Type = &mTypes.ExtendedTypes{}
 	prog.Declare.Type.Struct = map[string]*mTypes.StructType{}
 	prog.Declare.Type.LLVM = map[string]*types.Type{}

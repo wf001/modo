@@ -126,7 +126,7 @@ func (node *Node) IsScalar() bool {
 // ==============
 
 func GetGlobalVarName(s string, m *ir.Module, ndtype *NodeType) string {
-	return fmt.Sprintf(".%s.%d.%p", s, len(m.Globals), ndtype)
+	return fmt.Sprintf(".%s.%p", s, ndtype)
 }
 
 func (node *Node) GetUnnamedFuncName() string {

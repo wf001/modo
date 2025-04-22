@@ -125,28 +125,46 @@ func prnStructVector(
 
 	ty := getStructTypeFromPtr(v)
 	elemTy := ty.Fields[0].(*types.PointerType).ElemType
+
+	isNull := ctx.block.NewICmp(
+		enum.IPredEQ,
+		v,
+		constant.NewNull(types.NewPointer(ty)),
+	)
+
+	// if value is null ptr
+	nullBlock := ctx.function.NewBlock(n.GetBlockName("print.null.ptr", ctx.function.Blocks))
+	nullBlock.NewCall(
+		ctx.internal.Cstd.Printf,
+		ctx.internal.GlobalConst.FormatStr,
+		ctx.internal.GlobalConst.StringNil,
+	)
+
+	// if value is not null ptr
+	nonNullBlock := ctx.function.NewBlock(n.GetBlockName("print.non.null", ctx.function.Blocks))
+
 	formatStr, _ := mTypes.GetPrintFormat(elemTy, ctx.internal)
-	loaded := ctx.block.NewLoad(ty, n.IRValue)
+	loaded := nonNullBlock.NewLoad(ty, n.IRValue)
 	loaded.SetName("prn.loaded")
 
 	// 構造体のフィールドから arrPtr と len を取り出す
-	resultArrPtr := ctx.block.NewExtractValue(loaded, 0)
-	resultLen := ctx.block.NewExtractValue(loaded, 1)
+	resultArrPtr := nonNullBlock.NewExtractValue(loaded, 0)
+	resultLen := nonNullBlock.NewExtractValue(loaded, 1)
 
 	// インデックスの初期化
-	idx := ctx.block.NewAlloca(types.I64)
-	idx.SetName(n.GetVarName("idx", ctx.block.Insts))
-	ctx.block.NewStore(constant.NewInt(types.I64, 0), idx)
+	idx := nonNullBlock.NewAlloca(types.I64)
+	idx.SetName(n.GetVarName("idx", nonNullBlock.Insts))
+	nonNullBlock.NewStore(constant.NewInt(types.I64, 0), idx)
 
 	loopBlock := ctx.function.NewBlock(n.GetBlockName("printf.loop", ctx.function.Blocks))
 	continueBlock := ctx.function.NewBlock(n.GetBlockName("printf.continue", ctx.function.Blocks))
-	endBlock := ctx.function.NewBlock(n.GetBlockName("printf.end", ctx.function.Blocks))
+	loopEndBlock := ctx.function.NewBlock(n.GetBlockName("printf.loop.end", ctx.function.Blocks))
 
-	ctx.block.NewCall(
+	nonNullBlock.NewCall(
 		ctx.internal.Cstd.Printf,
 		ctx.internal.GlobalConst.StringBracketOpen,
 	)
-	ctx.block.NewBr(loopBlock)
+	nonNullBlock.NewBr(loopBlock)
 
 	// ループ内部の処理
 	// i をロード
@@ -188,13 +206,18 @@ func prnStructVector(
 
 	// i < len ?
 	cond := loopBlock.NewICmp(enum.IPredSLT, nextI, resultLen)
-	loopBlock.NewCondBr(cond, continueBlock, endBlock)
-	ctx.block = endBlock
-	ctx.block.NewCall(
+	loopBlock.NewCondBr(cond, continueBlock, loopEndBlock)
+	loopEndBlock.NewCall(
 		ctx.internal.Cstd.Printf,
 		ctx.internal.GlobalConst.StringBracketClose,
 	)
 
+	endBlock := ctx.function.NewBlock(n.GetBlockName("print.end", ctx.function.Blocks))
+	nullBlock.NewBr(endBlock)
+	loopEndBlock.NewBr(endBlock)
+
+	ctx.block.NewCondBr(isNull, nullBlock, nonNullBlock)
+	ctx.block = endBlock
 }
 
 func PreludePrn(

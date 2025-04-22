@@ -94,16 +94,20 @@ func parseIdent(
 				}
 				ty, _ := mTypes.GetModoType(tok.Kind)
 				typeCur.Type = ty
+
 				if typeCur.Type.Value == mTypes.TY_EXTENDED {
 					typeCur.Type.ExtendName = tok.Val
 				}
+
 				if tok.Kind.Child != nil {
 					typeCur.Type.Child, _ = mTypes.GetModoType(tok.Kind.Child)
 				}
+
 				typeCur.Next = &mTypes.Node{}
 				typeCur = typeCur.Next
 
 				tok = tok.Next
+
 				if tok.IsKind(mTypes.TK_TYPE_ARROW) {
 					tok = tok.Next
 				}
@@ -264,6 +268,7 @@ func parseDeclare(tok *mTypes.Token, parentKind mTypes.NodeKind) (*mTypes.Token,
 				if tok.IsKindAndVal(mTypes.TK_PAREN, mTypes.BRACKET_CLOSE) {
 					break
 				}
+
 				if tok == nil {
 					log.Panic("must be closed with ]")
 				}
@@ -372,6 +377,7 @@ func parseProgram(tok *mTypes.Token) *mTypes.Program {
 		if prevDeclare == nil {
 			tok, p.Declare.Func = parseDeclare(tok, mTypes.ND_PROGRAM_ROOT)
 			prevDeclare = p.Declare.Func
+
 		} else {
 			tok, prevDeclare.Next = parseDeclare(tok, mTypes.ND_PROGRAM_ROOT)
 			prevDeclare = prevDeclare.Next

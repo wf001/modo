@@ -43,6 +43,7 @@ func newI32(s string) *constant.Int {
 	if err != nil {
 		log.Panic("fail to newI32: %s", err)
 	}
+
 	return constant.NewInt(types.I32, i)
 }
 
@@ -101,11 +102,13 @@ func newVectorHeap(ctx *Context, n *mTypes.Node) value.Value {
 	var vecLength int64
 
 	vecContent := []value.Value{}
+
 	for e := n.Child; e != nil; e = e.Next {
 		e.IRValue = ctx.gen(e)
 		vecContent = append(vecContent, e.IRValue)
 		vecLength++
 	}
+
 	structedArrType, elemType, _ := mTypes.GetLLVMTypeRec(ctx.mod, n.Type, ctx.prog.Prelude)
 	//structedArrType, elemType, _ := mTypes.GetLLVMType(n, ctx.prog.Prelude)
 
@@ -126,6 +129,7 @@ func newVectorHeap(ctx *Context, n *mTypes.Node) value.Value {
 
 		}
 	}
+
 	vecIntAlloca := ctx.block.NewAlloca(structedArrType)
 
 	vecElemPtr := ctx.block.NewGetElementPtr(
@@ -221,6 +225,7 @@ func (ctx *Context) genVarDeclare(node *mTypes.Node) value.Value {
 
 		if node.Child.Kind == mTypes.ND_COLLECTION {
 			n = node.Child
+
 		} else {
 			n = node
 		}
@@ -229,12 +234,15 @@ func (ctx *Context) genVarDeclare(node *mTypes.Node) value.Value {
 
 		if childTy != nil {
 			retType = types.NewPointer(rootTy)
+
 		} else if rootTy != nil {
 			retType = rootTy
+
 		} else if ctx.prog.Declare.Type != nil && ctx.prog.Declare.Type.Struct != nil {
 			// Note: also get struct type from getLLVMType?
 			structType := mTypes.GetExtendedType(ctx.prog.Declare, node)
 			retType = types.NewPointer(structType.Types)
+
 		} else {
 			log.Panic(":have %#+v", node)
 		}
@@ -251,11 +259,14 @@ func (ctx *Context) genVarDeclare(node *mTypes.Node) value.Value {
 
 			if childTy != nil {
 				ty = types.NewPointer(rootTy)
+
 			} else if rootTy != nil {
 				ty = rootTy
+
 			} else if ctx.prog.Declare.Type != nil && ctx.prog.Declare.Type.Struct != nil {
 				structType := mTypes.GetExtendedType(ctx.prog.Declare, a)
 				ty = structType.Types
+
 			} else {
 				log.Panic(":have %#+v", a)
 			}
@@ -283,9 +294,11 @@ func (ctx *Context) genVarDeclare(node *mTypes.Node) value.Value {
 
 			if lambda.Type().Equal(types.Void) {
 				entryBlock.NewRet(nil)
+
 			} else {
 				entryBlock.NewRet(lambda)
 			}
+
 		} else {
 			entryBlock.NewRet(child)
 		}
@@ -354,8 +367,10 @@ func (ctx *Context) genVarReference(node *mTypes.Node) value.Value {
 		if scope.Val == node.Val {
 			if scope.Child.IsScalar() {
 				return scope.IRValue
+
 			} else if scope.Child.IsKind(mTypes.ND_LIBCALL) {
 				return scope.IRValue
+
 			} else if scope.Child.IsType(mTypes.TY_VECTOR) {
 				return scope.IRValue
 
@@ -439,6 +454,7 @@ func (ctx *Context) genBranch(
 		} else {
 			ctx.block.NewRet(res)
 		}
+
 	} else {
 		ctx.block.NewBr(exitBlock)
 	}
@@ -469,6 +485,7 @@ func (ctx *Context) genCondition(node *mTypes.Node) {
 
 	if retType.Equal(types.Void) {
 		exitBlock.NewRet(nil)
+
 	} else {
 		exitBlock.NewRet(exitBlock.NewLoad(retType, node.CondRet))
 	}
@@ -581,6 +598,7 @@ func (ctx *Context) gen(node *mTypes.Node) value.Value {
 			if node.IsGlobal {
 				return newStrGlobal(ctx, node)
 			}
+
 			return newStrHeap(ctx, node)
 
 		} else if node.IsType(mTypes.TY_NIL) {
@@ -592,6 +610,7 @@ func (ctx *Context) gen(node *mTypes.Node) value.Value {
 		} else {
 			log.Panic("unresolved Scalar: have %+v", node)
 		}
+
 	} else if node.IsKind(mTypes.ND_COLLECTION) && node.IsType(mTypes.TY_VECTOR) {
 		return newVectorHeap(ctx, node)
 

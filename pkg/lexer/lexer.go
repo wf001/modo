@@ -107,6 +107,7 @@ func accurateStructType(head *mTypes.Token) {
 		if t.IsKind(mTypes.TK_DECLARE_TYPE) && t.Next.IsKind(mTypes.TK_IDENT) {
 			t.Next.Kind = &mTypes.TokenKind{Value: mTypes.TK_TYPE_STRUCT}
 		}
+
 		if t.IsKind(mTypes.TK_TYPE_SIG) && t.Next.IsKind(mTypes.TK_IDENT) {
 			t.Next.Kind = &mTypes.TokenKind{Value: mTypes.TK_TYPE_EXTENDED}
 		}
@@ -146,8 +147,9 @@ func doLexicalAnalyse(splittedString []string) *mTypes.Token {
 			if prev.IsKind(mTypes.TK_INT) {
 				numRe := regexp.MustCompile(`^-?\d+$`)
 
-				isNumber := numRe.MatchString(p)
-				if !isNumber {
+				isExactNumber := numRe.MatchString(p)
+
+				if !isExactNumber {
 					log.Debug(log.YELLOW("change token kind to TY_IDENT: %#+v"), prev)
 					prev.Kind = &mTypes.TokenKind{Value: mTypes.TK_IDENT}
 				}
@@ -162,6 +164,7 @@ func doLexicalAnalyse(splittedString []string) *mTypes.Token {
 					baseType := matches[1] // eg. "int"
 					openBracketsCount := strings.Count(prev.Val, "[")
 					tokenType, matched := tokenMap.matchTokenType(baseType)
+
 					if matched {
 						// Build from the innermost TokenKind
 						child := &mTypes.TokenKind{Value: tokenType}

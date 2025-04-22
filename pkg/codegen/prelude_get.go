@@ -33,13 +33,13 @@ func getVec(ctx *Context, n *mTypes.Node) value.Value {
 	maxIdx := ctx.block.NewSub(loadedLength, constant.NewInt(types.I64, 1))
 
 	isIdxOutOfRange := ctx.block.NewICmp(enum.IPredSGT, idx, maxIdx)
-	isIdxOutOfRange.SetName(n.GetVarName("is.idx.out.of.range", ctx.block.Insts))
+	isIdxOutOfRange.SetName(n.GetVarName("get.is.idx.out.of.range", ctx.block.Insts))
 
-	inRangeBlock := ctx.function.NewBlock(n.GetBlockName("idx.in.range", ctx.function.Blocks))
+	inRangeBlock := ctx.function.NewBlock(n.GetBlockName("get.idx.in.range", ctx.function.Blocks))
 	outOfRangeBlock := ctx.function.NewBlock(
-		n.GetBlockName("idx.out.of.range", ctx.function.Blocks),
+		n.GetBlockName("get.idx.out.of.range", ctx.function.Blocks),
 	)
-	mergeBlock := ctx.function.NewBlock(n.GetBlockName("idx.merge", ctx.function.Blocks))
+	mergeBlock := ctx.function.NewBlock(n.GetBlockName("get.idx.merge", ctx.function.Blocks))
 
 	ctx.block.NewCondBr(isIdxOutOfRange, outOfRangeBlock, inRangeBlock)
 

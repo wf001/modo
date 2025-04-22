@@ -47,6 +47,8 @@ func newI32(s string) *constant.Int {
 	return constant.NewInt(types.I32, i)
 }
 
+var nullPtr = constant.NewNull(types.NewPointer(types.I32))
+
 func newStrGlobal(ctx *Context, n *mTypes.Node) *ir.InstLoad {
 	strConst := constant.NewCharArrayFromString(n.Val)
 	globalStr := ctx.mod.NewGlobalDef(fmt.Sprintf(".str.%d", len(ctx.mod.Globals)), strConst)
@@ -448,7 +450,7 @@ func (ctx *Context) genBranch(
 	retType := ctx.function.Sig.RetType
 	isVoid := retType.Equal(types.Void)
 
-	if res != nil && mTypes.IsScalar(res) {
+	if res != nil && (mTypes.IsScalar(res) || res == nullPtr) {
 		if retType.Equal(types.Void) {
 			ctx.block.NewRet(nil)
 		} else {
@@ -539,6 +541,9 @@ func (ctx *Context) gen(node *mTypes.Node) value.Value {
 			} else if bind.IsType(mTypes.TY_BOOL) {
 				bind.IRValue = child
 
+			} else if bind.IsType(mTypes.TY_NIL) {
+				bind.IRValue = child
+
 			} else if bind.IsType(mTypes.TY_VECTOR) {
 				bind.IRValue = child
 
@@ -602,7 +607,7 @@ func (ctx *Context) gen(node *mTypes.Node) value.Value {
 			return newStrHeap(ctx, node)
 
 		} else if node.IsType(mTypes.TY_NIL) {
-			return newStrGlobal(ctx, node)
+			return nullPtr
 
 		} else if node.IsType(mTypes.TY_BOOL) {
 			return newBool(node.Val)

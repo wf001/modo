@@ -11,6 +11,38 @@ import (
 	mTypes "github.com/wf001/modo/pkg/types"
 )
 
+func genNilBlock(
+	ctx *Context,
+	elemType *types.PointerType,
+	n *mTypes.Node,
+	v value.Value,
+) (*ir.Block, *ir.Block, *ir.Block) {
+	isNull := ctx.block.NewICmp(
+		enum.IPredEQ,
+		v,
+		constant.NewNull(elemType),
+	)
+
+	// if value is null ptr
+	nullBlock := ctx.function.NewBlock(n.GetBlockName("print.null.ptr", ctx.function.Blocks))
+	nullBlock.NewCall(
+		ctx.internal.Cstd.Printf,
+		ctx.internal.GlobalConst.FormatStr,
+		ctx.internal.GlobalConst.StringNil,
+	)
+
+	// if value is not null ptr
+	nonNullBlock := ctx.function.NewBlock(n.GetBlockName("print.non.null", ctx.function.Blocks))
+
+	endBlock := ctx.function.NewBlock(n.GetBlockName("print.end", ctx.function.Blocks))
+	nullBlock.NewBr(endBlock)
+	nonNullBlock.NewBr(endBlock)
+
+	ctx.block.NewCondBr(isNull, nullBlock, nonNullBlock)
+
+	return nullBlock, nonNullBlock, endBlock
+}
+
 func prnScalar(
 	ctx *Context,
 	n *mTypes.Node,
@@ -57,38 +89,6 @@ func prnScalar(
 		ctx.block.NewCall(ctx.internal.Cstd.Printf, formatStr, value)
 	}
 
-}
-
-func genNilBlock(
-	ctx *Context,
-	elemType *types.PointerType,
-	n *mTypes.Node,
-	v value.Value,
-) (*ir.Block, *ir.Block, *ir.Block) {
-	isNull := ctx.block.NewICmp(
-		enum.IPredEQ,
-		v,
-		constant.NewNull(elemType),
-	)
-
-	// if value is null ptr
-	nullBlock := ctx.function.NewBlock(n.GetBlockName("print.null.ptr", ctx.function.Blocks))
-	nullBlock.NewCall(
-		ctx.internal.Cstd.Printf,
-		ctx.internal.GlobalConst.FormatStr,
-		ctx.internal.GlobalConst.StringNil,
-	)
-
-	// if value is not null ptr
-	nonNullBlock := ctx.function.NewBlock(n.GetBlockName("print.non.null", ctx.function.Blocks))
-
-	endBlock := ctx.function.NewBlock(n.GetBlockName("print.end", ctx.function.Blocks))
-	nullBlock.NewBr(endBlock)
-	nonNullBlock.NewBr(endBlock)
-
-	ctx.block.NewCondBr(isNull, nullBlock, nonNullBlock)
-
-	return nullBlock, nonNullBlock, endBlock
 }
 
 func prnStructVector(

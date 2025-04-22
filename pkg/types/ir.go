@@ -117,7 +117,7 @@ func GetBitWidth(t types.Type) uint64 {
 		default:
 			return 0
 		}
-	case *types.PointerType:
+	case *types.PointerType, *types.StructType:
 		// 通常は64bitだが、プラットフォームによって異なる
 		return 64
 	default:

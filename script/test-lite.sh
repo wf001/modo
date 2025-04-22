@@ -17,6 +17,8 @@ testfile(){
   assertfile "vector_declare.modo" "[233, 842]\\\n[Global, Banana]\\\n[42, 23]\\\n[Local, Apple]\\\n"
   echo "== vector_operation.modo ==="
   assertfile "vector_operation.modo" "54\\\n[423, 83, 90]\\\n"
+  echo "== vector_2d_li.modo ==="
+  assertfile "vector_2d_li.modo" "[7, 8, 9]\\\nnil\\\n"
 
 
 }

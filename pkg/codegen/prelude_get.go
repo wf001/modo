@@ -13,17 +13,12 @@ import (
 	mTypes "github.com/wf001/modo/pkg/types"
 )
 
-func getStructTypeFromPtr(v value.Value) *types.StructType {
-	structPtr := v.Type().(*types.PointerType)
-	return structPtr.ElemType.(*types.StructType)
-}
-
 func getVec(ctx *Context, n *mTypes.Node) value.Value {
 	i, _ := strconv.ParseInt(n.Next.Val, 10, 32)
 	idx := constant.NewInt(types.I64, i)
 
 	structedVecPtr := n.IRValue
-	structedVecType := getStructTypeFromPtr(structedVecPtr)
+	structedVecType := mTypes.GetStructTypeFromPtr(structedVecPtr)
 	elemType := structedVecType.Fields[0].(*types.PointerType).ElemType
 
 	nullPtr := constant.NewNull(types.NewPointer(elemType))

@@ -30,9 +30,6 @@ type PreludeProps struct {
 }
 
 type PreludeTypeProps struct {
-	VectorInt    *types.StructType
-	VectorString *types.StructType
-	VectorBool   *types.StructType
 }
 
 type Internal struct {
@@ -123,6 +120,11 @@ func GetBitWidth(t types.Type) uint64 {
 	default:
 		return 0 // 未対応型など
 	}
+}
+
+func GetStructTypeFromPtr(v value.Value) *types.StructType {
+	structPtr := v.Type().(*types.PointerType)
+	return structPtr.ElemType.(*types.StructType)
 }
 
 // Note: remain here until it will be defined the strategy of memory lifecycle

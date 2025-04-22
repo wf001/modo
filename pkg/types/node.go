@@ -178,6 +178,7 @@ func declareVectorType(ir *ir.Module, ty types.Type, ndtype *NodeType) types.Typ
 	typeName := GetGlobalVarName("vec", ir, ndtype)
 	vectorIntType.SetName(typeName)
 
+	// not declare same type twice
 	for _, g := range ir.TypeDefs {
 		if s, ok := g.(*types.StructType); ok {
 			if s.TypeName == typeName {

@@ -140,7 +140,7 @@ func prnStructVector(
 ) {
 	v := n.IRValue
 
-	ty := getStructTypeFromPtr(v)
+	ty := mTypes.GetStructTypeFromPtr(v)
 	elemTy := ty.Fields[0].(*types.PointerType).ElemType
 
 	_, nonNullBlock, endBlock := genNilBlock(ctx, types.NewPointer(ty), n, v)

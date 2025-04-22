@@ -13,25 +13,29 @@ import (
 	mTypes "github.com/wf001/modo/pkg/types"
 )
 
+func getStructTypeFromPtr(v value.Value) *types.StructType {
+	structPtr := v.Type().(*types.PointerType)
+	return structPtr.ElemType.(*types.StructType)
+}
+
 func getVec(ctx *Context, n *mTypes.Node) value.Value {
 	i, _ := strconv.ParseInt(n.Next.Val, 10, 32)
 	idx := constant.NewInt(types.I64, i)
 
-	oldStructedVecPtr := n.IRValue
-	structPtrType := oldStructedVecPtr.Type().(*types.PointerType)
-	structType := structPtrType.ElemType.(*types.StructType)
+	structedVecPtr := n.IRValue
+	structedVecType := getStructTypeFromPtr(structedVecPtr)
+	elemType := structedVecType.Fields[0].(*types.PointerType).ElemType
 
-	structedVecType, elemType := GetLLVMTypeFromString(structType.TypeName, ctx.prog.Prelude)
 	nullPtr := constant.NewNull(types.NewPointer(elemType))
 
 	if i < 0 {
 		return nullPtr
 	}
 
-	oldStructedVec := ctx.block.NewLoad(structedVecType, oldStructedVecPtr)
-	oldVecPtr := ctx.block.NewExtractValue(oldStructedVec, 0)
-	oldLen := ctx.block.NewExtractValue(oldStructedVec, 1)
-	maxIdx := ctx.block.NewSub(oldLen, constant.NewInt(types.I64, 1))
+	loadedStructedVec := ctx.block.NewLoad(structedVecType, structedVecPtr)
+	loadedVecPtr := ctx.block.NewExtractValue(loadedStructedVec, 0)
+	loadedLength := ctx.block.NewExtractValue(loadedStructedVec, 1)
+	maxIdx := ctx.block.NewSub(loadedLength, constant.NewInt(types.I64, 1))
 
 	isIdxOutOfRange := ctx.block.NewICmp(enum.IPredSGT, idx, maxIdx)
 	isIdxOutOfRange.SetName(n.GetVarName("is.idx.out.of.range", ctx.block.Insts))
@@ -46,10 +50,10 @@ func getVec(ctx *Context, n *mTypes.Node) value.Value {
 
 	// branched when specified index is in range
 	ctx.block = inRangeBlock
-	oldArrElemPtr := ctx.block.NewGetElementPtr(elemType, oldVecPtr, idx)
-	oldElem := ctx.block.NewLoad(elemType, oldArrElemPtr)
+	vecElemPtr := ctx.block.NewGetElementPtr(elemType, loadedVecPtr, idx)
+	elem := ctx.block.NewLoad(elemType, vecElemPtr)
 	okPtr := ctx.block.NewAlloca(elemType)
-	ctx.block.NewStore(oldElem, okPtr)
+	ctx.block.NewStore(elem, okPtr)
 	ctx.block.NewBr(mergeBlock)
 
 	// branched when specified index is out of range

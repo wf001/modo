@@ -99,7 +99,7 @@ func newStrHeap(ctx *Context, n *mTypes.Node) *ir.InstCall {
 
 // Note: remain here until it will be defined the strategy of memory lifecycle
 func newVectorOld(ctx *Context, n *mTypes.Node) value.Value {
-	_, elemType, _ := mTypes.GetLLVMType(n, ctx.prog.Prelude)
+	_, elemType, _ := mTypes.GetLLVMTypeRec(ctx.mod, n.Type, ctx.prog.Prelude)
 
 	var arrLength uint64 = 0
 	var arr value.Value
@@ -163,7 +163,7 @@ func newVectorOld(ctx *Context, n *mTypes.Node) value.Value {
 // this logic may be reused. So, the decision to delete this function will be postponed until it is
 // determined whether fixed-size arrays will be supported.
 func newVectorGlobal(ctx *Context, n *mTypes.Node) value.Value {
-	_, elemType, _ := mTypes.GetLLVMType(n, ctx.prog.Prelude)
+	_, elemType, _ := mTypes.GetLLVMTypeRec(ctx.mod, n.Type, ctx.prog.Prelude)
 
 	var arrContent []constant.Constant
 	arrLength := 0
@@ -352,12 +352,12 @@ func (ctx *Context) genVarDeclare(node *mTypes.Node) value.Value {
 			n = node
 		}
 
-		collType, scalarType, _ := mTypes.GetLLVMType(n, ctx.prog.Prelude)
+		rootTy, childTy, _ := mTypes.GetLLVMTypeRec(ctx.mod, n.Type, ctx.prog.Prelude)
 
-		if collType != nil {
-			retType = types.NewPointer(collType)
-		} else if scalarType != nil {
-			retType = scalarType
+		if childTy != nil {
+			retType = types.NewPointer(rootTy)
+		} else if rootTy != nil {
+			retType = rootTy
 		} else if ctx.prog.Declare.Type != nil && ctx.prog.Declare.Type.Struct != nil {
 			// Note: also get struct type from getLLVMType?
 			structType := getExtendedType(ctx, node)
@@ -374,12 +374,12 @@ func (ctx *Context) genVarDeclare(node *mTypes.Node) value.Value {
 		// define arguments type of function
 		for a := node.Child.Args; a != nil; a = a.Next {
 			var ty types.Type
-			collType, scalarType, _ := mTypes.GetLLVMType(a, ctx.prog.Prelude)
+			rootTy, childTy, _ := mTypes.GetLLVMTypeRec(ctx.mod, a.Type, ctx.prog.Prelude)
 
-			if collType != nil {
-				ty = types.NewPointer(collType)
-			} else if scalarType != nil {
-				ty = scalarType
+			if childTy != nil {
+				ty = types.NewPointer(rootTy)
+			} else if rootTy != nil {
+				ty = rootTy
 			} else if ctx.prog.Declare.Type != nil && ctx.prog.Declare.Type.Struct != nil {
 				structType := getExtendedType(ctx, a)
 				ty = structType.Types
@@ -430,11 +430,11 @@ func (ctx *Context) genStructTypeDeclare(node *mTypes.Node) {
 
 	for n := node.Child; n != nil; n = n.Next {
 		// Note: is NOT TRUE
-		_, scalarTy, _ := mTypes.GetLLVMType(n, ctx.prog.Prelude)
-		typsArr = append(typsArr, scalarTy)
+		rootTy, _, _ := mTypes.GetLLVMTypeRec(ctx.mod, n.Type, ctx.prog.Prelude)
+		typsArr = append(typsArr, rootTy)
 		f := structField[n.Val]
 		f.Pos = pos
-		f.Type = scalarTy
+		f.Type = rootTy
 		structField[n.Val] = f
 		pos++
 	}

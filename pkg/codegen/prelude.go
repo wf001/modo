@@ -30,7 +30,5 @@ var PreludeFunction = map[string]func(*Context, *mTypes.Node) value.Value{
 
 func declarePrelude(ir *ir.Module, prelude *mTypes.PreludeProps) {
 
-	declareVectorType(ir, prelude)
-
 	log.DebugMessage("vector types declared")
 }

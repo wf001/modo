@@ -189,44 +189,6 @@ func declareVectorType(ir *ir.Module, ty types.Type, ndtype *NodeType) types.Typ
 	return vectorIntType
 
 }
-func GetLLVMType(node *Node, prelude *PreludeProps) (types.Type, types.Type, bool) {
-	var scalarTy types.Type
-
-	var scalarTypeMap = map[ModoType]types.Type{
-		TY_INT32: types.I32,
-		TY_BOOL:  types.I1,
-		TY_STR:   types.I8Ptr,
-		TY_NIL:   types.Void,
-	}
-
-	scalarTy, isRootScalar := scalarTypeMap[node.Type.Value]
-	if isRootScalar {
-		return nil, scalarTy, true
-	}
-
-	var collTy types.Type
-	var collTypeMap = map[ModoType]types.Type{
-		TY_INT32: prelude.Types.VectorInt,
-		TY_STR:   prelude.Types.VectorString,
-		TY_BOOL:  prelude.Types.VectorBool,
-	}
-
-	// if extende type including struct type
-	if node.Type.Child == nil {
-		return nil, nil, false
-	}
-
-	collTy, isRootColl := collTypeMap[node.Type.Child.Value]
-	scalarTy, isElemScalar := scalarTypeMap[node.Type.Child.Value]
-
-	if node.Type.Value == TY_VECTOR {
-		if isRootColl && isElemScalar {
-			return collTy, scalarTy, true
-		}
-	}
-
-	return nil, nil, false
-}
 
 // Get LLVM type from corresponding Node Type
 func GetLLVMTypeRec(

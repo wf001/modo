@@ -177,6 +177,14 @@ func declareVectorType(ir *ir.Module, ty types.Type, ndtype *NodeType) types.Typ
 	vectorIntType := types.NewStruct(types.NewPointer(ty), types.I64)
 	typeName := GetGlobalVarName("vec", ir, ndtype)
 	vectorIntType.SetName(typeName)
+
+	for _, g := range ir.TypeDefs {
+		if s, ok := g.(*types.StructType); ok {
+			if s.TypeName == typeName {
+				return vectorIntType
+			}
+		}
+	}
 	ir.NewTypeDef(typeName, vectorIntType)
 	return vectorIntType
 

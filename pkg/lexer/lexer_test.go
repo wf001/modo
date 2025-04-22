@@ -58,12 +58,16 @@ func TestSplitProgram(t *testing.T) {
 }
 
 func TestLexOneInteger(t *testing.T) {
-	assert.Equal(t, &mTypes.Token{Kind: mTypes.TK_INT, Val: "1"}, Lex("1"))
+	assert.Equal(
+		t,
+		&mTypes.Token{Kind: &mTypes.TokenKind{Value: mTypes.TK_INT}, Val: "1"},
+		Lex("1"),
+	)
 }
 
-func add(kind mTypes.TokenKind, val string) *mTypes.Token {
+func add(kind mTypes.SyntaxRole, val string) *mTypes.Token {
 	return &mTypes.Token{
-		Kind: kind,
+		Kind: &mTypes.TokenKind{Value: kind},
 		Val:  val,
 	}
 }

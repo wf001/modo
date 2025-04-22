@@ -91,49 +91,6 @@ func genNilBlock(
 	return nullBlock, nonNullBlock, endBlock
 }
 
-// Note: NOT USED
-// see newVectorGlobal comment
-func prnVector(internal *mTypes.Internal, block *ir.Block, n *mTypes.Node) {
-	var arr value.Value
-	var arrType *types.ArrayType
-
-	switch v := n.IRValue.(type) {
-	// The vector on global space: InstCall,
-	// The vector on local space: InstBitCast
-	case *ir.InstCall, *ir.InstBitCast:
-		arrType, _ = mTypes.AssertArrType(v)
-		arr = v
-
-	default:
-		log.Panic("Unsupported IRValue type: %#+v", n.IRValue)
-	}
-
-	block.NewCall(internal.Cstd.Printf, internal.GlobalConst.StringBracketOpen)
-
-	for i := uint64(0); i < arrType.Len; i++ {
-		elem := mTypes.LoadArrElem(block, arr, arrType, i)
-
-		formatStr, _ := mTypes.GetPrintFormat(elem.ElemType, internal)
-		if arrType.ElemType == types.I1 {
-			v := block.NewSelect(
-				elem,
-				internal.GlobalConst.StringTrue,
-				internal.GlobalConst.StringFalse,
-			)
-			block.NewCall(internal.Cstd.Printf, formatStr, v)
-		} else {
-			block.NewCall(internal.Cstd.Printf, formatStr, elem)
-		}
-
-		if i < uint64(arrType.Len-1) {
-			block.NewCall(internal.Cstd.Printf, internal.GlobalConst.StringComma)
-			block.NewCall(internal.Cstd.Printf, internal.GlobalConst.StringSpace)
-		}
-	}
-
-	block.NewCall(internal.Cstd.Printf, internal.GlobalConst.StringBracketClose)
-}
-
 func prnStructVector(
 	ctx *Context,
 	n *mTypes.Node,

@@ -2,7 +2,6 @@ package types
 
 import (
 	"github.com/llir/llvm/ir"
-	"github.com/llir/llvm/ir/constant"
 	"github.com/llir/llvm/ir/types"
 	"github.com/llir/llvm/ir/value"
 
@@ -125,34 +124,4 @@ func GetBitWidth(t types.Type) uint64 {
 func GetStructTypeFromPtr(v value.Value) *types.StructType {
 	structPtr := v.Type().(*types.PointerType)
 	return structPtr.ElemType.(*types.StructType)
-}
-
-// Note: remain here until it will be defined the strategy of memory lifecycle
-func LoadArrElem(block *ir.Block, src value.Value, ty *types.ArrayType, i uint64) *ir.InstLoad {
-	elemPtr := block.NewGetElementPtr(
-		ty,
-		src,
-		constant.NewInt(types.I32, 0),
-		constant.NewInt(types.I32, int64(i)),
-	)
-	return block.NewLoad(ty.ElemType, elemPtr)
-
-}
-
-// Note: remain here until it will be defined the strategy of memory lifecycle
-func AssertArrType(v value.Value) (*types.ArrayType, bool) {
-	ptrElemType, ok := v.Type().(*types.PointerType)
-
-	if !ok {
-		log.Warn("Not pointer type, got: %+v", v.Type())
-		return nil, false
-
-	}
-	arrType, ok := ptrElemType.ElemType.(*types.ArrayType)
-
-	if !ok {
-		log.Warn("Not pointer type to array, got: %+v", ptrElemType.ElemType)
-		return nil, false
-	}
-	return arrType, true
 }

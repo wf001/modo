@@ -12,10 +12,9 @@ import (
 
 func PreludeConj(ctx *Context, n *mTypes.Node) value.Value {
 	oldStructedVecPtr := n.IRValue
-	structPtrType := oldStructedVecPtr.Type().(*types.PointerType)
-	structType := structPtrType.ElemType.(*types.StructType)
 
-	structedVecType, elemType := GetLLVMTypeFromString(structType.TypeName, ctx.prog.Prelude)
+	structedVecType := getStructTypeFromPtr(oldStructedVecPtr)
+	elemType := structedVecType.Fields[0].(*types.PointerType).ElemType
 
 	oldStructedVec := ctx.block.NewLoad(structedVecType, oldStructedVecPtr)
 	oldLen := ctx.block.NewExtractValue(oldStructedVec, 1)

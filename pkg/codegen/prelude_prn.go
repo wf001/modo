@@ -145,7 +145,6 @@ func prnStructVector(
 
 	formatStr, _ := mTypes.GetPrintFormat(elemTy, ctx.internal)
 	loaded := nonNullBlock.NewLoad(ty, n.IRValue)
-	loaded.SetName("prn.loaded")
 
 	// 構造体のフィールドから arrPtr と len を取り出す
 	resultArrPtr := nonNullBlock.NewExtractValue(loaded, 0)

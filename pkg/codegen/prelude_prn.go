@@ -37,18 +37,8 @@ func prnScalar(
 			ctx.block.NewCall(ctx.internal.Cstd.Printf, formatStr, value)
 
 		} else {
-			isNull := ctx.block.NewICmp(
-				enum.IPredEQ,
-				value,
-				constant.NewNull(types.NewPointer(pointerElemTy)),
-			)
+			_, nonNullBlock, endBlock := genNilBlock(ctx, types.NewPointer(pointerElemTy), n, value)
 
-			// if value is null ptr
-			nullBlock := ctx.function.NewBlock(n.GetBlockName("print.null.ptr", ctx.function.Blocks))
-			nullBlock.NewCall(ctx.internal.Cstd.Printf, ctx.internal.GlobalConst.FormatStr, ctx.internal.GlobalConst.StringNil)
-
-			// if value is not null ptr
-			nonNullBlock := ctx.function.NewBlock(n.GetBlockName("print.non.null", ctx.function.Blocks))
 			formatStr, _ = mTypes.GetPrintFormat(pointerElemTy.ElemType, ctx.internal)
 
 			ptr := nonNullBlock.NewLoad(pointerElemTy, value)
@@ -60,11 +50,6 @@ func prnScalar(
 
 			nonNullBlock.NewCall(ctx.internal.Cstd.Printf, formatStr, value)
 
-			endBlock := ctx.function.NewBlock(n.GetBlockName("print.end", ctx.function.Blocks))
-			nullBlock.NewBr(endBlock)
-			nonNullBlock.NewBr(endBlock)
-
-			ctx.block.NewCondBr(isNull, nullBlock, nonNullBlock)
 			ctx.block = endBlock
 		}
 	} else {
@@ -72,6 +57,38 @@ func prnScalar(
 		ctx.block.NewCall(ctx.internal.Cstd.Printf, formatStr, value)
 	}
 
+}
+
+func genNilBlock(
+	ctx *Context,
+	elemType *types.PointerType,
+	n *mTypes.Node,
+	v value.Value,
+) (*ir.Block, *ir.Block, *ir.Block) {
+	isNull := ctx.block.NewICmp(
+		enum.IPredEQ,
+		v,
+		constant.NewNull(elemType),
+	)
+
+	// if value is null ptr
+	nullBlock := ctx.function.NewBlock(n.GetBlockName("print.null.ptr", ctx.function.Blocks))
+	nullBlock.NewCall(
+		ctx.internal.Cstd.Printf,
+		ctx.internal.GlobalConst.FormatStr,
+		ctx.internal.GlobalConst.StringNil,
+	)
+
+	// if value is not null ptr
+	nonNullBlock := ctx.function.NewBlock(n.GetBlockName("print.non.null", ctx.function.Blocks))
+
+	endBlock := ctx.function.NewBlock(n.GetBlockName("print.end", ctx.function.Blocks))
+	nullBlock.NewBr(endBlock)
+	nonNullBlock.NewBr(endBlock)
+
+	ctx.block.NewCondBr(isNull, nullBlock, nonNullBlock)
+
+	return nullBlock, nonNullBlock, endBlock
 }
 
 // Note: NOT USED
@@ -126,22 +143,9 @@ func prnStructVector(
 	ty := getStructTypeFromPtr(v)
 	elemTy := ty.Fields[0].(*types.PointerType).ElemType
 
-	isNull := ctx.block.NewICmp(
-		enum.IPredEQ,
-		v,
-		constant.NewNull(types.NewPointer(ty)),
-	)
-
-	// if value is null ptr
-	nullBlock := ctx.function.NewBlock(n.GetBlockName("print.null.ptr", ctx.function.Blocks))
-	nullBlock.NewCall(
-		ctx.internal.Cstd.Printf,
-		ctx.internal.GlobalConst.FormatStr,
-		ctx.internal.GlobalConst.StringNil,
-	)
+	_, nonNullBlock, endBlock := genNilBlock(ctx, types.NewPointer(ty), n, v)
 
 	// if value is not null ptr
-	nonNullBlock := ctx.function.NewBlock(n.GetBlockName("print.non.null", ctx.function.Blocks))
 
 	formatStr, _ := mTypes.GetPrintFormat(elemTy, ctx.internal)
 	loaded := nonNullBlock.NewLoad(ty, n.IRValue)
@@ -211,11 +215,8 @@ func prnStructVector(
 		ctx.internal.GlobalConst.StringBracketClose,
 	)
 
-	endBlock := ctx.function.NewBlock(n.GetBlockName("print.end", ctx.function.Blocks))
-	nullBlock.NewBr(endBlock)
 	loopEndBlock.NewBr(endBlock)
 
-	ctx.block.NewCondBr(isNull, nullBlock, nonNullBlock)
 	ctx.block = endBlock
 }
 

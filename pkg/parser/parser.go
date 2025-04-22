@@ -319,12 +319,14 @@ func parseDeclare(tok *mTypes.Token, parentKind mTypes.NodeKind) (*mTypes.Token,
 
 	} else if tok.IsKind(mTypes.TK_BOOL) {
 		var v string
-		if tok.Val == "true" {
+
+		switch tok.Val {
+		case "true":
 			v = "1"
-		} else if tok.Val == "false" {
+		case "false":
 			v = "0"
-		} else {
-			log.Panic("unresolved bool value :have %+v", tok)
+		default:
+			log.Panic("unresolved bool value: got %+v", tok)
 		}
 		return tok.Next, newNodeScalar(mTypes.TY_BOOL, v)
 

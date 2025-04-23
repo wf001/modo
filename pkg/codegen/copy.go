@@ -4,6 +4,7 @@ import (
 	"github.com/llir/llvm/ir"
 	"github.com/llir/llvm/ir/constant"
 	"github.com/llir/llvm/ir/types"
+	mTypes "github.com/wf001/modo/pkg/types"
 )
 
 // Note: remain here until it will be defined the strategy of memory lifecycle
@@ -21,7 +22,7 @@ func CopyArrayOld(
 		oldElemPtr := block.NewGetElementPtr(
 			oldArrPtr.ElemType,
 			oldArrPtr,
-			constant.NewInt(types.I32, 0),
+			mTypes.I32zero,
 			constant.NewInt(types.I32, int64(i)),
 		)
 		// Arrayの要素の型取得
@@ -29,7 +30,7 @@ func CopyArrayOld(
 		newElemPtr := block.NewGetElementPtr(
 			newArrType,
 			newArr,
-			constant.NewInt(types.I32, 0),
+			mTypes.I32zero,
 			constant.NewInt(types.I32, int64(i)),
 		)
 		block.NewStore(elem, newElemPtr)

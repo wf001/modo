@@ -2,6 +2,7 @@ package types
 
 import (
 	"github.com/llir/llvm/ir"
+	"github.com/llir/llvm/ir/constant"
 	"github.com/llir/llvm/ir/types"
 	"github.com/llir/llvm/ir/value"
 
@@ -66,6 +67,18 @@ type StructTypeField struct {
 	Pos  uint64
 	Type types.Type
 }
+
+// ==============
+// constant value
+// ==============
+var I1zero = constant.NewInt(types.I1, 0)
+var I1one = constant.NewInt(types.I1, 1)
+
+var I32zero = constant.NewInt(types.I32, 0)
+var I32one = constant.NewInt(types.I32, 1)
+
+var I64zero = constant.NewInt(types.I64, 0)
+var I64one = constant.NewInt(types.I64, 1)
 
 // ==============
 // predication

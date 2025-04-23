@@ -29,7 +29,7 @@ func getVec(ctx *Context, n *mTypes.Node) value.Value {
 	loadedStructedVec := ctx.block.NewLoad(structedVecType, structedVecPtr)
 	loadedVecPtr := ctx.block.NewExtractValue(loadedStructedVec, 0)
 	loadedLength := ctx.block.NewExtractValue(loadedStructedVec, 1)
-	maxIdx := ctx.block.NewSub(loadedLength, constant.NewInt(types.I64, 1))
+	maxIdx := ctx.block.NewSub(loadedLength, mTypes.I64one)
 
 	isIdxOutOfRange := ctx.block.NewICmp(enum.IPredSGT, idx, maxIdx)
 	isIdxOutOfRange.SetName(n.GetVarName("get.is.idx.out.of.range", ctx.block.Insts))

@@ -77,7 +77,7 @@ func prnScalar(
 			value = nonNullBlock.NewGetElementPtr(
 				pointerElemTy.ElemType,
 				ptr,
-				constant.NewInt(types.I32, 0),
+				mTypes.I32zero,
 			)
 
 			nonNullBlock.NewCall(ctx.internal.Cstd.Printf, formatStr, value)
@@ -114,7 +114,7 @@ func prnStructVector(
 	// インデックスの初期化
 	idx := nonNullBlock.NewAlloca(types.I64)
 	idx.SetName(n.GetVarName("prn.cur.idx", nonNullBlock.Insts))
-	nonNullBlock.NewStore(constant.NewInt(types.I64, 0), idx)
+	nonNullBlock.NewStore(mTypes.I64zero, idx)
 
 	loopBlock := ctx.function.NewBlock(n.GetBlockName("prn.vec.loop.enter", ctx.function.Blocks))
 	continueBlock := ctx.function.NewBlock(n.GetBlockName("prn.vec.continue", ctx.function.Blocks))
@@ -151,7 +151,7 @@ func prnStructVector(
 	}
 
 	// i++
-	nextI := loopBlock.NewAdd(i, constant.NewInt(types.I64, 1))
+	nextI := loopBlock.NewAdd(i, mTypes.I64one)
 	loopBlock.NewStore(nextI, idx)
 
 	continueBlock.NewCall(

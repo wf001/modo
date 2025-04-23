@@ -60,8 +60,8 @@ func newStrGlobal(ctx *Context, n *mTypes.Node) *ir.InstLoad {
 	strGEP := ctx.block.NewGetElementPtr(
 		types.NewArray(strConst.Typ.Len, types.I8),
 		globalStr,
-		newI32("0"),
-		newI32("0"),
+		mTypes.I32zero,
+		mTypes.I32zero,
 	)
 	ctx.block.NewStore(strGEP, strPtr)
 	str := ctx.block.NewLoad(types.I8Ptr, strPtr)
@@ -151,8 +151,8 @@ func newVectorHeap(ctx *Context, n *mTypes.Node) value.Value {
 	lenElemPtr := ctx.block.NewGetElementPtr(
 		structedArrType,
 		vecIntAlloca,
-		newI32("0"),
-		newI32("1"),
+		mTypes.I32zero,
+		mTypes.I32one,
 	)
 	lenElemPtr.SetName(n.GetVarName("new.vector.len.elem.ptr", ctx.block.Insts))
 	ctx.block.NewStore(constant.NewInt(types.I64, vecLength), lenElemPtr)
@@ -195,7 +195,7 @@ func newStruct(
 		namePtr := ctx.block.NewGetElementPtr(
 			structCtx.Types,
 			structPtr,
-			constant.NewInt(types.I32, 0), // first element
+			mTypes.I32zero,
 			constant.NewInt(types.I32, int64(structCtx.Field[field.Val].Pos)), // name field
 		)
 		v := ctx.gen(value)
@@ -436,6 +436,7 @@ func (ctx *Context) genLambda(node *mTypes.Node) value.Value {
 	}
 }
 
+// sub routine of genCondition
 func (ctx *Context) genBranch(
 	block *ir.Block,
 	node *mTypes.Node,

@@ -1,7 +1,6 @@
 package codegen
 
 import (
-	"github.com/llir/llvm/ir/constant"
 	"github.com/llir/llvm/ir/types"
 	"github.com/llir/llvm/ir/value"
 
@@ -16,7 +15,7 @@ func PreludeConj(ctx *Context, n *mTypes.Node) value.Value {
 
 	oldStructedVec := ctx.block.NewLoad(structedVecType, oldStructedVecPtr)
 	oldLen := ctx.block.NewExtractValue(oldStructedVec, 1)
-	newLen := ctx.block.NewAdd(oldLen, constant.NewInt(types.I64, 1))
+	newLen := ctx.block.NewAdd(oldLen, mTypes.I64one)
 
 	newVecPtr := CopyVector(ctx, oldStructedVec, n, elemType, oldLen, newLen)
 
@@ -29,16 +28,16 @@ func PreludeConj(ctx *Context, n *mTypes.Node) value.Value {
 	newVecField := ctx.block.NewGetElementPtr(
 		structedVecType,
 		newStructAlloca,
-		newI32("0"),
-		newI32("0"),
+		mTypes.I32zero,
+		mTypes.I32zero,
 	)
 	ctx.block.NewStore(newVecPtr, newVecField)
 
 	newLenField := ctx.block.NewGetElementPtr(
 		structedVecType,
 		newStructAlloca,
-		newI32("0"),
-		newI32("1"),
+		mTypes.I32zero,
+		mTypes.I32one,
 	)
 	ctx.block.NewStore(newLen, newLenField)
 

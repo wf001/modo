@@ -2,9 +2,7 @@ package codegen
 
 import (
 	"github.com/llir/llvm/ir"
-	"github.com/llir/llvm/ir/constant"
 	"github.com/llir/llvm/ir/enum"
-	"github.com/llir/llvm/ir/types"
 	"github.com/llir/llvm/ir/value"
 
 	mTypes "github.com/wf001/modo/pkg/types"
@@ -57,13 +55,13 @@ func PreludeEq(ctx *Context, node *mTypes.Node) value.Value {
 		snd := node.IRValue
 
 		cmpRes := ctx.block.NewCall(ctx.internal.Cstd.Strcmp, fst, snd)
-		isEq := ctx.block.NewICmp(enum.IPredEQ, cmpRes, constant.NewInt(types.I1, 0))
-		res := ctx.block.NewAnd(isEq, constant.NewInt(types.I1, 1))
+		isEq := ctx.block.NewICmp(enum.IPredEQ, cmpRes, mTypes.I1zero)
+		res := ctx.block.NewAnd(isEq, mTypes.I1one)
 
 		for n := node.Next; n != nil; n = n.Next {
 			snd = n.IRValue
 			cmpRes = ctx.block.NewCall(ctx.internal.Cstd.Strcmp, fst, snd)
-			isEq = ctx.block.NewICmp(enum.IPredEQ, cmpRes, constant.NewInt(types.I1, 0))
+			isEq = ctx.block.NewICmp(enum.IPredEQ, cmpRes, mTypes.I1zero)
 			res = ctx.block.NewAnd(res, isEq)
 		}
 		return res

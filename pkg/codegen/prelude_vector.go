@@ -27,7 +27,7 @@ func CopyVector(
 	newVecPtr := ctx.block.NewBitCast(newVecAllocPtr, types.NewPointer(elemType))
 
 	loopIndex := ctx.block.NewAlloca(types.I64)
-	ctx.block.NewStore(constant.NewInt(types.I64, 0), loopIndex)
+	ctx.block.NewStore(mTypes.I64zero, loopIndex)
 
 	loopBlock := ctx.function.NewBlock(n.GetBlockName("copy.loop", ctx.function.Blocks))
 	condBlock := ctx.function.NewBlock(n.GetBlockName("copy.cond", ctx.function.Blocks))
@@ -44,7 +44,7 @@ func CopyVector(
 	newVecElemPtr := loopBlock.NewGetElementPtr(elemType, newVecPtr, idx)
 	loopBlock.NewStore(oldElem, newVecElemPtr)
 
-	incI := loopBlock.NewAdd(idx, constant.NewInt(types.I64, 1))
+	incI := loopBlock.NewAdd(idx, mTypes.I64one)
 	loopBlock.NewStore(incI, loopIndex)
 	loopBlock.NewBr(condBlock)
 

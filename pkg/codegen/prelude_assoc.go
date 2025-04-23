@@ -2,7 +2,6 @@ package codegen
 
 import (
 	"github.com/llir/llvm/ir"
-	"github.com/llir/llvm/ir/constant"
 	"github.com/llir/llvm/ir/types"
 	"github.com/llir/llvm/ir/value"
 
@@ -27,7 +26,7 @@ func PreludeAssocOld(block *ir.Block, internal *mTypes.Internal, node *mTypes.No
 	newElemPtr := block.NewGetElementPtr(
 		newArr.ElemType,
 		newArr,
-		constant.NewInt(types.I32, 0),
+		mTypes.I32zero,
 		pos,
 	)
 	block.NewStore(newValue, newElemPtr)

@@ -148,27 +148,41 @@ func doRunExecutable(workingDirPrefix string, evaluatee string) int {
 	return 0
 }
 
+func wrapException(fn func()) (err error) {
+	defer func() {
+		if r := recover(); r != nil {
+			log.Error("%s", r)
+		}
+	}()
+
+	fn()
+
+	return nil
+}
+
 func main() {
-	cmd := kingpin.MustParse(app.Parse(os.Args[1:]))
+	_ = wrapException(func() {
+		cmd := kingpin.MustParse(app.Parse(os.Args[1:]))
 
-	setLogLevel()
-	showOpts(cmd)
-	switch cmd {
+		setLogLevel()
+		showOpts(cmd)
+		switch cmd {
 
-	case runCmd.FullCommand():
-		if *runExec == "" {
-			if inputFile != nil {
-				arg := util.ReadFile(inputFile)
-				if *appLLI {
-					os.Exit(doRunLLI(*appOutput, arg))
+		case runCmd.FullCommand():
+			if *runExec == "" {
+				if inputFile != nil {
+					arg := util.ReadFile(inputFile)
+					if *appLLI {
+						os.Exit(doRunLLI(*appOutput, arg))
+					} else {
+						os.Exit(doRunExecutable(*appOutput, arg))
+					}
 				} else {
-					os.Exit(doRunExecutable(*appOutput, arg))
+					log.Panic("fail to run, input must be specified")
 				}
 			} else {
-				log.Panic("fail to run, input must be specified")
+				os.Exit(doRunExecutable(*appOutput, *runExec))
 			}
-		} else {
-			os.Exit(doRunExecutable(*appOutput, *runExec))
 		}
-	}
+	})
 }

@@ -149,6 +149,14 @@ func doRunExecutable(workingDirPrefix string, evaluatee string) int {
 }
 
 func wrapException(fn func()) (err error) {
+	// Note: Use `panic` over returning `error` in deeply nested function calls:
+	//
+	//   - When functions are deeply nested (e.g., main → f → g → h → ...),
+	//     returning `error` from every level becomes noisy and repetitive.
+	//   - Using `panic` allows us to abort execution immediately from any depth
+	//     without having to thread `error` through all function signatures.
+	//   - A `panic` can be caught with `recover`, converted back to an `error`,
+	//     or handled gracefully depending on debug flags or runtime configuration.
 	defer func() {
 		if r := recover(); r != nil {
 			log.Error("%s", r)

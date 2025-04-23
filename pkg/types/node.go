@@ -14,36 +14,36 @@ import (
 type NodeKind string
 
 const (
-	ND_PROGRAM_ROOT = NodeKind("ND_PROGRAM_ROOT")
+	ND_PROGRAM_ROOT = NodeKind("nd.program.root")
 
 	// reserved symbol
-	ND_VAR_DECLARE   = NodeKind("ND_VAR_DECLARE")   // variables and functions
-	ND_VAR_REFERENCE = NodeKind("ND_VAR_REFERENCE") // variables and functions
-	ND_TYPE_DECLARE  = NodeKind("ND_TYPE_DECLARE")
-	ND_DECLARE       = NodeKind("ND_DECLARE")  // def
-	ND_LAMBDA        = NodeKind("ND_LAMBDA")   // fn
-	ND_BIND          = NodeKind("ND_BIND")     // let
-	ND_EXPR          = NodeKind("ND_EXPR")     // set of functions
-	ND_IF            = NodeKind("ND_IF")       // if
-	ND_FUNCCALL      = NodeKind("ND_FUNCCALL") // calling declared function
-	ND_LIBCALL       = NodeKind("ND_LIBCALL")  // calling buitin library function
+	ND_VAR_DECLARE   = NodeKind("nd.var.declare")   // variables and functions
+	ND_VAR_REFERENCE = NodeKind("nd.var.reference") // variables and functions
+	ND_TYPE_DECLARE  = NodeKind("nd.type.declare")
+	ND_DECLARE       = NodeKind("nd.declare")  // def
+	ND_LAMBDA        = NodeKind("nd.lambda")   // fn
+	ND_BIND          = NodeKind("nd.bind")     // let
+	ND_EXPR          = NodeKind("nd.expr")     // set of functions
+	ND_IF            = NodeKind("nd.if")       // if
+	ND_FUNCCALL      = NodeKind("nd.funccall") // calling declared function
+	ND_LIBCALL       = NodeKind("nd.libcall")  // calling builtin library function
 
 	// type
-	ND_SCALAR     = NodeKind("ND_SCALAR")     // int32, string, bool
-	ND_COLLECTION = NodeKind("ND_COLLECTION") // vector, map, list
+	ND_SCALAR     = NodeKind("nd.scalar")     // int32, string, bool
+	ND_COLLECTION = NodeKind("nd.collection") // vector, map, list
 )
 
 type ModoType string
 
 // Note: what for?
 const (
-	TY_INT32    = ModoType("TY_INT32")
-	TY_STR      = ModoType("TY_STR")
-	TY_NIL      = ModoType("TY_NIL")
-	TY_BOOL     = ModoType("TY_BOOL")
-	TY_VECTOR   = ModoType("TY_VECTOR")
-	TY_STRUCT   = ModoType("TY_STRUCT")
-	TY_EXTENDED = ModoType("TY_EXTENDED")
+	TY_INT32    = ModoType("ty.int32")
+	TY_STR      = ModoType("ty.str")
+	TY_NIL      = ModoType("ty.nil")
+	TY_BOOL     = ModoType("ty.bool")
+	TY_VECTOR   = ModoType("ty.vector")
+	TY_STRUCT   = ModoType("ty.struct")
+	TY_EXTENDED = ModoType("ty.extended")
 )
 
 type NodeType struct {

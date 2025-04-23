@@ -186,10 +186,10 @@ testexec(){
   assertexec '(def v :: [bool] [false, true, true]) (def main :: int (fn [] (prn v)))' "[false, true, true]\\\n"
 
   # vector operation
-  # get
-  # assertexec '(def main :: int (fn [] (let [vec :: [int] [41, 28, 239]] (prn (get vec 1)))))'  "28\\\n"
-  # assertexec '(def v :: [int] [233, 842]) (def main :: int (fn [] (prn (get v 0))))' "233\\\n"
-  assertexec '(def main :: int (fn [] (let [vec :: [int] [423, 83, 90]] (prn (get vec -1)) (prn (get vec 2)) (prn (get vec 3)) )))' "nil\\\n90\\\nnil\\\n"
+  # nth
+  # assertexec '(def main :: int (fn [] (let [vec :: [int] [41, 28, 239]] (prn (nth vec 1)))))'  "28\\\n"
+  # assertexec '(def v :: [int] [233, 842]) (def main :: int (fn [] (prn (nth v 0))))' "233\\\n"
+  assertexec '(def main :: int (fn [] (let [vec :: [int] [423, 83, 90]] (prn (nth vec -1)) (prn (nth vec 2)) (prn (nth vec 3)) )))' "nil\\\n90\\\nnil\\\n"
   # conj
   assertexec '(def main :: int (fn [] (let [vec :: [int] [423, 83, 90]] (prn (conj vec 27)) (prn vec))))' "[423, 83, 90, 27]\\\n[423, 83, 90]\\\n"
   assertexec '(def v :: [int] [233, 842]) (def main :: int (fn [] (prn (conj v 569))))' "[233, 842, 569]\\\n"
@@ -206,7 +206,7 @@ testexec(){
   assertexec "(def f::[int] => nil (fn[v] (prn v))) (def main::int (fn[] (let[v::[int][42, 64, 90]] (f v))))" "[42, 64, 90]\\\n"
   assertexec "(def f::[int] (fn[] (let[v::[int] [42, 64, 90, 84]]v))) (def main::int (fn[] (prn f)))" "[42, 64, 90, 84]\\\n"
   assertexec "(def f :: [int] => [int] (fn [v] (conj v 81))) (def main :: int (fn [] (let [v :: [int] [42, 64, 90]] (prn (f v)))))" "[42, 64, 90, 81]\\\n"
-  assertexec "(def main :: int (fn [] (let [vec :: [[[int]]] [[[11 12 13] [14 15]] [[21 22 23] [24]] [[31 32] [33 34 35]] [[41 42] [43 44 45]]]] (prn (get (get (get vec 1) 1) 0)) )))" "24\\\n"
+  assertexec "(def main :: int (fn [] (let [vec :: [[[int]]] [[[11 12 13] [14 15]] [[21 22 23] [24]] [[31 32] [33 34 35]] [[41 42] [43 44 45]]]] (prn (nth (nth (nth vec 1) 1) 0)) )))" "24\\\n"
 
 
   # struct

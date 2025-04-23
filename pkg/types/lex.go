@@ -81,13 +81,15 @@ var (
 	// Core library
 	PRELUDE_PRN              = "prn"
 	PRELUDE_GET              = "get"
+	PRELUDE_NTH              = "nth"
 	PRELUDE_CONJ             = "conj"
 	PRELUDE_ASSOC            = "assoc"
 	PRELUDE_POP              = "pop"
 	PRELUDE_FUNCTION_REG_EXP = fmt.Sprintf(
-		"\\b(%s|%s|%s|%s|%s)\\b",
+		"\\b(%s|%s|%s|%s|%s|%s)\\b",
 		PRELUDE_PRN,
 		PRELUDE_GET,
+		PRELUDE_NTH,
 		PRELUDE_CONJ,
 		PRELUDE_ASSOC,
 		PRELUDE_POP,

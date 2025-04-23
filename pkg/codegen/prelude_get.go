@@ -79,8 +79,8 @@ func getStruct(ctx *Context, n *mTypes.Node) value.Value {
 		return constant.NewNull(types.NewPointer(types.I32))
 	}
 
-	oldStruct := ctx.block.NewLoad(structeType, targetStructPtr)
-	elemPtr := ctx.block.NewExtractValue(oldStruct, i)
+	loadedStruct := ctx.block.NewLoad(structeType, targetStructPtr)
+	elemPtr := ctx.block.NewExtractValue(loadedStruct, i)
 
 	return elemPtr
 }
@@ -91,13 +91,9 @@ func PreludeGet(ctx *Context, n *mTypes.Node) value.Value {
 
 	if okPtr &&
 		okStr &&
-		ctx.prog.Declare.Type != nil &&
-		ctx.prog.Declare.Type.Struct != nil {
-		for k := range ctx.prog.Declare.Type.Struct {
-			if k == tyStr.TypeName {
-				return getStruct(ctx, n)
-			}
-		}
+		mTypes.TypeExists(ctx.prog.Declare, tyStr.TypeName) {
+		return getStruct(ctx, n)
 	}
+
 	return getVec(ctx, n)
 }

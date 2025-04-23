@@ -330,14 +330,6 @@ func (ctx *Context) genStructTypeDeclare(node *mTypes.Node) {
 	structType.Fields = typsArr
 	ctx.mod.NewTypeDef(node.Val, structType)
 
-	if ctx.prog.Declare.Type == nil {
-		ctx.prog.Declare.Type = &mTypes.ExtendedTypes{}
-	}
-
-	if ctx.prog.Declare.Type.Struct == nil {
-		ctx.prog.Declare.Type.Struct = map[string]*mTypes.StructType{}
-	}
-
 	ctx.prog.Declare.Type.Struct[node.Val] = &mTypes.StructType{
 		Name:  node.Val,
 		Field: structField,

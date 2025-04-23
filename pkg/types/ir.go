@@ -78,6 +78,21 @@ func IsScalar(v value.Value) bool {
 		v.Type().Equal(types.Void)
 }
 
+func TypeExists(declare DeclareProps, typeName string) bool {
+
+	for k := range declare.Type.Struct {
+		if k == typeName {
+			return true
+		}
+	}
+	for k := range declare.Type.LLVM {
+		if k == typeName {
+			return true
+		}
+	}
+	return false
+}
+
 // ==============
 // conversion llir/llvm properties to other properties
 // ==============

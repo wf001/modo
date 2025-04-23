@@ -153,13 +153,10 @@ func main() {
 
 	setLogLevel()
 	showOpts(cmd)
-
 	switch cmd {
 
 	case runCmd.FullCommand():
-		if *runExec != "" {
-			os.Exit(doRunExecutable(*appOutput, *runExec))
-		} else {
+		if *runExec == "" {
 			if inputFile != nil {
 				arg := util.ReadFile(inputFile)
 				if *appLLI {
@@ -170,6 +167,8 @@ func main() {
 			} else {
 				log.Panic("fail to run, input must be specified")
 			}
+		} else {
+			os.Exit(doRunExecutable(*appOutput, *runExec))
 		}
 	}
 }

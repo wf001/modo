@@ -7,6 +7,7 @@ import (
 
 	"github.com/alecthomas/kingpin/v2"
 	"github.com/wf001/modo/pkg/codegen"
+	e "github.com/wf001/modo/pkg/error"
 	"github.com/wf001/modo/pkg/lexer"
 	"github.com/wf001/modo/pkg/log"
 	"github.com/wf001/modo/pkg/parser"
@@ -117,10 +118,9 @@ func doRunLLI(workingDirPrefix string, evaluatee string) int {
 
 	out, err, errMsg := util.RunCommand("lli", llName)
 	// TODO: it works, but correctly?
-	log.Debug("executed: %s", llName)
+	log.Info("successed to execute: %s", llName)
 	if err != nil {
-		log.Debug("artifactDir: %s", llName)
-		log.Error("fail to run: err %+v, message %+v", err, errMsg)
+		log.Error("%s: fail to run: err %+v, message %+v", e.ERROR_RUNTINME, err, errMsg)
 		return 1
 	}
 	fmt.Println(out)
@@ -137,10 +137,9 @@ func doRunExecutable(workingDirPrefix string, evaluatee string) int {
 
 	out, err, errMsg := util.RunCommand(executableName)
 	// TODO: it works, but correctly?
-	log.Debug("executed: %s", executableName)
+	log.Info("successed to execute: %s", executableName)
 	if err != nil {
-		log.Debug("artifactDir: %s", executableName)
-		log.Error("fail to run: err %+v, message %+v", err, errMsg)
+		log.Error("%s: fail to run: err %+v, message %+v", e.ERROR_RUNTINME, err, errMsg)
 		return 1
 	}
 	fmt.Println(out)
@@ -186,7 +185,7 @@ func main() {
 						os.Exit(doRunExecutable(*appOutput, arg))
 					}
 				} else {
-					log.Panic("fail to run, input must be specified")
+					log.Panic("%s: missing input file", e.ERROR_RUNTINME)
 				}
 			} else {
 				os.Exit(doRunExecutable(*appOutput, *runExec))

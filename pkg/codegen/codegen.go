@@ -11,6 +11,7 @@ import (
 	"github.com/llir/llvm/ir/types"
 	"github.com/llir/llvm/ir/value"
 
+	"github.com/wf001/modo/pkg/error"
 	"github.com/wf001/modo/pkg/log"
 	mTypes "github.com/wf001/modo/pkg/types"
 )
@@ -33,7 +34,7 @@ type Context struct {
 func newBool(s string) *constant.Int {
 	i, err := strconv.ParseInt(s, 2, 2)
 	if err != nil {
-		log.Panic("fail to newBool: %s", err)
+		log.Panic("%s: fail to newBool: %s", error.ERROR_SYNTAX_ERROR, err)
 	}
 	return constant.NewInt(types.I1, i)
 }
@@ -41,7 +42,7 @@ func newBool(s string) *constant.Int {
 func newI32(s string) *constant.Int {
 	i, err := strconv.ParseInt(s, 10, 32)
 	if err != nil {
-		log.Panic("fail to newI32: %s", err)
+		log.Panic("%s: fail to newI32: %s", error.ERROR_SYNTAX_ERROR, err)
 	}
 
 	return constant.NewInt(types.I32, i)
@@ -251,7 +252,7 @@ func (ctx *Context) genVarDeclare(node *mTypes.Node) value.Value {
 			retType = types.NewPointer(structType.Types)
 
 		} else {
-			log.Panic(":have %#+v", node)
+			log.Panic("%s: not found type: have %+v", error.ERROR_UNDEFINE, node)
 		}
 
 		funcName := node.GetFuncName()
@@ -270,12 +271,11 @@ func (ctx *Context) genVarDeclare(node *mTypes.Node) value.Value {
 			} else if rootTy != nil {
 				ty = rootTy
 
-			} else if ctx.prog.Declare.Type != nil && ctx.prog.Declare.Type.Struct != nil {
-				structType := mTypes.GetExtendedType(ctx.prog.Declare, a)
+			} else if structType := mTypes.GetExtendedType(ctx.prog.Declare, a); structType != nil {
 				ty = structType.Types
 
 			} else {
-				log.Panic(":have %#+v", a)
+				log.Panic("%s: undefined type used with variable declaration: have %s", error.ERROR_UNDEFINE, a.Type.ExtendName)
 			}
 
 			p := ir.NewParam(a.Val, ty)
@@ -377,7 +377,7 @@ func (ctx *Context) genVarReference(node *mTypes.Node) value.Value {
 				return scope.IRValue
 
 			} else {
-				log.Panic("unresolved NodeType: have %+v", node)
+				log.Panic("%s: unexpected value type used in let bindings: have %s", error.ERROR_UNDEFINE, node.Val)
 			}
 		}
 	}
@@ -389,7 +389,10 @@ func (ctx *Context) genVarReference(node *mTypes.Node) value.Value {
 		}
 	}
 
-	log.Debug("unresolved symbol, treated as struct field: '%s'", node.Val)
+	log.Debug(
+		"variable unresolved treated as struct field: '%s'",
+		node.Val,
+	)
 
 	return nil
 }
@@ -549,7 +552,7 @@ func (ctx *Context) gen(node *mTypes.Node) value.Value {
 				bind.IRValue = child
 
 			} else {
-				log.Panic("unresolved NodeType: have %+v", node)
+				log.Panic("%s: unexpected symbol used: have %s", error.ERROR_UNDEFINE, node.Val)
 			}
 
 		}
@@ -591,7 +594,7 @@ func (ctx *Context) gen(node *mTypes.Node) value.Value {
 			}
 
 		}
-		log.Panic("unresolved function name: have %+v", node)
+		log.Panic("%s: function name unresolved: have %+v", error.ERROR_UNDEFINE, node)
 
 	} else if node.IsKind(mTypes.ND_SCALAR) {
 		if node.IsType(mTypes.TY_INT32) {
@@ -611,7 +614,7 @@ func (ctx *Context) gen(node *mTypes.Node) value.Value {
 			return newBool(node.Val)
 
 		} else {
-			log.Panic("unresolved Scalar: have %+v", node)
+			log.Panic("%s: unresolved symbol used: have %s", error.ERROR_UNDEFINE, node.Val)
 		}
 
 	} else if node.IsKind(mTypes.ND_COLLECTION) && node.IsType(mTypes.TY_VECTOR) {
@@ -621,7 +624,7 @@ func (ctx *Context) gen(node *mTypes.Node) value.Value {
 		return newStruct(ctx, node)
 
 	} else {
-		log.Panic("unresolved Nodekind: have %+v", node)
+		log.Panic("%s: unexpected character used, or missing essential signature to generate code: have %+v", error.ERROR_SYNTAX_ERROR, node)
 	}
 	return nil
 }
@@ -635,6 +638,7 @@ func constructModule(prog *mTypes.Program, internal *mTypes.Internal) *ir.Module
 	prog.Declare.Type.Struct = map[string]*mTypes.StructType{}
 	prog.Declare.Type.LLVM = map[string]*types.Type{}
 
+	log.Info("prepared to compile")
 	for declare := prog.Declare.Func; declare != nil; declare = declare.Next {
 		c := &Context{
 			mod:      module,
@@ -643,6 +647,7 @@ func constructModule(prog *mTypes.Program, internal *mTypes.Internal) *ir.Module
 		}
 		c.gen(declare)
 	}
+	log.Info("compiled source")
 
 	return module
 }
@@ -655,15 +660,19 @@ func Construct(program *mTypes.Program) *assembler {
 }
 
 func (a assembler) GenIntermediates(llName string, asmName string) {
-	log.DebugMessage("ir module constructing")
+	log.Info("compiling")
 	module := constructModule(a.program, a.internal)
-	log.DebugMessage("ir module constructed")
+	log.Info("compiled")
 	log.Debug("[IR]\n%s\n", module.String())
 
 	err := os.WriteFile(llName, []byte(module.String()), 0600)
 	if err != nil {
-		log.Panic("fail to write ll: %+v", map[string]interface{}{"err": err, "llName": llName})
+		log.Panic(
+			"%s: fail to write llvm file: %+v",
+			error.ERROR_UNDEFINE,
+			map[string]interface{}{"err": err, "llName": llName},
+		)
 	}
-	log.Debug("written ll: %s", llName)
+	log.Info("completed to store llvm file: %s", llName)
 
 }

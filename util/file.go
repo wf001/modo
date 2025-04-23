@@ -6,6 +6,7 @@ import (
 	"os"
 	"os/exec"
 
+	"github.com/wf001/modo/pkg/error"
 	"github.com/wf001/modo/pkg/log"
 )
 
@@ -14,18 +15,19 @@ func PrepareWorkingFile(artifactFilePrefix string, currentTime int64) (string, s
 		generated := "generated"
 		artifactDir := fmt.Sprintf("%s/%d", generated, currentTime)
 		out, err := exec.Command("mkdir", "-p", artifactDir).CombinedOutput()
+
 		if err != nil {
 			log.Panic(
-				"fail to make directory: %+v",
+				"%s: fail to make directory: %+v",
+				error.ERROR_UNDEFINE,
 				map[string]interface{}{"err": err, "out": out, "artifactDir": artifactDir},
 			)
 		}
-		log.Debug(log.YELLOW("make dir: %s"), artifactDir)
+		log.Info("make working directory: %s", artifactDir)
 
 		artifactFilePrefix = fmt.Sprintf("%s/out", artifactDir)
 	}
-	log.Debug(log.YELLOW("artifactFilePrefix = %s"), artifactFilePrefix)
-	log.Info("persist all of build artifact in %s", artifactFilePrefix)
+	log.Info("complete to persist all of build artifacts in %s", artifactFilePrefix)
 
 	llName := fmt.Sprintf("%s.ll", artifactFilePrefix)
 	asmName := fmt.Sprintf("%s.s", artifactFilePrefix)

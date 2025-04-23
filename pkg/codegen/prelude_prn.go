@@ -7,6 +7,7 @@ import (
 	"github.com/llir/llvm/ir/types"
 	"github.com/llir/llvm/ir/value"
 
+	"github.com/wf001/modo/pkg/error"
 	"github.com/wf001/modo/pkg/log"
 	mTypes "github.com/wf001/modo/pkg/types"
 )
@@ -196,7 +197,7 @@ func PreludePrn(
 			prnStructVector(ctx, n)
 
 		} else {
-			log.Panic("unresolved type: have %+v", n)
+			log.Panic("%s: unexpected value passed to prn function: have %+v", error.ERROR_UNDEFINE, n)
 		}
 
 		if n.Next == nil {

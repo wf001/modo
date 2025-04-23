@@ -1,6 +1,7 @@
 package parser
 
 import (
+	"github.com/wf001/modo/pkg/error"
 	"github.com/wf001/modo/pkg/log"
 	mTypes "github.com/wf001/modo/pkg/types"
 )
@@ -117,15 +118,18 @@ func parseIdent(
 				}
 			}
 		} else {
-			log.Panic("must be :: :have %+v", tok)
+			log.Panic("%s : must have '::' with var type", error.ERROR_SYNTAX_ERROR)
 		}
 
-		// this parseDeclare which parse all of child expression  may return node which have Args
+		// this parseDeclare which parse all of child expression may return node which have Args
 		tok, head = parseDeclare(tok, mTypes.ND_VAR_DECLARE)
 		if head.Args != nil {
 			for nodeArg := head.Args; nodeArg != nil; nodeArg = nodeArg.Next {
 				if typeList.Type == nil {
-					log.Panic("type required :have %+v, %+v", typeCur, nodeArg)
+					log.Panic(
+						"%s : mismatch between declared types and function parameters",
+						error.ERROR_SYNTAX_ERROR,
+					)
 				}
 				// set Args.Type with correspond linked-list Type
 				nodeArg.Type = typeList.Type
@@ -164,7 +168,10 @@ func parseLambda(tok *mTypes.Token, head *mTypes.Node) (*mTypes.Token, *mTypes.N
 
 	for tok = tok.Next; !tok.IsKindAndVal(mTypes.TK_PAREN, mTypes.BRACKET_CLOSE); tok = tok.Next {
 		if !tok.IsKind(mTypes.TK_IDENT) {
-			log.Panic("unresolved token kind, must be TK_IDENT: have %+v", tok)
+			log.Panic(
+				"%s : missing argument symbol, find other type symbol",
+				error.ERROR_SYNTAX_ERROR,
+			)
 		}
 
 		argCur.Next = newNodeParent(mTypes.ND_VAR_REFERENCE, nil, tok.Val)
@@ -207,7 +214,7 @@ func parseDeclare(tok *mTypes.Token, parentKind mTypes.NodeKind) (*mTypes.Token,
 
 			tok = tok.Next
 			if !tok.IsKindAndVal(mTypes.TK_PAREN, mTypes.BRACE_OPEN) {
-				log.Panic("defschema must begin with { have: %#+v", tok)
+				log.Panic("%s: missing '{' for defschema", error.ERROR_SYNTAX_ERROR)
 			}
 			// Note: prefer to be TY_TYPE_STRUCT
 			varDeclare := &mTypes.Node{
@@ -226,7 +233,7 @@ func parseDeclare(tok *mTypes.Token, parentKind mTypes.NodeKind) (*mTypes.Token,
 
 				tok = tok.Next
 				if !tok.IsKind(mTypes.TK_TYPE_SIG) {
-					log.Panic("type signature '::' required have: %#+v", tok)
+					log.Panic("%s: missing type signature '::' for type declaration", error.ERROR_SYNTAX_ERROR)
 				}
 
 				tok = tok.Next
@@ -245,7 +252,7 @@ func parseDeclare(tok *mTypes.Token, parentKind mTypes.NodeKind) (*mTypes.Token,
 					break
 				}
 				if tok == nil {
-					log.Panic("must be closed with }")
+					log.Panic("%s: missing closing paren '}'", error.ERROR_SYNTAX_ERROR)
 				}
 			}
 			varDeclare.Child = childHead.Next
@@ -257,7 +264,7 @@ func parseDeclare(tok *mTypes.Token, parentKind mTypes.NodeKind) (*mTypes.Token,
 			tok = tok.Next
 
 			if tok.IsKindAndVal(mTypes.TK_PAREN, mTypes.BRACKET_CLOSE) {
-				log.Panic("let bindings require even number of forms")
+				log.Panic("%s: let bindings must involve the more than one pair of variable name and value", error.ERROR_SYNTAX_ERROR)
 			}
 
 			prev := &mTypes.Node{}
@@ -274,7 +281,7 @@ func parseDeclare(tok *mTypes.Token, parentKind mTypes.NodeKind) (*mTypes.Token,
 				}
 
 				if tok == nil {
-					log.Panic("must be closed with ]")
+					log.Panic("%s: missing clossing brace ']' for let bindings", error.ERROR_SYNTAX_ERROR)
 				}
 			}
 
@@ -311,7 +318,7 @@ func parseDeclare(tok *mTypes.Token, parentKind mTypes.NodeKind) (*mTypes.Token,
 		}
 
 		if !tok.IsKindAndVal(mTypes.TK_PAREN, mTypes.PARREN_CLOSE) {
-			log.Panic("must be ) :have %+v", tok)
+			log.Panic("%s: missing ) for condition expression", error.ERROR_SYNTAX_ERROR)
 		}
 		return tok.Next, head
 
@@ -330,7 +337,7 @@ func parseDeclare(tok *mTypes.Token, parentKind mTypes.NodeKind) (*mTypes.Token,
 		case "false":
 			v = "0"
 		default:
-			log.Panic("unresolved bool value: got %+v", tok)
+			log.Panic("%s: bool value must either 'true' or 'false' : have %s", error.ERROR_SYNTAX_ERROR, tok.Val)
 		}
 		return tok.Next, newNodeScalar(mTypes.TY_BOOL, v)
 
@@ -347,7 +354,7 @@ func parseDeclare(tok *mTypes.Token, parentKind mTypes.NodeKind) (*mTypes.Token,
 	} else if tok.IsKindAndVal(mTypes.TK_PAREN, mTypes.BRACE_OPEN) {
 		tok, rootNode := parseBody(tok, mTypes.ND_COLLECTION, "")
 		if !tok.IsKindAndVal(mTypes.TK_PAREN, mTypes.BRACE_CLOSE) {
-			log.Panic("struct must be closed with brace :have %+v", tok)
+			log.Panic("%s: missing close brace for struct", error.ERROR_SYNTAX_ERROR)
 		}
 		tok = tok.Next
 		return tok, rootNode
@@ -357,13 +364,13 @@ func parseDeclare(tok *mTypes.Token, parentKind mTypes.NodeKind) (*mTypes.Token,
 		t, rootNode := parseBody(tok, mTypes.ND_COLLECTION, "")
 		tok = t
 		if !tok.IsKindAndVal(mTypes.TK_PAREN, mTypes.BRACKET_CLOSE) {
-			log.Panic("vector must be closed with bracket :have %+v", tok)
+			log.Panic("%s: missing close bracket for vector", error.ERROR_SYNTAX_ERROR)
 		}
 		tok = tok.Next
 		return tok, rootNode
 
 	} else {
-		log.Panic("unresolved token :have %+v", tok)
+		log.Panic("%s: unexpected character used, or missing essential signature to parse: have %+v", error.ERROR_SYNTAX_ERROR, tok)
 	}
 
 	return tok, head
@@ -377,7 +384,11 @@ func parseProgram(tok *mTypes.Token) *mTypes.Program {
 	for tok != nil && tok.IsKindAndVal(mTypes.TK_PAREN, mTypes.PARREN_OPEN) {
 
 		if !tok.Next.IsKind(mTypes.TK_DECLARE_VAR) && !tok.Next.IsKind(mTypes.TK_DECLARE_TYPE) {
-			log.Panic("must be declare token: have %+v", tok.Next)
+			log.Panic(
+				"%s: missing declaration symbol, must be either 'def' or 'defschema': have %s",
+				error.ERROR_SYNTAX_ERROR,
+				tok.Next.Val,
+			)
 		}
 
 		if prevDeclare == nil {

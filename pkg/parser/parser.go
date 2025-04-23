@@ -81,11 +81,15 @@ func parseIdent(
 		log.DebugValueColored("is Variable declaration :have %s", tok)
 
 		identName := tok.Val
-		// HACK: change other local struct
-		typeCur := &mTypes.Node{}
+
+		type typeListProps struct {
+			Type *mTypes.NodeType
+			Next *typeListProps
+		}
+		typeCur := &typeListProps{}
 		typeList := typeCur
 
-		// create linked-list(typeHead) which have TYPE and ElemType
+		// create linked-list(typeList)
 		if tok.Next.IsKind(mTypes.TK_TYPE_SIG) {
 			tok = tok.Next.Next
 			for {
@@ -103,7 +107,7 @@ func parseIdent(
 					typeCur.Type.Child, _ = mTypes.GetModoType(tok.Kind.Child)
 				}
 
-				typeCur.Next = &mTypes.Node{}
+				typeCur.Next = &typeListProps{}
 				typeCur = typeCur.Next
 
 				tok = tok.Next

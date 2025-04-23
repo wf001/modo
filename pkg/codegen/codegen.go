@@ -100,6 +100,11 @@ func newStrHeap(ctx *Context, n *mTypes.Node) *ir.InstCall {
 	return dest
 }
 
+// Unlike strings, vectors use malloc, which means structures containing pointer types cannot be
+// used directly in the global space. While a vector used as a local variable can be represented
+// as a structure, and a global vector can be defined using types.ArrayType, the added complexity
+// doesn't seem worth the benefit.
+// Therefore, global vectors also use heap memory.
 func newVectorHeap(ctx *Context, n *mTypes.Node) value.Value {
 	var vecLength int64
 

@@ -144,11 +144,12 @@ func parseIdent(
 		// the last element of typeList must be return type of function
 		varDeclareNode.Type = typeList.Type
 
-		// NOTE: need? prefer to change to check whether the actual value type match to the type declared or not for all type
 		// type ND_COLLECTION recursively
-		//varDecChild := varDeclareNode.Child
-		//tlType := typeList.Type
-		//typeCollectionNode(varDecChild, tlType)
+		// This is just a quick fix — when nesting a struct inside another struct using conj, have to build the type info from the actual value.
+		// NOTE: prefer to change to check whether the actual value type match to the type declared or not for all type
+		varDecChild := varDeclareNode.Child
+		tlType := typeList.Type
+		typeCollectionNode(varDecChild, tlType)
 		return tok, varDeclareNode
 
 	} else {
@@ -354,6 +355,8 @@ func parseDeclare(tok *mTypes.Token, parentKind mTypes.NodeKind) (*mTypes.Token,
 		// means struct value
 	} else if tok.IsKindAndVal(mTypes.TK_PAREN, mTypes.BRACE_OPEN) {
 		tok, rootNode := parseBody(tok, mTypes.ND_COLLECTION, "")
+		// ExtendedName (equals to struct type name) is given parent node,
+		// so type struct ND_COLLECTION on var_reference
 		if !tok.IsKindAndVal(mTypes.TK_PAREN, mTypes.BRACE_CLOSE) {
 			log.Panic("%s: missing close brace for struct", error.ERROR_SYNTAX_ERROR)
 		}

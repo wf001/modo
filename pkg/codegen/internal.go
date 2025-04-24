@@ -11,5 +11,5 @@ func declareInternal(ir *ir.Module, internal *mTypes.Internal) {
 	declareInternalConst(ir, internal)
 	declareCstd(ir, internal)
 
-	log.DebugMessage("built-in library declared")
+	log.DebugMessage("declared internal global constant variable")
 }

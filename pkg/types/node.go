@@ -171,21 +171,41 @@ func (node *Node) GetNodeSize() uint64 {
 // conversion Node properties to other properties
 // ==============
 
+func isStructTypeDefined(mod *ir.Module, fields []types.Type) (types.Type, bool) {
+	for _, typ := range mod.TypeDefs {
+		structType, ok := typ.(*types.StructType)
+		if !ok {
+			continue
+		}
+		// 明示的に同じかチェック（要素数・型一致）
+		if len(structType.Fields) != len(fields) {
+			continue
+		}
+		match := true
+		for i := range fields {
+			if !types.Equal(structType.Fields[i], fields[i]) {
+				match = false
+				break
+			}
+		}
+		if match {
+			return structType, true
+		}
+	}
+	return nil, false
+}
+
 func declareVectorType(ir *ir.Module, ty types.Type, ndtype *NodeType) types.Type {
 	// i32 type vector
 	// 型: struct { i32* %arrElm, i64 %len}
 	vectorIntType := types.NewStruct(types.NewPointer(ty), types.I64)
-	typeName := GetGlobalVarName("vec", ir, ndtype)
-	vectorIntType.SetName(typeName)
 
 	// not declare same type twice
-	for _, g := range ir.TypeDefs {
-		if s, ok := g.(*types.StructType); ok {
-			if s.TypeName == typeName {
-				return vectorIntType
-			}
-		}
+	if ty, defined := isStructTypeDefined(ir, vectorIntType.Fields); defined {
+		return ty
 	}
+	typeName := GetGlobalVarName("vec", ir, ndtype)
+	vectorIntType.SetName(typeName)
 	ir.NewTypeDef(typeName, vectorIntType)
 	return vectorIntType
 

@@ -144,10 +144,11 @@ func parseIdent(
 		// the last element of typeList must be return type of function
 		varDeclareNode.Type = typeList.Type
 
+		// NOTE: need? prefer to change to check whether the actual value type match to the type declared or not for all type
 		// type ND_COLLECTION recursively
-		varDecChild := varDeclareNode.Child
-		tlType := typeList.Type
-		typeCollectionNode(varDecChild, tlType)
+		//varDecChild := varDeclareNode.Child
+		//tlType := typeList.Type
+		//typeCollectionNode(varDecChild, tlType)
 		return tok, varDeclareNode
 
 	} else {
@@ -362,6 +363,7 @@ func parseDeclare(tok *mTypes.Token, parentKind mTypes.NodeKind) (*mTypes.Token,
 		// means vector value
 	} else if tok.IsKindAndVal(mTypes.TK_PAREN, mTypes.BRACKET_OPEN) {
 		t, rootNode := parseBody(tok, mTypes.ND_COLLECTION, "")
+		rootNode.Type = &mTypes.NodeType{Value: mTypes.TY_VECTOR, Child: rootNode.Child.Type}
 		tok = t
 		if !tok.IsKindAndVal(mTypes.TK_PAREN, mTypes.BRACKET_CLOSE) {
 			log.Panic("%s: missing close bracket for vector", error.ERROR_SYNTAX_ERROR)

@@ -3,7 +3,6 @@ package codegen
 import (
 	"github.com/llir/llvm/ir"
 	"github.com/llir/llvm/ir/constant"
-	"github.com/wf001/modo/pkg/log"
 	mTypes "github.com/wf001/modo/pkg/types"
 )
 
@@ -71,6 +70,4 @@ func declareInternalConst(ir *ir.Module, internal *mTypes.Internal) {
 	globalConst.StringComma.Immutable = true
 
 	internal.GlobalConst = globalConst
-
-	log.DebugMessage("built-in variable declared")
 }

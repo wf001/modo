@@ -3,7 +3,6 @@ package main
 import (
 	"fmt"
 	"os"
-	d "runtime/debug"
 	"time"
 
 	"github.com/alecthomas/kingpin/v2"
@@ -159,11 +158,10 @@ func wrapException(fn func()) (err error) {
 	//   - A `panic` can be caught with `recover`, converted back to an `error`,
 	//     or handled gracefully depending on debug flags or runtime configuration.
 	defer func() {
-		if r := recover(); r != nil {
-			if logrus.GetLevel() == logrus.DebugLevel {
-				os.Stderr.Write(d.Stack())
+		if logrus.GetLevel() != logrus.DebugLevel {
+			if r := recover(); r != nil {
+				log.Error("%s", r)
 			}
-			log.Error("%s", r)
 		}
 	}()
 

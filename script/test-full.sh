@@ -209,6 +209,10 @@ testexec(){
   assertexec "(def f :: [int] => [int] (fn [v] (conj v 81))) (def main :: int (fn [] (let [v :: [int] [42, 64, 90]] (prn (f v)))))" "[42, 64, 90, 81]\\\n"
   assertexec "(def main :: int (fn [] (let [vec :: [[[int]]] [[[11 12 13] [14 15]] [[21 22 23] [24]] [[31 32] [33 34 35]] [[41 42] [43 44 45]]]] (prn (nth (nth (nth vec 1) 1) 0)) )))" "24\\\n"
 
+  # reference
+  assertexec "(def main :: int (fn [] (let [vec1 :: [int] [42, 23] vec2 :: [int] vec1] (prn (conj vec2 1)) (prn (conj vec1 3)) (prn vec1) (prn vec2))))" "[42, 23, 1]\\\n[42, 23, 3]\\\n[42, 23]\\\n[42, 23]\\\n"
+
+
 
   # struct
   echo "== struct ==="

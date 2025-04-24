@@ -365,16 +365,16 @@ func (ctx *Context) genVarReference(node *mTypes.Node) value.Value {
 	// find in local variable which is declared with let
 	for scope := ctx.scope; scope != nil; scope = scope.Next {
 		if scope.Val == node.Val {
-			if scope.Child.IsScalar() {
+			if scope.IsScalar() {
 				return scope.IRValue
 
-			} else if scope.Child.IsKind(mTypes.ND_LIBCALL) {
+			} else if scope.IsKind(mTypes.ND_LIBCALL) {
 				return scope.IRValue
 
-			} else if scope.Child.IsType(mTypes.TY_VECTOR) {
+			} else if scope.IsType(mTypes.TY_VECTOR) {
 				return scope.IRValue
 
-			} else if scope.Child.IsType(mTypes.TY_EXTENDED) {
+			} else if scope.IsType(mTypes.TY_EXTENDED) {
 				return scope.IRValue
 
 			} else {

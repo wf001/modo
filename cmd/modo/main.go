@@ -3,10 +3,10 @@ package main
 import (
 	"fmt"
 	"os"
-	"time"
 
 	"github.com/alecthomas/kingpin/v2"
 	"github.com/sirupsen/logrus"
+
 	"github.com/wf001/modo/pkg/codegen"
 	e "github.com/wf001/modo/pkg/error"
 	"github.com/wf001/modo/pkg/lexer"
@@ -16,25 +16,25 @@ import (
 )
 
 const (
-	VERSION = "0.0.1"
-	AUTHOR  = "wf001"
+	VERSION = "modo version modo0.0.1"
 )
 
 var (
 	app = kingpin.
 		New("modo", "Compiler for the modo programming language.").
-		Version(VERSION).
-		Author(AUTHOR)
-	appVerbose = app.Flag("verbose", "Use verbose log").Bool()
-	appDebug   = app.Flag("debug", "Use debug log").Bool()
-	appOutput  = app.Flag("output", "Write output to <OUTPUT>").Short('o').String()
-	appLLI     = app.Flag("lli", "run with lli").Bool()
+		Version(VERSION)
+	appVerboseEnabled = app.Flag("verbose", "Show verbose log").Bool()
+	appDebugEnabled   = app.Flag("debug", "Show debug log (more detailed than verbose)").Bool()
+	appWorkEnabled    = app.Flag("work", "run the program by executable and do not delete temporary work directory when exiting").
+				Bool()
 
-	buildCmd = app.Command("build", "Build an executable.")
+	buildCmd       = app.Command("build", "Build an executable")
+	buildOutput    = buildCmd.Flag("output", "Write output to <OUTPUT>").Short('o').String()
+	buildInputFile = buildCmd.Arg("file", "source file").String()
 
-	runCmd    = app.Command("run", "Build and run an executable.")
-	runExec   = runCmd.Flag("exec", "evaluate <EXEC>").String()
-	inputFile = runCmd.Arg("file", "source file").String()
+	runCmd       = app.Command("run", "Build and run a program")
+	runExec      = runCmd.Flag("exec", "evaluate <EXEC>").String()
+	runInputFile = runCmd.Arg("file", "source file").String()
 )
 
 type IAssebler interface {
@@ -49,103 +49,98 @@ func GenFrontend(a IAssebler) {
 func showOpts(cmd string) {
 	m := map[string]interface{}{}
 	m["cmd"] = cmd
-	m["appOutput"] = *appOutput
-	m["appLLI"] = *appLLI
+	m["buildOutput"] = *buildOutput
+	m["appWorkEnabled"] = *appWorkEnabled
 	m["exec"] = *runExec
-	m["debug"] = *appDebug
-	m["verbose"] = *appVerbose
-	m["inputFile"] = *inputFile
+	m["debug"] = *appDebugEnabled
+	m["verbose"] = *appVerboseEnabled
+	m["buildInputFile"] = *buildInputFile
+	m["runInputFile"] = *runInputFile
 	log.Debug("options = %#+v", m)
 }
 
 func setLogLevel() {
-	if *appVerbose {
+	if *appVerboseEnabled {
 		log.SetLevelInfo()
 	}
-	if *appDebug {
+	if *appDebugEnabled {
 		log.SetLevelDebug()
 	}
 }
 
-func compile(asmFile string, executableFile string) {
-	_, err, errMsg := util.RunCommand("clang", asmFile, "-o", executableFile)
+type context struct {
+	llFlleName          string
+	asmFileName         string
+	executableFileNamne string
+	artifactDirectory   string
+	isDebug             bool
+	useExecutable       bool
+}
+
+func (ctx *context) compile() {
+	_, err, errMsg := util.RunCommand("clang", ctx.asmFileName, "-o", ctx.executableFileNamne)
 	if err != nil {
-		log.Debug("artifactDir: %s", executableFile)
+		log.Debug("executableFileNamne: %s", ctx.executableFileNamne)
 		log.Panic("fail to run: err %+v, message %+v", err, errMsg)
 	}
-	log.Debug("written executable: %s", executableFile)
+	log.Info("successfully wrote executable file: %s", ctx.executableFileNamne)
 }
 
-func assemble(llFile string, asmFile string) {
+func (ctx *context) assemble() {
 	// TODO: work it?
-	out, err, errMsg := util.RunCommand("llc", llFile, "-o", asmFile)
+	out, err, errMsg := util.RunCommand("llc", ctx.llFlleName, "-o", ctx.asmFileName)
 	if err != nil {
-		log.Debug("llFile: %s, asmFile: %s", llFile, asmFile)
+		log.Debug("llFlleName: %s, asmFileName: %s", ctx.llFlleName, ctx.asmFileName)
 		log.Panic("fail to asemble: out %+v, err %+v, message %+v", out, err, errMsg)
 	}
-	log.Debug("written asm: %s", asmFile)
+	log.Info("successfully wrote assembly file: %s", ctx.asmFileName)
 }
 
-func genFrontend(workingDirPrefix string, evaluatee string) (string, string, string) {
-	currentTime := time.Now().Unix()
+func (ctx *context) genFrontend(sourceText string) {
 	// string -> Token
-	token := lexer.Lex(evaluatee)
+	token := lexer.Lex(sourceText)
 
 	// Token -> Node
 	node := parser.Parse(token)
 
-	llName, asmName, executableName := util.PrepareWorkingFile(workingDirPrefix, currentTime)
-
 	// Node -> write intermediate representation(IR)
-	codegen.Construct(node).GenIntermediates(llName, asmName)
-
-	return llName, asmName, executableName
+	codegen.Construct(node).GenIntermediates(ctx.llFlleName, ctx.asmFileName)
 }
 
-func doBuild(workingDirPrefix string, evaluatee string) (error, string) {
-	llName, asmName, executableName := genFrontend(workingDirPrefix, evaluatee)
+func (ctx *context) doRunLLI(sourceText string) {
+	ctx.genFrontend(sourceText)
 
-	// IR -> write assembly
-	assemble(llName, asmName)
-
-	// assembly file -> write executable
-	compile(asmName, executableName)
-
-	return nil, executableName
-}
-
-func doRunLLI(workingDirPrefix string, evaluatee string) int {
-	llName, _, _ := genFrontend(workingDirPrefix, evaluatee)
-
-	out, err, errMsg := util.RunCommand("lli", llName)
+	out, err, errMsg := util.RunCommand("lli", ctx.llFlleName)
 	// TODO: it works, but correctly?
-	log.Info("successed to execute: %s", llName)
 	if err != nil {
-		log.Error("%s: fail to run: err %+v, message %+v", e.ERROR_RUNTINME, err, errMsg)
-		return 1
+		log.Panic("%s: fail to run: err %+v, message %+v", e.ERROR_RUNTINME, err, errMsg)
 	}
+	log.Info("successfully executed: %s", ctx.llFlleName)
 	fmt.Println(out)
 
-	return 0
+}
+
+func (ctx *context) doBuild(sourceText string) {
+	ctx.genFrontend(sourceText)
+
+	// IR -> write assembly
+	ctx.assemble()
+
+	// assembly file -> write executable
+	ctx.compile()
 }
 
 // HACK: It might be better if the return type matches that of doBuild
-func doRunExecutable(workingDirPrefix string, evaluatee string) int {
-	err, executableName := doBuild(workingDirPrefix, evaluatee)
-	if err != nil {
-		log.Panic("fail to run: err %+v, executable %+v", err, executableName)
-	}
+func (ctx *context) doRunExecutable(sourceText string) {
+	ctx.doBuild(sourceText)
 
-	out, err, errMsg := util.RunCommand(executableName)
+	out, err, errMsg := util.RunCommand(ctx.executableFileNamne)
 	// TODO: it works, but correctly?
-	log.Info("successed to execute: %s", executableName)
 	if err != nil {
 		log.Error("%s: fail to run: err %+v, message %+v", e.ERROR_RUNTINME, err, errMsg)
-		return 1
 	}
+	log.Info("successfully executed: %s", ctx.executableFileNamne)
 	fmt.Println(out)
-
-	return 0
 }
 
 func wrapException(fn func()) (err error) {
@@ -169,6 +164,50 @@ func wrapException(fn func()) (err error) {
 
 	return nil
 }
+func (ctx *context) constructContext() {
+	artifactDirectory, llName, asmName, executableName := util.PrepareWorkingFile(
+		*buildOutput,
+		ctx.useExecutable,
+	)
+	ctx.artifactDirectory = artifactDirectory
+	ctx.llFlleName = llName
+	ctx.asmFileName = asmName
+	ctx.executableFileNamne = executableName
+}
+
+func (ctx *context) runRunCmd() {
+
+	var sourceText string
+
+	if *runExec == "" {
+		if runInputFile == nil {
+			log.Panic("%s: missing input file", e.ERROR_RUNTINME)
+		}
+		sourceText = util.ReadFile(runInputFile)
+
+	} else {
+		sourceText = *runExec
+	}
+
+	if *appWorkEnabled {
+		ctx.doRunExecutable(sourceText)
+
+	} else {
+		ctx.doRunLLI(sourceText)
+	}
+
+}
+
+func (ctx *context) runBuildCmd() {
+	var sourceText string
+	if buildInputFile == nil {
+		log.Panic("%s: missing input file", e.ERROR_RUNTINME)
+	}
+	sourceText = util.ReadFile(buildInputFile)
+
+	ctx.doBuild(sourceText)
+
+}
 
 func main() {
 	_ = wrapException(func() {
@@ -176,23 +215,37 @@ func main() {
 
 		setLogLevel()
 		showOpts(cmd)
+
+		ctx := &context{
+			isDebug: *appDebugEnabled,
+		}
+
+		defer func() {
+			if !*appWorkEnabled {
+				err := os.RemoveAll(ctx.artifactDirectory)
+				if err != nil {
+					log.Error("%s: failed to remove temporary work directory: %v", err)
+				} else {
+					log.Info("successfully removed temporary work directory(%s)", ctx.artifactDirectory)
+				}
+			}
+		}()
+
 		switch cmd {
 
 		case runCmd.FullCommand():
-			if *runExec == "" {
-				if inputFile != nil {
-					arg := util.ReadFile(inputFile)
-					if *appLLI {
-						os.Exit(doRunLLI(*appOutput, arg))
-					} else {
-						os.Exit(doRunExecutable(*appOutput, arg))
-					}
-				} else {
-					log.Panic("%s: missing input file", e.ERROR_RUNTINME)
-				}
-			} else {
-				os.Exit(doRunExecutable(*appOutput, *runExec))
-			}
+			ctx.useExecutable = false
+			ctx.constructContext()
+
+			ctx.runRunCmd()
+
+		case buildCmd.FullCommand():
+			ctx.useExecutable = true
+			ctx.constructContext()
+
+			ctx.runBuildCmd()
+
+		default:
 		}
 	})
 }

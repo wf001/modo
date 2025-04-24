@@ -4,36 +4,41 @@ import (
 	"bufio"
 	"fmt"
 	"os"
-	"os/exec"
 
 	"github.com/wf001/modo/pkg/error"
 	"github.com/wf001/modo/pkg/log"
 )
 
-func PrepareWorkingFile(artifactFilePrefix string, currentTime int64) (string, string, string) {
-	if artifactFilePrefix == "" {
-		generated := "generated"
-		artifactDir := fmt.Sprintf("%s/%d", generated, currentTime)
-		out, err := exec.Command("mkdir", "-p", artifactDir).CombinedOutput()
+func PrepareWorkingFile(
+	executableName string,
+	useExecutable bool,
+) (string, string, string, string) {
+	artifactDir, err := os.MkdirTemp("", "modo-build-")
 
-		if err != nil {
-			log.Panic(
-				"%s: fail to make directory: %+v",
-				error.ERROR_UNDEFINE,
-				map[string]interface{}{"err": err, "out": out, "artifactDir": artifactDir},
-			)
-		}
-		log.Info("make working directory: %s", artifactDir)
-
-		artifactFilePrefix = fmt.Sprintf("%s/out", artifactDir)
+	if err != nil {
+		log.Panic(
+			"%s: fail to make directory: %+v",
+			error.ERROR_UNDEFINE,
+			map[string]interface{}{"err": err, "artifactDir": artifactDir},
+		)
 	}
-	log.Info("complete to persist all of build artifacts in %s", artifactFilePrefix)
+	log.Info("made working directory: %s", artifactDir)
 
-	llName := fmt.Sprintf("%s.ll", artifactFilePrefix)
-	asmName := fmt.Sprintf("%s.s", artifactFilePrefix)
-	executableName := fmt.Sprintf("%s", artifactFilePrefix)
+	workingDirPrefix := fmt.Sprintf("%s/out", artifactDir)
 
-	return llName, asmName, executableName
+	llName := fmt.Sprintf("%s.ll", workingDirPrefix)
+	asmName := fmt.Sprintf("%s.s", workingDirPrefix)
+
+	if useExecutable {
+		if executableName == "" {
+			// TODO: get current dir correctly
+			executableName = "./main"
+		}
+	} else {
+		executableName = fmt.Sprintf("%s", workingDirPrefix)
+	}
+
+	return artifactDir, llName, asmName, executableName
 }
 
 func ReadFile(inputFile *string) string {

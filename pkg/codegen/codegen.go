@@ -640,6 +640,7 @@ func constructModule(prog *mTypes.Program, internal *mTypes.Internal) *ir.Module
 	prog.Declare.Type.LLVM = map[string]*types.Type{}
 
 	log.Info("prepared to compile")
+	log.Info("compilling input file")
 	for declare := prog.Declare.Func; declare != nil; declare = declare.Next {
 		c := &Context{
 			mod:      module,
@@ -648,7 +649,7 @@ func constructModule(prog *mTypes.Program, internal *mTypes.Internal) *ir.Module
 		}
 		c.gen(declare)
 	}
-	log.Info("compiled source")
+	log.Info("compiled input file")
 
 	return module
 }
@@ -661,7 +662,7 @@ func Construct(program *mTypes.Program) *assembler {
 }
 
 func (a assembler) GenIntermediates(llName string, asmName string) {
-	log.Info("compiling")
+	log.Info("compilling")
 	module := constructModule(a.program, a.internal)
 	log.Info("compiled")
 	// usually use log.Debug
@@ -678,6 +679,6 @@ func (a assembler) GenIntermediates(llName string, asmName string) {
 			map[string]interface{}{"err": err, "llName": llName},
 		)
 	}
-	log.Info("completed to store llvm file: %s", llName)
+	log.Info("successfully wrote ll file: %s", llName)
 
 }

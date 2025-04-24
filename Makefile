@@ -1,28 +1,16 @@
 dir = generated/$(shell date +%s)
 
-all:
-	mkdir -p $(dir)
-	make build dir=$(dir)
-	make run dir=$(dir) -i
-	rm -rf modo
-
-clean:
-	rm -rf generated
-	rm -rf modo
-
 build:
 	mkdir -p $(dir)
 	go build ./cmd/modo
 
 build-debug:
 	mkdir -p $(dir)
-	go build -a -p 1 -x -work ./cmd/modo
+	go build -a -p 1 -x -work -o ./$(dir)/modo ./cmd/modo
 
-run:
-	@echo "----------------------\n"
-	./modo run --debug --exec "1+2"
-	@echo $?
-	@echo "----------------------\n"
+clean:
+	rm -rf generated
+	rm -rf modo
 
 
 test-all:

@@ -118,6 +118,7 @@ func newVectorHeap(ctx *Context, n *mTypes.Node) value.Value {
 	}
 
 	structedArrType, elemType, _ := mTypes.GetLLVMTypeRec(ctx.mod, n.Type, ctx.prog.Prelude)
+	// TODO: remove
 	//structedArrType, elemType, _ := mTypes.GetLLVMType(n, ctx.prog.Prelude)
 
 	typeSize := constant.NewInt(types.I64, int64(mTypes.GetBitWidth(elemType)))
@@ -663,7 +664,11 @@ func (a assembler) GenIntermediates(llName string, asmName string) {
 	log.Info("compiling")
 	module := constructModule(a.program, a.internal)
 	log.Info("compiled")
+	// usually use log.Debug
+	// Sometimes String() just blows up, but WriteTo at least gives me something.
+	// super handy when I'm chasing weird behaviors while implementing.
 	log.Debug("[IR]\n%s\n", module.String())
+	//module.WriteTo(os.Stdout)
 
 	err := os.WriteFile(llName, []byte(module.String()), 0600)
 	if err != nil {

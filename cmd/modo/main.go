@@ -3,9 +3,11 @@ package main
 import (
 	"fmt"
 	"os"
+	d "runtime/debug"
 	"time"
 
 	"github.com/alecthomas/kingpin/v2"
+	"github.com/sirupsen/logrus"
 	"github.com/wf001/modo/pkg/codegen"
 	e "github.com/wf001/modo/pkg/error"
 	"github.com/wf001/modo/pkg/lexer"
@@ -158,6 +160,9 @@ func wrapException(fn func()) (err error) {
 	//     or handled gracefully depending on debug flags or runtime configuration.
 	defer func() {
 		if r := recover(); r != nil {
+			if logrus.GetLevel() == logrus.DebugLevel {
+				os.Stderr.Write(d.Stack())
+			}
 			log.Error("%s", r)
 		}
 	}()

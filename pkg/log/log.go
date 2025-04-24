@@ -5,7 +5,6 @@ import (
 	"os"
 	"regexp"
 	"runtime"
-	d "runtime/debug"
 
 	"github.com/sirupsen/logrus"
 )
@@ -113,9 +112,6 @@ func Panic(format string, value ...interface{}) {
 	defaultFormat := DEFAULT_FORMAT
 	if format == "" {
 		format = defaultFormat
-	}
-	if logrus.GetLevel() == logrus.DebugLevel {
-		os.Stderr.Write(d.Stack())
 	}
 
 	panic(fmt.Sprintf(format, value...))

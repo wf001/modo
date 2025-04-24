@@ -21,7 +21,13 @@ func PreludeConj(ctx *Context, n *mTypes.Node) value.Value {
 
 	newVecElemPtr := ctx.block.NewGetElementPtr(elemType, newVecPtr, oldLen)
 	newVal := n.Next.IRValue
-	ctx.block.NewStore(newVal, newVecElemPtr)
+	if _, ok := elemType.(*types.StructType); ok {
+		v := ctx.block.NewLoad(elemType, newVal)
+		ctx.block.NewStore(v, newVecElemPtr)
+	} else {
+		ctx.block.NewStore(newVal, newVecElemPtr)
+
+	}
 
 	newStructAlloca := ctx.block.NewAlloca(structedVecType)
 

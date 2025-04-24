@@ -69,21 +69,21 @@ func setLogLevel() {
 }
 
 type context struct {
-	llFlleName          string
-	asmFileName         string
-	executableFileNamne string
-	artifactDirectory   string
-	isDebug             bool
-	useExecutable       bool
+	llFlleName            string
+	asmFileName           string
+	executableFileName    string
+	artifactDirectory     string
+	isDebug               bool
+	storeExecutableInTemp bool
 }
 
 func (ctx *context) compile() {
-	_, err, errMsg := util.RunCommand("clang", ctx.asmFileName, "-o", ctx.executableFileNamne)
+	_, err, errMsg := util.RunCommand("clang", ctx.asmFileName, "-o", ctx.executableFileName)
 	if err != nil {
-		log.Debug("executableFileNamne: %s", ctx.executableFileNamne)
+		log.Debug("executableFileNamne: %s", ctx.executableFileName)
 		log.Panic("fail to run: err %+v, message %+v", err, errMsg)
 	}
-	log.Info("successfully wrote executable file: %s", ctx.executableFileNamne)
+	log.Info("successfully wrote executable file: %s", ctx.executableFileName)
 }
 
 func (ctx *context) assemble() {
@@ -134,12 +134,12 @@ func (ctx *context) doBuild(sourceText string) {
 func (ctx *context) doRunExecutable(sourceText string) {
 	ctx.doBuild(sourceText)
 
-	out, err, errMsg := util.RunCommand(ctx.executableFileNamne)
+	out, err, errMsg := util.RunCommand(ctx.executableFileName)
 	// TODO: it works, but correctly?
 	if err != nil {
 		log.Error("%s: fail to run: err %+v, message %+v", e.ERROR_RUNTINME, err, errMsg)
 	}
-	log.Info("successfully executed: %s", ctx.executableFileNamne)
+	log.Info("successfully executed: %s", ctx.executableFileName)
 	fmt.Println(out)
 }
 
@@ -167,12 +167,12 @@ func wrapException(fn func()) (err error) {
 func (ctx *context) constructContext() {
 	artifactDirectory, llName, asmName, executableName := util.PrepareWorkingFile(
 		*buildOutput,
-		ctx.useExecutable,
+		ctx.storeExecutableInTemp,
 	)
 	ctx.artifactDirectory = artifactDirectory
 	ctx.llFlleName = llName
 	ctx.asmFileName = asmName
-	ctx.executableFileNamne = executableName
+	ctx.executableFileName = executableName
 }
 
 func (ctx *context) runRunCmd() {
@@ -234,13 +234,13 @@ func main() {
 		switch cmd {
 
 		case runCmd.FullCommand():
-			ctx.useExecutable = false
+			ctx.storeExecutableInTemp = true
 			ctx.constructContext()
 
 			ctx.runRunCmd()
 
 		case buildCmd.FullCommand():
-			ctx.useExecutable = true
+			ctx.storeExecutableInTemp = false
 			ctx.constructContext()
 
 			ctx.runBuildCmd()

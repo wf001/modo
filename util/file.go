@@ -11,7 +11,7 @@ import (
 
 func PrepareWorkingFile(
 	executableName string,
-	useExecutable bool,
+	storeExecutableInTemp bool,
 ) (string, string, string, string) {
 	artifactDir, err := os.MkdirTemp("", "modo-build-")
 
@@ -29,13 +29,13 @@ func PrepareWorkingFile(
 	llName := fmt.Sprintf("%s.ll", workingDirPrefix)
 	asmName := fmt.Sprintf("%s.s", workingDirPrefix)
 
-	if useExecutable {
+	if storeExecutableInTemp {
+		executableName = fmt.Sprintf("%s", workingDirPrefix)
+	} else {
 		if executableName == "" {
 			// TODO: get current dir correctly
 			executableName = "./main"
 		}
-	} else {
-		executableName = fmt.Sprintf("%s", workingDirPrefix)
 	}
 
 	return artifactDir, llName, asmName, executableName

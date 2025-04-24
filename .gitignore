@@ -6,3 +6,4 @@ sample/
 .lsp
 .DS_Store
 __debug*
+config.yaml

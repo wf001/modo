@@ -144,12 +144,19 @@ func parseIdent(
 		// the last element of typeList must be return type of function
 		varDeclareNode.Type = typeList.Type
 
-		// type ND_COLLECTION recursively
-		// This is just a quick fix — when nesting a struct inside another struct using conj, have to build the type info from the actual value.
-		// NOTE: prefer to change to check whether the actual value type match to the type declared or not for all type
+		// Only in the case of extended typing that includes structs, the declared type
+		// information is treated as the variable’s type as-is.
+		// For most other values, especially those involving vectors, the type is not
+		// determined by the declared type, but rather inferred from the actual
+		// structure—such as the SyntaxRole of the token or its child nodes.
+		//
+		// Additionally, There are tha plan that the use and definition of struct-typed values are disabled
+		// unless they are introduced via a let binding.
+
 		varDecChild := varDeclareNode.Child
-		tlType := typeList.Type
-		typeCollectionNode(varDecChild, tlType)
+		if varDecChild.Type != nil && varDecChild.Type.Value == mTypes.TY_EXTENDED {
+			varDecChild.Type.ExtendName = typeList.Type.ExtendName
+		}
 		return tok, varDeclareNode
 
 	} else {
@@ -355,8 +362,8 @@ func parseDeclare(tok *mTypes.Token, parentKind mTypes.NodeKind) (*mTypes.Token,
 		// means struct value
 	} else if tok.IsKindAndVal(mTypes.TK_PAREN, mTypes.BRACE_OPEN) {
 		tok, rootNode := parseBody(tok, mTypes.ND_COLLECTION, "")
-		// ExtendedName (equals to struct type name) is given parent node,
-		// so type struct ND_COLLECTION on var_reference
+		// ExtendedName (equals to struct type name) is given by parent node,
+		rootNode.Type = &mTypes.NodeType{Value: mTypes.TY_EXTENDED}
 		if !tok.IsKindAndVal(mTypes.TK_PAREN, mTypes.BRACE_CLOSE) {
 			log.Panic("%s: missing close brace for struct", error.ERROR_SYNTAX_ERROR)
 		}

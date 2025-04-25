@@ -1,0 +1,38 @@
+name: Test Modo Compiler
+
+on:
+  push:
+    branches:
+      - dev
+      - 'feature/**'
+      - 'dependabot/**'
+
+jobs:
+  ci:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: ubuntu-latest
+            platform: linux/amd64
+          - os: ubuntu-24.04-arm
+            platform: linux/arm64
+    runs-on: ${{ matrix.os }}
+    steps:
+      # リポジトリをチェックアウト
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      # GHCRからDockerイメージをプル
+      - name: Log in to GitHub Container Registry
+        uses: docker/login-action@v2
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      # Dockerイメージを使用してコマンドを実行
+      - name: Run test-lite-compiler in Docker
+        run: |
+          docker run -it --rm -v "$PWD":/work ghcr.io/wf001/modo/llvm16-go-linux-arm64:0.0.8 make test-lite-compiler
+

@@ -23,7 +23,7 @@ assertfile() {
 assert() {
   input="$1"
   expected="$2"
-  actual_output=$(./generated/test/modo run --exec "$input" |gsed ':a;N;$!ba;s/\n/\\\\n/g')
+  actual_output=$(./generated/test/modo run --exec "$input" |sed ':a;N;$!ba;s/\n/\\\\n/g')
   actual_exit_code="$?"
 
   ((total_tests++))

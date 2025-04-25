@@ -4,6 +4,7 @@ go 1.23.2
 
 require (
 	github.com/alecthomas/kingpin/v2 v2.4.0
+	github.com/chzyer/readline v1.5.1
 	github.com/llir/llvm v0.3.6
 	github.com/sirupsen/logrus v1.9.3
 	github.com/stretchr/testify v1.8.2

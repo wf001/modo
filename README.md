@@ -10,6 +10,10 @@
 
 # modo, Programming language
 
+![GitHub release (latest by date)](https://img.shields.io/github/v/release/wf001/modo)
+![GitHub go.mod Go version (subdirectory of monorepo)](https://img.shields.io/github/go-mod/go-version/wf001/modo?filename=go.mod)
+![GitHub Workflow Status](https://img.shields.io/github/actions/workflow/status/wf001/modo/ci.yaml?branch=dev)
+
 **modo** is a statically typed, functional programming language inspired by Clojure and Haskell. 
 
 Designed with simplicity and clarity in mind, it embraces the principles that,
@@ -62,3 +66,4 @@ To install modo, follow these steps:
 
 ## 📄 License
 modo is provided under the MIT License.
+

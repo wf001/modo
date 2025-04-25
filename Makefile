@@ -35,7 +35,11 @@ test-lite-compiler:
 	./script/test-lite.sh
 
 test-go:
-	go test -v ./... | tc
+	@if command -v tc >/dev/null 2>&1; then \
+		go test -v ./... | tc; \
+	else \
+		go test -v ./...; \
+	fi
 
 
 dist:

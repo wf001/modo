@@ -1,0 +1,56 @@
+name: Test Modo Compiler
+
+on:
+  push:
+    branches:
+      - dev
+      - 'feature/**'
+      - 'dependabot/**'
+
+jobs:
+  build-and-test:
+    runs-on: macos-latest
+
+    
+    steps:
+      - uses: actions/checkout@v3
+
+      - uses: actions/cache@v4
+        with:
+          path: |
+            ~/Library/Caches/go-build
+            ~/go/pkg/mod
+          key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
+          restore-keys: |
+            ${{ runner.os }}-go-
+
+      - name: Setup LLVM
+        uses: ZhongRuoyu/setup-llvm@v0
+        with:
+         llvm-version: 17
+
+      - name: Show LLVM version
+        run: |
+          echo "llc version:"
+          llc --version
+          echo "llvm-config:"
+          llvm-config --version
+          echo "lli version:"
+          lli --version
+
+      - name: Install Go and gsed
+        run: |
+          brew update
+          brew install go gnu-sed
+          echo "go version:"
+          go version
+          echo "gsed version:"
+          gsed --version
+
+      - name: Run tests
+        run: |
+          make test-compiler
+
+          #- name: Run Go unit tests
+          #  run: make test-go
+

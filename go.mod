@@ -7,6 +7,7 @@ require (
 	github.com/llir/llvm v0.3.6
 	github.com/sirupsen/logrus v1.9.3
 	github.com/stretchr/testify v1.8.2
+	gopkg.in/yaml.v2 v2.2.2
 )
 
 require (

@@ -1,9 +1,9 @@
 generated
-/modo
+**/modo*
 !cmd/modo/
 sample/
 .clj-kondo
 .lsp
 .DS_Store
 __debug*
-config.yaml
+cmd/modo/version.yaml

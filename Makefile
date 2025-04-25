@@ -1,17 +1,24 @@
 dir = generated/$(shell date +%s)
+host-target := $(shell grep -s 'arch:' ./cmd/modo/version.yaml | cut -d' ' -f2| cut -d- -f1,2)
+version := $(shell grep -s 'version:' ./cmd/modo/version.yaml | cut -d' ' -f2 )
+
+
+init:
+	./script/gen-version-yaml.sh
 
 build:
-	mkdir -p $(dir)
-	go build ./cmd/modo
+	go build -ldflags="$(shell go run ./script/gen_ldflag.go)" -o modo ./cmd/modo
 
-build-debug:
-	mkdir -p $(dir)
-	go build -a -p 1 -x -work -o ./$(dir)/modo ./cmd/modo
 
 clean:
 	rm -rf generated
 	rm -rf modo
+	rm -rf dist
+	rm -rf cmd/modo/version.yaml
 
+build-debug:
+	mkdir -p $(dir)
+	go build -a -p 1 -x -work -o ./$(dir)/modo ./cmd/modo
 
 test-all:
 	make test-compiler
@@ -29,3 +36,10 @@ test-lite-compiler:
 
 test-go:
 	go test -v ./... | tc
+
+
+dist:
+	mkdir -p dist/modo/bin
+	cp modo dist/modo/bin/
+	cp cmd/modo/version.yaml dist/modo/
+	tar -czf modo"$(version)"."$(host-target)".tar.gz -C dist modo

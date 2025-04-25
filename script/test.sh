@@ -36,6 +36,7 @@ assert() {
     ((failed_count++))
     echo -e "$input => $expected expected, but got $actual_output \033[0;31mNG\033[0m"
     msg="\033[0;31mNG\033[0m"
+    code=1
   fi
 
 }

@@ -46,4 +46,4 @@ dist:
 	mkdir -p dist/modo/bin
 	cp modo dist/modo/bin/
 	cp cmd/modo/version.yaml dist/modo/
-	tar -czf modo"$(version)"."$(host-target)".tar.gz -C dist modo
+	tar -czf modo$(version).$(host-target).tar.gz -C dist modo

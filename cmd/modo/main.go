@@ -3,8 +3,10 @@ package main
 import (
 	"fmt"
 	"os"
+	"strings"
 
 	"github.com/alecthomas/kingpin/v2"
+	"github.com/chzyer/readline"
 	"github.com/sirupsen/logrus"
 
 	"github.com/wf001/modo/pkg/codegen"
@@ -37,6 +39,8 @@ var (
 	runCmd       = app.Command("run", "Build and run a program")
 	runExec      = runCmd.Flag("exec", "evaluate <EXEC>").String()
 	runInputFile = runCmd.Arg("file", "source file").String()
+
+	replCmd = app.Command("repl", "Start REPL")
 )
 
 type IAssebler interface {
@@ -211,6 +215,47 @@ func (ctx *context) runBuildCmd() {
 
 }
 
+func isBeginWithDef(input string) bool {
+	return strings.HasPrefix(input, "(def main)")
+}
+
+func (ctx *context) repl() {
+
+	fmt.Printf("modo version %s\n^C or type 'exit' to quit\n\n", VERSION)
+	rl, err := readline.NewEx(&readline.Config{
+		Prompt:          "modo >> ",
+		HistoryFile:     "/tmp/repl_history.txt", // 履歴をファイルに保存
+		InterruptPrompt: "^C",
+		EOFPrompt:       "exit",
+	})
+	if err != nil {
+		fmt.Println("Error initializing readline:", err)
+		return
+	}
+	defer rl.Close()
+
+	for {
+		line, err := rl.Readline()
+		if err != nil {
+			break
+		}
+
+		if line == "exit" {
+			break
+		}
+		if line == "" {
+			continue
+		}
+		if !isBeginWithDef(line) {
+			line = fmt.Sprintf("(def main ::nil (fn [] (prn %s)))", line)
+		}
+
+		ctx.doRunLLI(line)
+
+	}
+
+}
+
 func main() {
 	_ = wrapException(func() {
 		cmd := kingpin.MustParse(app.Parse(os.Args[1:]))
@@ -246,6 +291,12 @@ func main() {
 			ctx.constructContext()
 
 			ctx.runBuildCmd()
+
+		case replCmd.FullCommand():
+			ctx.storeExecutableInTemp = true
+			ctx.constructContext()
+
+			ctx.repl()
 
 		default:
 		}

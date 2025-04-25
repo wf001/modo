@@ -34,5 +34,5 @@ jobs:
       # Dockerイメージを使用してコマンドを実行
       - name: Run test-lite-compiler in Docker
         run: |
-          docker run -it --rm -v "$PWD":/work ghcr.io/wf001/modo/llvm16-go-linux-arm64:0.0.8 make test-lite-compiler
+          docker run --rm -v "$PWD":/work ghcr.io/wf001/modo/llvm16-go-linux-arm64:0.0.8 make test-lite-compiler
 

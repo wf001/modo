@@ -18,6 +18,8 @@ func PreludeMap(ctx *Context, n *mTypes.Node) value.Value {
 	}
 	var f *ir.Func
 
+	// find declared function
+	// TODO: find also in prelude function
 	for i := 0; i < len(ctx.mod.Funcs); i = i + 1 {
 		if ctx.mod.Funcs[i].GlobalName == n.GetFuncName() {
 			f = ctx.mod.Funcs[i]
@@ -32,7 +34,7 @@ func PreludeMap(ctx *Context, n *mTypes.Node) value.Value {
 	oldStructedVec := ctx.block.NewLoad(structedVecType, oldStructedVecPtr)
 	oldLen := ctx.block.NewExtractValue(oldStructedVec, 1)
 
-	/////
+	// create a new vector which element are applied by specified function
 	oldVecPtr := ctx.block.NewExtractValue(oldStructedVec, 0)
 
 	elemSize := constant.NewInt(types.I64, int64(mTypes.GetBitWidth(elemType)))
@@ -44,9 +46,9 @@ func PreludeMap(ctx *Context, n *mTypes.Node) value.Value {
 	loopIndex := ctx.block.NewAlloca(types.I64)
 	ctx.block.NewStore(mTypes.I64zero, loopIndex)
 
-	loopBlock := ctx.function.NewBlock(n.GetBlockName("copy.loop", ctx.function.Blocks))
-	condBlock := ctx.function.NewBlock(n.GetBlockName("copy.cond", ctx.function.Blocks))
-	endBlock := ctx.function.NewBlock(n.GetBlockName("copy.end", ctx.function.Blocks))
+	loopBlock := ctx.function.NewBlock(n.GetBlockName("map.loop", ctx.function.Blocks))
+	condBlock := ctx.function.NewBlock(n.GetBlockName("map.cond", ctx.function.Blocks))
+	endBlock := ctx.function.NewBlock(n.GetBlockName("map.end", ctx.function.Blocks))
 
 	ctx.block.NewBr(condBlock)
 
@@ -65,7 +67,7 @@ func PreludeMap(ctx *Context, n *mTypes.Node) value.Value {
 	loopBlock.NewBr(condBlock)
 
 	ctx.block = endBlock
-	/////
+	// loop end
 
 	newStructVecType := mTypes.DeclareVectorType(
 		ctx.mod,

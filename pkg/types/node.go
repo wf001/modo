@@ -195,7 +195,7 @@ func isStructTypeDefined(mod *ir.Module, fields []types.Type) (types.Type, bool)
 	return nil, false
 }
 
-func declareVectorType(ir *ir.Module, ty types.Type, ndtype *NodeType) types.Type {
+func DeclareVectorType(ir *ir.Module, ty types.Type, ndtype *NodeType) types.Type {
 	// i32 type vector
 	// 型: struct { i32* %arrElm, i64 %len}
 	vectorIntType := types.NewStruct(types.NewPointer(ty), types.I64)
@@ -235,7 +235,7 @@ func GetLLVMTypeRec(
 
 	if ndtype.Value == TY_VECTOR {
 		chidType, _, _ := GetLLVMTypeRec(m, ndtype.Child, prelude)
-		ret := declareVectorType(m, chidType, ndtype)
+		ret := DeclareVectorType(m, chidType, ndtype)
 		return ret, chidType, true
 	}
 

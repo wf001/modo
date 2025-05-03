@@ -67,10 +67,15 @@ func PreludeMap(ctx *Context, n *mTypes.Node) value.Value {
 	ctx.block = endBlock
 	/////
 
-	newStructAlloca := ctx.block.NewAlloca(structedVecType)
+	newStructVecType := mTypes.DeclareVectorType(
+		ctx.mod,
+		elemType,
+		&mTypes.NodeType{Value: mTypes.TY_VECTOR},
+	)
+	newStructAlloca := ctx.block.NewAlloca(newStructVecType)
 
 	newVecField := ctx.block.NewGetElementPtr(
-		structedVecType,
+		newStructVecType,
 		newStructAlloca,
 		mTypes.I32zero,
 		mTypes.I32zero,
@@ -78,7 +83,7 @@ func PreludeMap(ctx *Context, n *mTypes.Node) value.Value {
 	ctx.block.NewStore(newVecPtr, newVecField)
 
 	newLenField := ctx.block.NewGetElementPtr(
-		structedVecType,
+		newStructVecType,
 		newStructAlloca,
 		mTypes.I32zero,
 		mTypes.I32one,

@@ -202,6 +202,10 @@ testexec(){
   # pop
   # assertexec '(def main :: int (fn [] (let [vec :: [int] [423, 83, 90]] (prn (pop vec)) (prn vec))))'  "[423, 83]\\\n[423, 83, 90]\\\n"
   # assertexec '(def v :: [int] [233, 842]) (def main :: int (fn [] (prn (pop v))))' "[233]\\\n"
+  # map
+  assertexec "(def inc :: int => int (fn [x] (+ x 1))) (def main :: int (fn [] (prn (map inc [32 13 99]))))" "[33, 14, 100]\\\n"
+  assertexec '(def str :: int => string (fn [x] "a")) (def main :: int (fn [] (prn (map str [32 13 99]))))' "[a, a, a]\\\n"
+  assertexec '(def truely :: int => bool (fn [x] true)) (def main :: int (fn [] (prn (map truely [32 13 99]))))' "[true, true, true]\\\n"
 
   # argument and return
   assertexec "(def f::[int] => nil (fn[v] (prn v))) (def main::int (fn[] (let[v::[int][42, 64, 90]] (f v))))" "[42, 64, 90]\\\n"

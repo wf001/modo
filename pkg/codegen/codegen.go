@@ -87,8 +87,8 @@ func newStrHeap(ctx *Context, n *mTypes.Node) *ir.InstCall {
 	srcPtr := ctx.block.NewGetElementPtr(
 		strConstType,
 		srcAlloca,
-		constant.NewInt(types.I64, 0),
-		constant.NewInt(types.I64, 0),
+		mTypes.I64zero,
+		mTypes.I64zero,
 	)
 
 	ctx.block.NewCall(
@@ -144,8 +144,8 @@ func newVectorHeap(ctx *Context, n *mTypes.Node) value.Value {
 	vecElemPtr := ctx.block.NewGetElementPtr(
 		structedArrType,
 		vecIntAlloca,
-		newI32("0"),
-		newI32("0"),
+		mTypes.I32zero,
+		mTypes.I32zero,
 	)
 	vecElemPtr.SetName(n.GetVarName("new.vector.vec.elem.ptr", ctx.block.Insts))
 	ctx.block.NewStore(vecPtr, vecElemPtr)
@@ -177,7 +177,7 @@ func newStruct(
 	gepEndPtr := ctx.block.NewGetElementPtr(
 		structCtx.Types,
 		nullStructPtr,
-		constant.NewInt(types.I32, 1),
+		mTypes.I32one,
 	)
 
 	// ptrtoint: i64 (size in bytes)
@@ -222,7 +222,7 @@ func (ctx *Context) genVarDeclare(node *mTypes.Node) value.Value {
 		ctx.block = llBlock
 		res := ctx.gen(node.Child)
 		llBlock.NewCall(res)
-		llBlock.NewRet(newI32("0"))
+		llBlock.NewRet(mTypes.I32zero)
 
 	} else {
 		// means declaring global variable or function named except main

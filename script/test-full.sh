@@ -186,11 +186,13 @@ testexec(){
   assertexec '(def v :: [bool] [false, true, true]) (def main :: int (fn [] (prn v)))' "[false, true, true]\\\n"
 
   # vector operation
+  echo "[nth]"
   # nth
   # assertexec '(def main :: int (fn [] (let [vec :: [int] [41, 28, 239]] (prn (nth vec 1)))))'  "28\\\n"
   # assertexec '(def v :: [int] [233, 842]) (def main :: int (fn [] (prn (nth v 0))))' "233\\\n"
   assertexec '(def main :: int (fn [] (let [vec :: [int] [423, 83, 90]] (prn (nth vec -1)) (prn (nth vec 2)) (prn (nth vec 3)) )))' "nil\\\n90\\\nnil\\\n"
   # conj
+  echo "[conj]"
   assertexec '(def main :: int (fn [] (let [vec :: [int] [423, 83, 90]] (prn (conj vec 27)) (prn vec))))' "[423, 83, 90, 27]\\\n[423, 83, 90]\\\n"
   assertexec '(def v :: [int] [233, 842]) (def main :: int (fn [] (prn (conj v 569))))' "[233, 842, 569]\\\n"
   assertexec "(def v :: [int] [233, 842]) (def f :: [int] (fn [] (conj v 39))) (def main :: int (fn [] (prn f)))" "[233, 842, 39]\\\n"
@@ -203,16 +205,25 @@ testexec(){
   # assertexec '(def main :: int (fn [] (let [vec :: [int] [423, 83, 90]] (prn (pop vec)) (prn vec))))'  "[423, 83]\\\n[423, 83, 90]\\\n"
   # assertexec '(def v :: [int] [233, 842]) (def main :: int (fn [] (prn (pop v))))' "[233]\\\n"
   # map
+  echo "[map]"
   assertexec "(def inc :: int => int (fn [x] (+ x 1))) (def main :: int (fn [] (prn (map inc [32 13 99]))))" "[33, 14, 100]\\\n"
   assertexec '(def str :: int => string (fn [x] "a")) (def main :: int (fn [] (prn (map str [32 13 99]))))' "[a, a, a]\\\n"
   assertexec '(def truely :: int => bool (fn [x] true)) (def main :: int (fn [] (prn (map truely [32 13 99]))))' "[true, true, true]\\\n"
+  # filter
+  echo "[filter]"
+  assertexec '(def even :: int => bool (fn [x] (= 0 (mod x 2))))  (def main :: int (fn [] (prn (filter even [8 1 7 10 18 42 45]))))' "[8, 10, 18, 42]\\\n"
+  assertexec '(def isThree :: int => bool (fn [x] (= 3 x))) (def main :: int (fn [] (prn (filter isThree [8 1 7 10 3 42 3]))))' "[3, 3]\\\n"
 
+  echo "[taking and returning]"
   # argument and return
   assertexec "(def f::[int] => nil (fn[v] (prn v))) (def main::int (fn[] (let[v::[int][42, 64, 90]] (f v))))" "[42, 64, 90]\\\n"
   assertexec "(def f::[int] (fn[] (let[v::[int] [42, 64, 90, 84]]v))) (def main::int (fn[] (prn f)))" "[42, 64, 90, 84]\\\n"
   assertexec "(def f :: [int] => [int] (fn [v] (conj v 81))) (def main :: int (fn [] (let [v :: [int] [42, 64, 90]] (prn (f v)))))" "[42, 64, 90, 81]\\\n"
+
+  echo "[3-dimension]"
   assertexec "(def main :: int (fn [] (let [vec :: [[[int]]] [[[11 12 13] [14 15]] [[21 22 23] [24]] [[31 32] [33 34 35]] [[41 42] [43 44 45]]]] (prn (nth (nth (nth vec 1) 1) 0)) )))" "24\\\n"
 
+  echo "[reference]"
   # reference
   assertexec "(def main :: int (fn [] (let [vec1 :: [int] [42, 23] vec2 :: [int] vec1] (prn (conj vec2 1)) (prn (conj vec1 3)) (prn vec1) (prn vec2))))" "[42, 23, 1]\\\n[42, 23, 3]\\\n[42, 23]\\\n[42, 23]\\\n"
 

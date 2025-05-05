@@ -409,7 +409,7 @@ func (ctx *Context) genLambda(node *mTypes.Node) value.Value {
 			types.Void,
 			ctx.function.Params...,
 		)
-		entryBlock := funcFn.NewBlock(node.GetBlockName(fnEntryBlockName, ctx.function.Blocks))
+		entryBlock := funcFn.NewBlock(ctx.GetBlockName(fnEntryBlockName, node))
 
 		ctx.function = funcFn
 		ctx.block = entryBlock
@@ -426,7 +426,7 @@ func (ctx *Context) genLambda(node *mTypes.Node) value.Value {
 			ctx.function.Sig.RetType,
 			ctx.function.Params...,
 		)
-		entryBlock := funcFn.NewBlock(node.GetBlockName(fnEntryBlockName, ctx.function.Blocks))
+		entryBlock := funcFn.NewBlock(ctx.GetBlockName(fnEntryBlockName, node))
 
 		ctx.function = funcFn
 		ctx.block = entryBlock

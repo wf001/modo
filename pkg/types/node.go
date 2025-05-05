@@ -137,10 +137,6 @@ func (node *Node) GetFuncName() string {
 	return fmt.Sprintf("fn.%s", node.Val)
 }
 
-func (node *Node) GetBlockName(s string, blks []*ir.Block) string {
-	return fmt.Sprintf("%s.%p.%d", s, node, len(blks))
-}
-
 func (node *Node) GetVarName(s string, insts []ir.Instruction) string {
 	return fmt.Sprintf("%s.%p", s, node)
 }

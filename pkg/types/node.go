@@ -173,11 +173,12 @@ func isStructTypeDefined(mod *ir.Module, fields []types.Type) (types.Type, bool)
 		if !ok {
 			continue
 		}
-		// 明示的に同じかチェック（要素数・型一致）
+		// check the number of element is same or not
 		if len(structType.Fields) != len(fields) {
 			continue
 		}
 		match := true
+		// check each element type is same or not
 		for i := range fields {
 			if !types.Equal(structType.Fields[i], fields[i]) {
 				match = false
@@ -191,19 +192,17 @@ func isStructTypeDefined(mod *ir.Module, fields []types.Type) (types.Type, bool)
 	return nil, false
 }
 
-func DeclareVectorType(ir *ir.Module, ty types.Type, ndtype *NodeType) types.Type {
-	// i32 type vector
-	// 型: struct { i32* %arrElm, i64 %len}
-	vectorIntType := types.NewStruct(types.NewPointer(ty), types.I64)
+func DeclareVectorType(ir *ir.Module, elemTy types.Type, ndtype *NodeType) types.Type {
+	structedVectorType := types.NewStruct(types.NewPointer(elemTy), types.I64)
 
 	// not declare same type twice
-	if ty, defined := isStructTypeDefined(ir, vectorIntType.Fields); defined {
+	if ty, defined := isStructTypeDefined(ir, structedVectorType.Fields); defined {
 		return ty
 	}
 	typeName := GetGlobalVarName("vec", ir, ndtype)
-	vectorIntType.SetName(typeName)
-	ir.NewTypeDef(typeName, vectorIntType)
-	return vectorIntType
+	structedVectorType.SetName(typeName)
+	ir.NewTypeDef(typeName, structedVectorType)
+	return structedVectorType
 
 }
 

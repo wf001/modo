@@ -16,13 +16,13 @@ func PreludeFilter(ctx *Context, n *mTypes.Node) value.Value {
 	if !n.IsKind(mTypes.ND_VAR_REFERENCE) {
 		log.Panic("%s: unexpected character used", error.ERROR_SYNTAX_ERROR)
 	}
-	var f *ir.Func
+	var pred *ir.Func
 
 	// find declared function
 	// TODO: find also in prelude function
 	for i := 0; i < len(ctx.mod.Funcs); i = i + 1 {
 		if ctx.mod.Funcs[i].GlobalName == n.GetFuncName() {
-			f = ctx.mod.Funcs[i]
+			pred = ctx.mod.Funcs[i]
 			break
 		}
 	}
@@ -66,13 +66,13 @@ func PreludeFilter(ctx *Context, n *mTypes.Node) value.Value {
 	countloopIdx := countCondBlock.NewLoad(types.I64, countLoopIdxPtr)
 	countloopIdx.SetName(n.GetVarName("filter.count.loop.idx", ctx.block.Insts))
 
-	isLTOldLen := countCondBlock.NewICmp(enum.IPredULT, countloopIdx, oldLen)
-	countCondBlock.NewCondBr(isLTOldLen, countLoopBlock, countEndBlock)
+	isIdxLTOldLen := countCondBlock.NewICmp(enum.IPredULT, countloopIdx, oldLen)
+	countCondBlock.NewCondBr(isIdxLTOldLen, countLoopBlock, countEndBlock)
 
-	oldArrElemPtr := countLoopBlock.NewGetElementPtr(elemType, oldVecPtr, countloopIdx)
-	oldElem := countLoopBlock.NewLoad(elemType, oldArrElemPtr)
-	isTrue := countLoopBlock.NewCall(f, oldElem)
-	countLoopBlock.NewCondBr(isTrue, countLoopIncCountBlock, countLoopIncIdxBlock)
+	oldElemPtr := countLoopBlock.NewGetElementPtr(elemType, oldVecPtr, countloopIdx)
+	oldElem := countLoopBlock.NewLoad(elemType, oldElemPtr)
+	isPredResultTrue := countLoopBlock.NewCall(pred, oldElem)
+	countLoopBlock.NewCondBr(isPredResultTrue, countLoopIncCountBlock, countLoopIncIdxBlock)
 
 	countLoopIncCountBlock.NewStore(
 		countLoopIncCountBlock.NewAdd(numTrue, mTypes.I64one),
@@ -115,16 +115,16 @@ func PreludeFilter(ctx *Context, n *mTypes.Node) value.Value {
 	conjLoopIdx := condBlock.NewLoad(types.I64, conjLoopIdxPtr)
 	newVecIdx := condBlock.NewLoad(types.I64, newVecIdxPtr)
 
-	isLTOldLen = condBlock.NewICmp(enum.IPredULT, conjLoopIdx, oldLen)
-	condBlock.NewCondBr(isLTOldLen, loopBlock, endBlock)
+	isIdxLTOldLen = condBlock.NewICmp(enum.IPredULT, conjLoopIdx, oldLen)
+	condBlock.NewCondBr(isIdxLTOldLen, loopBlock, endBlock)
 
 	// Note: redeclare needed to avoid 'Instruction does not dominate all uses!' error
-	oldArrElemPtr = loopBlock.NewGetElementPtr(elemType, oldVecPtr, conjLoopIdx)
-	oldElem = loopBlock.NewLoad(elemType, oldArrElemPtr)
-	isTrue = loopBlock.NewCall(f, oldElem)
-	loopBlock.NewCondBr(isTrue, loopConjBlock, loopIncBlock)
+	oldElemPtr = loopBlock.NewGetElementPtr(elemType, oldVecPtr, conjLoopIdx)
+	oldElem = loopBlock.NewLoad(elemType, oldElemPtr)
+	isPredResultTrue = loopBlock.NewCall(pred, oldElem)
+	loopBlock.NewCondBr(isPredResultTrue, loopConjBlock, loopIncBlock)
 
-	newVecElemPtr := loopBlock.NewGetElementPtr(elemType, newVecPtr, newVecIdx)
+	newVecElemPtr := loopConjBlock.NewGetElementPtr(elemType, newVecPtr, newVecIdx)
 	loopConjBlock.NewStore(oldElem, newVecElemPtr)
 	loopConjBlock.NewStore(
 		loopConjBlock.NewAdd(newVecIdx, mTypes.I64one),
@@ -141,15 +141,10 @@ func PreludeFilter(ctx *Context, n *mTypes.Node) value.Value {
 	ctx.block = endBlock
 	// loop end
 
-	newStructVecType := mTypes.DeclareVectorType(
-		ctx.mod,
-		elemType,
-		&mTypes.NodeType{Value: mTypes.TY_VECTOR},
-	)
 	newStructAlloca := ctx.block.NewAlloca(structedVecType)
 
 	newVecField := ctx.block.NewGetElementPtr(
-		newStructVecType,
+		structedVecType,
 		newStructAlloca,
 		mTypes.I32zero,
 		mTypes.I32zero,
@@ -157,7 +152,7 @@ func PreludeFilter(ctx *Context, n *mTypes.Node) value.Value {
 	ctx.block.NewStore(newVecPtr, newVecField)
 
 	newLenField := ctx.block.NewGetElementPtr(
-		newStructVecType,
+		structedVecType,
 		newStructAlloca,
 		mTypes.I32zero,
 		mTypes.I32one,

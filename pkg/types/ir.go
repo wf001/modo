@@ -46,6 +46,7 @@ type Cstd struct {
 
 type GlobalConst struct {
 	FormatDigit        *ir.Global
+	FormatFloat        *ir.Global
 	FormatStr          *ir.Global
 	StringSpace        *ir.Global
 	StringCR           *ir.Global
@@ -88,6 +89,7 @@ func IsScalar(v value.Value) bool {
 	return v.Type().Equal(types.I1) ||
 		v.Type().Equal(types.I8Ptr) ||
 		v.Type().Equal(types.I32) ||
+		v.Type().Equal(types.Float) ||
 		v.Type().Equal(types.Void)
 }
 
@@ -116,6 +118,7 @@ func GetPrintFormat(ty types.Type, internal *Internal) (*ir.Global, bool) {
 		types.I1:    internal.GlobalConst.FormatStr,
 		types.I8Ptr: internal.GlobalConst.FormatStr,
 		types.I32:   internal.GlobalConst.FormatDigit,
+		types.Float: internal.GlobalConst.FormatFloat,
 		types.Void:  internal.GlobalConst.FormatStr,
 	}
 	if f, ok := formatMap[ty]; ok {

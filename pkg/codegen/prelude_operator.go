@@ -13,19 +13,38 @@ func PreludeAdd(ctx *Context, node *mTypes.Node) value.Value {
 	return ctx.block.NewAdd(node.IRValue, node.Next.IRValue)
 }
 
+func PreludeFAdd(ctx *Context, node *mTypes.Node) value.Value {
+	return ctx.block.NewFAdd(node.IRValue, node.Next.IRValue)
+}
+
 func PreludeSub(ctx *Context, node *mTypes.Node) value.Value {
 	return ctx.block.NewSub(node.IRValue, node.Next.IRValue)
+}
+func PreludeFSub(ctx *Context, node *mTypes.Node) value.Value {
+	return ctx.block.NewFSub(node.IRValue, node.Next.IRValue)
 }
 
 func PreludeMul(ctx *Context, node *mTypes.Node) value.Value {
 	return ctx.block.NewMul(node.IRValue, node.Next.IRValue)
 }
+
+func PreludeFMul(ctx *Context, node *mTypes.Node) value.Value {
+	return ctx.block.NewFMul(node.IRValue, node.Next.IRValue)
+}
+
 func PreludeDiv(ctx *Context, node *mTypes.Node) value.Value {
 	return ctx.block.NewSDiv(node.IRValue, node.Next.IRValue)
 }
 
+func PreludeFDiv(ctx *Context, node *mTypes.Node) value.Value {
+	return ctx.block.NewFDiv(node.IRValue, node.Next.IRValue)
+}
+
 func PreludeMod(ctx *Context, node *mTypes.Node) value.Value {
 	return ctx.block.NewSRem(node.IRValue, node.Next.IRValue)
+}
+func PreludeFMod(ctx *Context, node *mTypes.Node) value.Value {
+	return ctx.block.NewFRem(node.IRValue, node.Next.IRValue)
 }
 
 // equality
@@ -46,11 +65,25 @@ func PreludeEq(ctx *Context, node *mTypes.Node) value.Value {
 		return ctx.block.NewICmp(enum.IPredEQ, node.IRValue, node.Next.IRValue)
 	}
 }
+
+func PreludeFEq(ctx *Context, node *mTypes.Node) value.Value {
+	return ctx.block.NewFCmp(enum.FPredOEQ, node.IRValue, node.Next.IRValue)
+}
+
 func PreludeGt(ctx *Context, node *mTypes.Node) value.Value {
 	return ctx.block.NewICmp(enum.IPredSGT, node.IRValue, node.Next.IRValue)
 }
+
+func PreludeFGt(ctx *Context, node *mTypes.Node) value.Value {
+	return ctx.block.NewFCmp(enum.FPredOGT, node.IRValue, node.Next.IRValue)
+}
+
 func PreludeLt(ctx *Context, node *mTypes.Node) value.Value {
 	return ctx.block.NewICmp(enum.IPredSLT, node.IRValue, node.Next.IRValue)
+}
+
+func PreludeFLt(ctx *Context, node *mTypes.Node) value.Value {
+	return ctx.block.NewFCmp(enum.FPredOLT, node.IRValue, node.Next.IRValue)
 }
 
 // logical

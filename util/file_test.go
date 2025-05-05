@@ -1,15 +1,16 @@
 package util
 
 import (
+	"fmt"
 	"testing"
 )
 
-func TestPrepareWarkingFile(t *testing.T) {
-	llName, asmName, executableName := PrepareWorkingFile("out", 123)
-	if llName != "out.ll" {
+func TestPrepareWorkingFile(t *testing.T) {
+	artifactDir, llName, asmName, executableName := PrepareWorkingFile("out", false)
+	if llName != fmt.Sprintf("%s/out.ll", artifactDir) {
 		t.Errorf("have = %s, want = %s", "out.ll", llName)
 	}
-	if asmName != "out.s" {
+	if asmName != fmt.Sprintf("%s/out.s", artifactDir) {
 		t.Errorf("have = %s, want = %s", "out.s", asmName)
 	}
 	if executableName != "out" {

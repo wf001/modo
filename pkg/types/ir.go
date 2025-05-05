@@ -149,7 +149,10 @@ func GetBitWidth(t types.Type) uint64 {
 	}
 }
 
-func GetStructTypeFromPtr(v value.Value) *types.StructType {
+func GetVectorTypeFromPtr(v value.Value) (*types.StructType, types.Type) {
 	structPtr := v.Type().(*types.PointerType)
-	return structPtr.ElemType.(*types.StructType)
+	structedVecType := structPtr.ElemType.(*types.StructType)
+	elemType := structedVecType.Fields[0].(*types.PointerType).ElemType
+
+	return structedVecType, elemType
 }

@@ -17,8 +17,7 @@ func PreludeNth(ctx *Context, n *mTypes.Node) value.Value {
 	idx := constant.NewInt(types.I64, i)
 
 	structedVecPtr := n.IRValue
-	structedVecType := mTypes.GetStructTypeFromPtr(structedVecPtr)
-	elemType := structedVecType.Fields[0].(*types.PointerType).ElemType
+	structedVecType, elemType := mTypes.GetVectorTypeFromPtr(structedVecPtr)
 
 	nullPtr := constant.NewNull(types.NewPointer(elemType))
 

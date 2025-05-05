@@ -28,7 +28,7 @@ func PreludeMap(ctx *Context, n *mTypes.Node) value.Value {
 	}
 
 	oldStructedVecPtr := n.Next.IRValue
-	structedVecType := mTypes.GetStructTypeFromPtr(oldStructedVecPtr)
+	structedVecType, _ := mTypes.GetVectorTypeFromPtr(oldStructedVecPtr)
 	elemType := f.Sig.RetType
 
 	oldStructedVec := ctx.block.NewLoad(structedVecType, oldStructedVecPtr)

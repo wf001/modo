@@ -15,7 +15,7 @@ type VersionInfo struct {
 }
 
 func main() {
-	data, err := os.ReadFile("cmd/modo/version.yaml")
+	data, err := os.ReadFile("cmd/modo/version-info.yaml")
 	if err != nil {
 		panic(err)
 	}

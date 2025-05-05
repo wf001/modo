@@ -87,6 +87,7 @@ func (tok *Token) IsKind(kind SyntaxRole) bool {
 func (tok *Token) IsKindType() bool {
 	return tok.IsKind(TK_TYPE_ARROW) ||
 		tok.IsKind(TK_TYPE_INT) ||
+		tok.IsKind(TK_TYPE_FLOAT) ||
 		tok.IsKind(TK_TYPE_STR) ||
 		tok.IsKind(TK_TYPE_NIL) ||
 		tok.IsKind(TK_TYPE_BOOL) ||
@@ -101,6 +102,7 @@ func (tok *Token) IsKindType() bool {
 func GetModoType(tkkind *TokenKind) (*NodeType, bool) {
 	var scalarType = map[string]ModoType{
 		TK_TYPE_INT:      TY_INT32,
+		TK_TYPE_FLOAT:    TY_FLOAT,
 		TK_TYPE_STR:      TY_STR,
 		TK_TYPE_NIL:      TY_NIL,
 		TK_TYPE_BOOL:     TY_BOOL,

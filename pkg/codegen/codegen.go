@@ -549,6 +549,9 @@ func (ctx *Context) gen(node *mTypes.Node) value.Value {
 			} else if bind.IsType(mTypes.TY_STR) {
 				bind.IRValue = child
 
+			} else if bind.IsType(mTypes.TY_FLOAT) {
+				bind.IRValue = child
+
 			} else if bind.IsType(mTypes.TY_BOOL) {
 				bind.IRValue = child
 

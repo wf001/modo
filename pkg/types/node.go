@@ -117,6 +117,7 @@ func (node *Node) IsScalar() bool {
 		return false
 	}
 	return node.IsType(TY_INT32) ||
+		node.IsType(TY_FLOAT) ||
 		node.IsType(TY_BOOL) ||
 		node.IsType(TY_STR) ||
 		node.IsType(TY_NIL)

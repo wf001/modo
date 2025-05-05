@@ -5,7 +5,7 @@ import (
 	"testing"
 )
 
-func TestPrepareWarkingFile(t *testing.T) {
+func TestPrepareWorkingFile(t *testing.T) {
 	artifactDir, llName, asmName, executableName := PrepareWorkingFile("out", false)
 	if llName != fmt.Sprintf("%s/out.ll", artifactDir) {
 		t.Errorf("have = %s, want = %s", "out.ll", llName)

@@ -48,6 +48,15 @@ func newI32(s string) *constant.Int {
 	return constant.NewInt(types.I32, i)
 }
 
+func newFloat(s string) *constant.Float {
+	i, err := strconv.ParseFloat(s, 10)
+	if err != nil {
+		log.Panic("%s: fail to newI32: %s", error.ERROR_SYNTAX_ERROR, err)
+	}
+
+	return constant.NewFloat(types.Float, i)
+}
+
 var nullPtr = constant.NewNull(types.NewPointer(types.I32))
 
 func newStrGlobal(ctx *Context, n *mTypes.Node) *ir.InstLoad {
@@ -610,6 +619,9 @@ func (ctx *Context) gen(node *mTypes.Node) value.Value {
 
 		} else if node.IsType(mTypes.TY_BOOL) {
 			return newBool(node.Val)
+
+		} else if node.IsType(mTypes.TY_FLOAT) {
+			return newFloat(node.Val)
 
 		} else {
 			log.Panic("%s: unresolved symbol used: have %s", error.ERROR_UNDEFINE, node.Val)

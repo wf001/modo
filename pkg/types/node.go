@@ -38,6 +38,7 @@ type ModoType string
 // Note: what for?
 const (
 	TY_INT32    = ModoType("ty.int32")
+	TY_FLOAT    = ModoType("ty.float")
 	TY_STR      = ModoType("ty.str")
 	TY_NIL      = ModoType("ty.nil")
 	TY_BOOL     = ModoType("ty.bool")
@@ -156,7 +157,7 @@ func (node *Node) GetLastNode() *Node {
 
 func (node *Node) GetNodeSize() uint64 {
 	var size uint64 = 0
-	for n := node.Child; n != nil; n = n.Next {
+	for n := node; n != nil; n = n.Next {
 		size++
 	}
 	return size
@@ -216,6 +217,7 @@ func GetLLVMTypeRec(
 
 	var scalarTypeMap = map[ModoType]types.Type{
 		TY_INT32: types.I32,
+		TY_FLOAT: types.Float,
 		TY_BOOL:  types.I1,
 		TY_STR:   types.I8Ptr,
 		TY_NIL:   types.Void,

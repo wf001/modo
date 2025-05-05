@@ -35,8 +35,8 @@ func (tp *tokenPattern) matchTokenType(s string) (string, bool) {
 // initializes a TokenPattern with predefined patterns and token types
 func newTokenPattern() *tokenPattern {
 	head := &tokenPattern{
-		Pattern:   mTypes.INTEGER_REG_EXP,
-		TokenType: mTypes.TK_INT,
+		Pattern:   mTypes.FRACTIONAL_REG_EXP,
+		TokenType: mTypes.TK_FLOAT,
 	}
 	current := head
 
@@ -53,10 +53,12 @@ func newTokenPattern() *tokenPattern {
 	add(mTypes.SYMBOL_TYPE_ARROW, mTypes.TK_TYPE_ARROW)
 	add(mTypes.SYMBOL_TYPE_VECTOR, mTypes.TK_TYPE_VECTOR)
 	add(mTypes.SYMBOL_TYPE_INT, mTypes.TK_TYPE_INT)
+	add(mTypes.SYMBOL_TYPE_FLOAT, mTypes.TK_TYPE_FLOAT)
 	add(mTypes.SYMBOL_TYPE_STR, mTypes.TK_TYPE_STR)
 	add(mTypes.SYMBOL_TYPE_NIL, mTypes.TK_TYPE_NIL)
 	add(mTypes.SYMBOL_TYPE_BOOL, mTypes.TK_TYPE_BOOL)
 
+	add(mTypes.INTEGER_REG_EXP, mTypes.TK_INT)
 	add(mTypes.STRING_REG_EXP, mTypes.TK_STR)
 	add(mTypes.BOOL_REG_EXP, mTypes.TK_BOOL)
 	add(mTypes.OPERATORS_REG_EXP, mTypes.TK_LIBCALL)

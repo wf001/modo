@@ -13,6 +13,10 @@ func PreludeAdd(ctx *Context, node *mTypes.Node) value.Value {
 	return ctx.block.NewAdd(node.IRValue, node.Next.IRValue)
 }
 
+func PreludeFAdd(ctx *Context, node *mTypes.Node) value.Value {
+	return ctx.block.NewFAdd(node.IRValue, node.Next.IRValue)
+}
+
 func PreludeSub(ctx *Context, node *mTypes.Node) value.Value {
 	return ctx.block.NewSub(node.IRValue, node.Next.IRValue)
 }

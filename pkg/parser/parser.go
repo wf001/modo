@@ -31,6 +31,7 @@ func parseExprs(
 
 	var isScalarOrFunc = func(token *mTypes.Token) bool {
 		return token.IsKind(mTypes.TK_INT) ||
+			token.IsKind(mTypes.TK_FLOAT) ||
 			token.IsKind(mTypes.TK_STR) ||
 			token.IsKind(mTypes.TK_BOOL) ||
 			token.IsKind(mTypes.TK_IDENT) ||
@@ -337,6 +338,9 @@ func parseDeclare(tok *mTypes.Token, parentKind mTypes.NodeKind) (*mTypes.Token,
 
 	} else if tok.IsKind(mTypes.TK_INT) {
 		return tok.Next, newNodeScalar(mTypes.TY_INT32, tok.Val)
+
+	} else if tok.IsKind(mTypes.TK_FLOAT) {
+		return tok.Next, newNodeScalar(mTypes.TY_FLOAT, tok.Val)
 
 	} else if tok.IsKind(mTypes.TK_BOOL) {
 		var v string

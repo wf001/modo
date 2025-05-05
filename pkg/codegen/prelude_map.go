@@ -43,8 +43,8 @@ func PreludeMap(ctx *Context, n *mTypes.Node) value.Value {
 	newVecAllocPtr := ctx.block.NewCall(ctx.internal.Cstd.Malloc, newVecAllocSize)
 	newVecPtr := ctx.block.NewBitCast(newVecAllocPtr, types.NewPointer(elemType))
 
-	loopIndex := ctx.block.NewAlloca(types.I64)
-	ctx.block.NewStore(mTypes.I64zero, loopIndex)
+	loopIndexPtr := ctx.block.NewAlloca(types.I64)
+	ctx.block.NewStore(mTypes.I64zero, loopIndexPtr)
 
 	loopBlock := ctx.function.NewBlock(n.GetBlockName("map.loop", ctx.function.Blocks))
 	condBlock := ctx.function.NewBlock(n.GetBlockName("map.cond", ctx.function.Blocks))
@@ -52,18 +52,20 @@ func PreludeMap(ctx *Context, n *mTypes.Node) value.Value {
 
 	ctx.block.NewBr(condBlock)
 
-	idx := condBlock.NewLoad(types.I64, loopIndex)
-	copyContinue := condBlock.NewICmp(enum.IPredULT, idx, oldLen)
-	condBlock.NewCondBr(copyContinue, loopBlock, endBlock)
+	loopIdx := condBlock.NewLoad(types.I64, loopIndexPtr)
+	isIdxLTOldLen := condBlock.NewICmp(enum.IPredULT, loopIdx, oldLen)
+	condBlock.NewCondBr(isIdxLTOldLen, loopBlock, endBlock)
 
-	oldArrElemPtr := loopBlock.NewGetElementPtr(elemType, oldVecPtr, idx)
+	oldArrElemPtr := loopBlock.NewGetElementPtr(elemType, oldVecPtr, loopIdx)
 	oldElem := loopBlock.NewLoad(elemType, oldArrElemPtr)
 	newElem := loopBlock.NewCall(f, oldElem)
-	newVecElemPtr := loopBlock.NewGetElementPtr(elemType, newVecPtr, idx)
+	newVecElemPtr := loopBlock.NewGetElementPtr(elemType, newVecPtr, loopIdx)
 	loopBlock.NewStore(newElem, newVecElemPtr)
 
-	incI := loopBlock.NewAdd(idx, mTypes.I64one)
-	loopBlock.NewStore(incI, loopIndex)
+	loopBlock.NewStore(
+		loopBlock.NewAdd(loopIdx, mTypes.I64one),
+		loopIndexPtr,
+	)
 	loopBlock.NewBr(condBlock)
 
 	ctx.block = endBlock

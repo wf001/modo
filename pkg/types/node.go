@@ -137,7 +137,7 @@ func (node *Node) GetFuncName() string {
 	return fmt.Sprintf("fn.%s", node.Val)
 }
 
-func (node *Node) GetVarName(s string, insts []ir.Instruction) string {
+func (node *Node) GetVarName(s string) string {
 	return fmt.Sprintf("%s.%p", s, node)
 }
 

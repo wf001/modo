@@ -31,7 +31,7 @@ func PreludeNth(ctx *Context, n *mTypes.Node) value.Value {
 	maxIdx := ctx.block.NewSub(loadedLength, mTypes.I64one)
 
 	isIdxOutOfRange := ctx.block.NewICmp(enum.IPredSGT, idx, maxIdx)
-	isIdxOutOfRange.SetName(n.GetVarName("get.is.idx.out.of.range", ctx.block.Insts))
+	isIdxOutOfRange.SetName(n.GetVarName("get.is.idx.out.of.range"))
 
 	inRangeBlock := ctx.NewBlock("get.idx.in.range", n)
 	outOfRangeBlock := ctx.NewBlock("get.idx.out.of.range", n)

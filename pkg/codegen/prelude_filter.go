@@ -51,9 +51,9 @@ func PreludeFilter(ctx *Context, n *mTypes.Node) value.Value {
 	ctx.block.NewBr(countCondBlock)
 
 	numTrue := countCondBlock.NewLoad(types.I64, numTruePtr)
-	numTrue.SetName(n.GetVarName("filter.count.true", ctx.block.Insts))
+	numTrue.SetName(n.GetVarName("filter.count.true"))
 	countloopIdx := countCondBlock.NewLoad(types.I64, countLoopIdxPtr)
-	countloopIdx.SetName(n.GetVarName("filter.count.loop.idx", ctx.block.Insts))
+	countloopIdx.SetName(n.GetVarName("filter.count.loop.idx"))
 
 	isIdxLTOldLen := countCondBlock.NewICmp(enum.IPredULT, countloopIdx, oldLen)
 	countCondBlock.NewCondBr(isIdxLTOldLen, countLoopBlock, countEndBlock)

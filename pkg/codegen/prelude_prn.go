@@ -113,7 +113,7 @@ func prnStructVector(
 
 	// インデックスの初期化
 	idx := nonNullBlock.NewAlloca(types.I64)
-	idx.SetName(n.GetVarName("prn.cur.idx", nonNullBlock.Insts))
+	idx.SetName(n.GetVarName("prn.cur.idx"))
 	nonNullBlock.NewStore(mTypes.I64zero, idx)
 
 	loopBlock := ctx.NewBlock("prn.vec.loop.enter", n)

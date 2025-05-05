@@ -66,7 +66,6 @@ var PreludeFunction = map[string]OpFunc{
 	mTypes.PRELUDE_FILTER: PreludeFilter,
 	//mTypes.LIB_CORE_ASSOC: PreludeAssoc,
 	//mTypes.LIB_CORE_POP:   PreludePop,
-	// nary
 	mTypes.OPERATOR_ADD: OperatorDispatcher(mTypes.OPERATOR_ADD),
 	mTypes.OPERATOR_SUB: OperatorDispatcher(mTypes.OPERATOR_SUB),
 	mTypes.OPERATOR_MUL: OperatorDispatcher(mTypes.OPERATOR_MUL),
@@ -76,6 +75,5 @@ var PreludeFunction = map[string]OpFunc{
 	mTypes.OPERATOR_LT:  OperatorDispatcher(mTypes.OPERATOR_LT),
 	mTypes.OPERATOR_AND: PreludeAnd,
 	mTypes.OPERATOR_OR:  PreludeOr,
-	// binary
 	mTypes.OPERATOR_MOD: OperatorDispatcher(mTypes.OPERATOR_MOD),
 }

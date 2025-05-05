@@ -17,8 +17,7 @@ func PreludeNth(ctx *Context, n *mTypes.Node) value.Value {
 	idx := constant.NewInt(types.I64, i)
 
 	structedVecPtr := n.IRValue
-	structedVecType := mTypes.GetStructTypeFromPtr(structedVecPtr)
-	elemType := structedVecType.Fields[0].(*types.PointerType).ElemType
+	structedVecType, elemType := mTypes.GetVectorTypeFromPtr(structedVecPtr)
 
 	nullPtr := constant.NewNull(types.NewPointer(elemType))
 
@@ -32,13 +31,11 @@ func PreludeNth(ctx *Context, n *mTypes.Node) value.Value {
 	maxIdx := ctx.block.NewSub(loadedLength, mTypes.I64one)
 
 	isIdxOutOfRange := ctx.block.NewICmp(enum.IPredSGT, idx, maxIdx)
-	isIdxOutOfRange.SetName(n.GetVarName("get.is.idx.out.of.range", ctx.block.Insts))
+	isIdxOutOfRange.SetName(n.GetVarName("get.is.idx.out.of.range"))
 
-	inRangeBlock := ctx.function.NewBlock(n.GetBlockName("get.idx.in.range", ctx.function.Blocks))
-	outOfRangeBlock := ctx.function.NewBlock(
-		n.GetBlockName("get.idx.out.of.range", ctx.function.Blocks),
-	)
-	mergeBlock := ctx.function.NewBlock(n.GetBlockName("get.idx.merge", ctx.function.Blocks))
+	inRangeBlock := ctx.NewBlock("get.idx.in.range", n)
+	outOfRangeBlock := ctx.NewBlock("get.idx.out.of.range", n)
+	mergeBlock := ctx.NewBlock("get.idx.merge", n)
 
 	ctx.block.NewCondBr(isIdxOutOfRange, outOfRangeBlock, inRangeBlock)
 

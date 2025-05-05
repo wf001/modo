@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/llir/llvm/ir"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -18,14 +17,6 @@ func TestGetFuncNameUnnamed(t *testing.T) {
 	node := &Node{}
 	want := "fn.unnamed." + fmt.Sprintf("%p", node)
 	assert.Equal(t, want, node.GetUnnamedFuncName())
-}
-
-func TestGetBlockName(t *testing.T) {
-	node := &Node{}
-	blockName := "block"
-	var blks = []*ir.Block{&ir.Block{}, &ir.Block{}}
-	want := blockName + "." + fmt.Sprintf("%p", node) + ".2"
-	assert.Equal(t, want, node.GetBlockName(blockName, blks))
 }
 
 func add(kind NodeKind, val string) *Node {

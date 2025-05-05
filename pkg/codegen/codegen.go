@@ -147,7 +147,7 @@ func newVectorHeap(ctx *Context, n *mTypes.Node) value.Value {
 		mTypes.I32zero,
 		mTypes.I32zero,
 	)
-	vecElemPtr.SetName(n.GetVarName("new.vector.vec.elem.ptr", ctx.block.Insts))
+	vecElemPtr.SetName(n.GetVarName("new.vector.vec.elem.ptr"))
 	ctx.block.NewStore(vecPtr, vecElemPtr)
 
 	lenElemPtr := ctx.block.NewGetElementPtr(
@@ -156,7 +156,7 @@ func newVectorHeap(ctx *Context, n *mTypes.Node) value.Value {
 		mTypes.I32zero,
 		mTypes.I32one,
 	)
-	lenElemPtr.SetName(n.GetVarName("new.vector.len.elem.ptr", ctx.block.Insts))
+	lenElemPtr.SetName(n.GetVarName("new.vector.len.elem.ptr"))
 	ctx.block.NewStore(constant.NewInt(types.I64, vecLength), lenElemPtr)
 
 	return vecIntAlloca
@@ -409,7 +409,7 @@ func (ctx *Context) genLambda(node *mTypes.Node) value.Value {
 			types.Void,
 			ctx.function.Params...,
 		)
-		entryBlock := funcFn.NewBlock(node.GetBlockName(fnEntryBlockName, ctx.function.Blocks))
+		entryBlock := funcFn.NewBlock(ctx.GetBlockName(fnEntryBlockName, node))
 
 		ctx.function = funcFn
 		ctx.block = entryBlock
@@ -426,7 +426,7 @@ func (ctx *Context) genLambda(node *mTypes.Node) value.Value {
 			ctx.function.Sig.RetType,
 			ctx.function.Params...,
 		)
-		entryBlock := funcFn.NewBlock(node.GetBlockName(fnEntryBlockName, ctx.function.Blocks))
+		entryBlock := funcFn.NewBlock(ctx.GetBlockName(fnEntryBlockName, node))
 
 		ctx.function = funcFn
 		ctx.block = entryBlock
@@ -470,7 +470,7 @@ func (ctx *Context) genBranch(
 
 func (ctx *Context) genCondition(node *mTypes.Node) {
 	// cond
-	condBlock := ctx.function.NewBlock(node.GetBlockName("if.cond", ctx.function.Blocks))
+	condBlock := ctx.NewBlock("if.cond", node)
 	ctx.block.NewBr(condBlock)
 	ctx.block = condBlock
 	cond := ctx.gen(node.Cond)
@@ -485,7 +485,7 @@ func (ctx *Context) genCondition(node *mTypes.Node) {
 
 	// exit
 	// NOTE: is it the type truly?
-	exitBlock := ctx.function.NewBlock(node.GetBlockName("if.exit", ctx.function.Blocks))
+	exitBlock := ctx.NewBlock("if.exit", node)
 
 	if retType.Equal(types.Void) {
 		exitBlock.NewRet(nil)
@@ -495,11 +495,11 @@ func (ctx *Context) genCondition(node *mTypes.Node) {
 	}
 
 	// then
-	thenBlock := ctx.function.NewBlock(node.GetBlockName("if.then", ctx.function.Blocks))
+	thenBlock := ctx.NewBlock("if.then", node)
 	ctx.genBranch(thenBlock, node.Then, node.CondRet, exitBlock)
 
 	// else
-	elseBlock := ctx.function.NewBlock(node.GetBlockName("if.else", ctx.function.Blocks))
+	elseBlock := ctx.NewBlock("if.else", node)
 	ctx.genBranch(elseBlock, node.Else, node.CondRet, exitBlock)
 
 	condBlock.NewCondBr(cond, thenBlock, elseBlock)

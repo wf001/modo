@@ -25,7 +25,7 @@ func genNilBlock(
 	)
 
 	// if value is null ptr
-	nullBlock := ctx.function.NewBlock(n.GetBlockName("prn.null", ctx.function.Blocks))
+	nullBlock := ctx.NewBlock("prn.null", n)
 	nullBlock.NewCall(
 		ctx.internal.Cstd.Printf,
 		ctx.internal.GlobalConst.FormatStr,
@@ -33,9 +33,9 @@ func genNilBlock(
 	)
 
 	// if value is not null ptr
-	nonNullBlock := ctx.function.NewBlock(n.GetBlockName("prn.non.null", ctx.function.Blocks))
+	nonNullBlock := ctx.NewBlock("prn.non.null", n)
 
-	endBlock := ctx.function.NewBlock(n.GetBlockName("prn.exit", ctx.function.Blocks))
+	endBlock := ctx.NewBlock("prn.exit", n)
 	nullBlock.NewBr(endBlock)
 	nonNullBlock.NewBr(endBlock)
 
@@ -98,28 +98,23 @@ func prnStructVector(
 ) {
 	v := n.IRValue
 
-	ty := mTypes.GetStructTypeFromPtr(v)
-	elemTy := ty.Fields[0].(*types.PointerType).ElemType
+	ty, elemTy := mTypes.GetVectorTypeFromPtr(v)
 
 	_, nonNullBlock, endBlock := genNilBlock(ctx, types.NewPointer(ty), n, v)
 
-	// if value is not null ptr
-
 	formatStr, _ := mTypes.GetPrintFormat(elemTy, ctx.internal)
-	loaded := nonNullBlock.NewLoad(ty, n.IRValue)
+	structedVec := nonNullBlock.NewLoad(ty, n.IRValue)
 
-	// 構造体のフィールドから arrPtr と len を取り出す
-	resultArrPtr := nonNullBlock.NewExtractValue(loaded, 0)
-	resultLen := nonNullBlock.NewExtractValue(loaded, 1)
+	vecPtr := nonNullBlock.NewExtractValue(structedVec, 0)
+	vecLenPtr := nonNullBlock.NewExtractValue(structedVec, 1)
 
-	// インデックスの初期化
-	idx := nonNullBlock.NewAlloca(types.I64)
-	idx.SetName(n.GetVarName("prn.cur.idx", nonNullBlock.Insts))
-	nonNullBlock.NewStore(mTypes.I64zero, idx)
+	loopIdxPtr := nonNullBlock.NewAlloca(types.I64)
+	loopIdxPtr.SetName(n.GetVarName("prn.cur.idx"))
+	nonNullBlock.NewStore(mTypes.I64zero, loopIdxPtr)
 
-	loopBlock := ctx.function.NewBlock(n.GetBlockName("prn.vec.loop.enter", ctx.function.Blocks))
-	continueBlock := ctx.function.NewBlock(n.GetBlockName("prn.vec.continue", ctx.function.Blocks))
-	loopEndBlock := ctx.function.NewBlock(n.GetBlockName("prn.vec.loop.exit", ctx.function.Blocks))
+	loopBlock := ctx.NewBlock("prn.vec.loop", n)
+	condBlock := ctx.NewBlock("prn.vec.cond", n)
+	exitBlock := ctx.NewBlock("prn.vec.exit", n)
 
 	nonNullBlock.NewCall(
 		ctx.internal.Cstd.Printf,
@@ -127,12 +122,9 @@ func prnStructVector(
 	)
 	nonNullBlock.NewBr(loopBlock)
 
-	// ループ内部の処理
-	// i をロード
-	i := loopBlock.NewLoad(types.I64, idx)
+	loopIdx := loopBlock.NewLoad(types.I64, loopIdxPtr)
 
-	// 配列の各要素を取り出して表示
-	elemPtr := loopBlock.NewGetElementPtr(elemTy, resultArrPtr, i)
+	elemPtr := loopBlock.NewGetElementPtr(elemTy, vecPtr, loopIdx)
 	elem := loopBlock.NewLoad(elemTy, elemPtr)
 
 	if elem.ElemType == types.I1 {
@@ -152,28 +144,27 @@ func prnStructVector(
 	}
 
 	// i++
-	nextI := loopBlock.NewAdd(i, mTypes.I64one)
-	loopBlock.NewStore(nextI, idx)
+	nextIdx := loopBlock.NewAdd(loopIdx, mTypes.I64one)
+	loopBlock.NewStore(nextIdx, loopIdxPtr)
 
-	continueBlock.NewCall(
+	condBlock.NewCall(
 		ctx.internal.Cstd.Printf,
 		ctx.internal.GlobalConst.StringComma,
 	)
-	continueBlock.NewCall(
+	condBlock.NewCall(
 		ctx.internal.Cstd.Printf,
 		ctx.internal.GlobalConst.StringSpace,
 	)
-	continueBlock.NewBr(loopBlock)
+	condBlock.NewBr(loopBlock)
 
-	// i < len ?
-	cond := loopBlock.NewICmp(enum.IPredSLT, nextI, resultLen)
-	loopBlock.NewCondBr(cond, continueBlock, loopEndBlock)
-	loopEndBlock.NewCall(
+	cond := loopBlock.NewICmp(enum.IPredULT, nextIdx, vecLenPtr)
+	loopBlock.NewCondBr(cond, condBlock, exitBlock)
+	exitBlock.NewCall(
 		ctx.internal.Cstd.Printf,
 		ctx.internal.GlobalConst.StringBracketClose,
 	)
 
-	loopEndBlock.NewBr(endBlock)
+	exitBlock.NewBr(endBlock)
 
 	ctx.block = endBlock
 }

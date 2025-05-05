@@ -55,6 +55,7 @@ func parseBody(
 ) (*mTypes.Token, *mTypes.Node) {
 
 	nextToken, argHead := parseExprs(rootToken.Next, parentKind)
+	// Note: validate argument properties here?
 	rootNode := newNodeParent(parentKind, argHead, exprName)
 	return nextToken, rootNode
 }

@@ -10,34 +10,18 @@ import (
 
 // arithmetic
 func PreludeAdd(ctx *Context, node *mTypes.Node) value.Value {
-	return invokeFoldArithmetic(
-		node,
-		func(x, y value.Value) value.Value {
-			return ctx.block.NewAdd(x, y)
-		})
+	return ctx.block.NewAdd(node.IRValue, node.Next.IRValue)
 }
 
 func PreludeSub(ctx *Context, node *mTypes.Node) value.Value {
-	return invokeFoldArithmetic(
-		node,
-		func(x, y value.Value) value.Value {
-			return ctx.block.NewSub(x, y)
-		})
+	return ctx.block.NewSub(node.IRValue, node.Next.IRValue)
 }
 
 func PreludeMul(ctx *Context, node *mTypes.Node) value.Value {
-	return invokeFoldArithmetic(
-		node,
-		func(x, y value.Value) value.Value {
-			return ctx.block.NewMul(x, y)
-		})
+	return ctx.block.NewMul(node.IRValue, node.Next.IRValue)
 }
 func PreludeDiv(ctx *Context, node *mTypes.Node) value.Value {
-	return invokeFoldArithmetic(
-		node,
-		func(x, y value.Value) value.Value {
-			return ctx.block.NewSDiv(x, y)
-		})
+	return ctx.block.NewSDiv(node.IRValue, node.Next.IRValue)
 }
 
 func PreludeMod(ctx *Context, node *mTypes.Node) value.Value {
@@ -56,57 +40,23 @@ func PreludeEq(ctx *Context, node *mTypes.Node) value.Value {
 
 		cmpRes := ctx.block.NewCall(ctx.internal.Cstd.Strcmp, fst, snd)
 		isEq := ctx.block.NewICmp(enum.IPredEQ, cmpRes, mTypes.I1zero)
-		res := ctx.block.NewAnd(isEq, mTypes.I1one)
-
-		for n := node.Next; n != nil; n = n.Next {
-			snd = n.IRValue
-			cmpRes = ctx.block.NewCall(ctx.internal.Cstd.Strcmp, fst, snd)
-			isEq = ctx.block.NewICmp(enum.IPredEQ, cmpRes, mTypes.I1zero)
-			res = ctx.block.NewAnd(res, isEq)
-		}
-		return res
+		return ctx.block.NewAnd(isEq, mTypes.I1one)
 
 	} else {
-		return invokeFoldPred(
-			ctx.block,
-			node,
-			func(x, y value.Value) value.Value {
-				return ctx.block.NewICmp(enum.IPredEQ, x, y)
-			})
-
+		return ctx.block.NewICmp(enum.IPredEQ, node.IRValue, node.Next.IRValue)
 	}
 }
 func PreludeGt(ctx *Context, node *mTypes.Node) value.Value {
-	return invokeFoldPred(
-		ctx.block,
-		node,
-		func(x, y value.Value) value.Value {
-			return ctx.block.NewICmp(enum.IPredSGT, x, y)
-		})
+	return ctx.block.NewICmp(enum.IPredSGT, node.IRValue, node.Next.IRValue)
 }
 func PreludeLt(ctx *Context, node *mTypes.Node) value.Value {
-	return invokeFoldPred(
-		ctx.block,
-		node,
-		func(x, y value.Value) value.Value {
-			return ctx.block.NewICmp(enum.IPredSLT, x, y)
-		})
+	return ctx.block.NewICmp(enum.IPredSLT, node.IRValue, node.Next.IRValue)
 }
 
 // logical
 func PreludeAnd(ctx *Context, node *mTypes.Node) value.Value {
-	return invokeFoldPred(
-		ctx.block,
-		node,
-		func(x, y value.Value) value.Value {
-			return ctx.block.NewAnd(x, y)
-		})
+	return ctx.block.NewAnd(node.IRValue, node.Next.IRValue)
 }
 func PreludeOr(ctx *Context, node *mTypes.Node) value.Value {
-	return invokeFoldPred(
-		ctx.block,
-		node,
-		func(x, y value.Value) value.Value {
-			return ctx.block.NewOr(x, y)
-		})
+	return ctx.block.NewOr(node.IRValue, node.Next.IRValue)
 }

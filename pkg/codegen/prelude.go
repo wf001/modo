@@ -7,11 +7,12 @@ import (
 )
 
 var PreludeFunction = map[string]func(*Context, *mTypes.Node) value.Value{
-	mTypes.PRELUDE_PRN:  PreludePrn,
-	mTypes.PRELUDE_GET:  PreludeGet,
-	mTypes.PRELUDE_NTH:  PreludeNth,
-	mTypes.PRELUDE_CONJ: PreludeConj,
-	mTypes.PRELUDE_MAP:  PreludeMap,
+	mTypes.PRELUDE_PRN:    PreludePrn,
+	mTypes.PRELUDE_GET:    PreludeGet,
+	mTypes.PRELUDE_NTH:    PreludeNth,
+	mTypes.PRELUDE_CONJ:   PreludeConj,
+	mTypes.PRELUDE_MAP:    PreludeMap,
+	mTypes.PRELUDE_FILTER: PreludeFilter,
 	//mTypes.LIB_CORE_ASSOC: PreludeAssoc,
 	//mTypes.LIB_CORE_POP:   PreludePop,
 	// nary

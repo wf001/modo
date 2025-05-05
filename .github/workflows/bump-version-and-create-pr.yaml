@@ -1,0 +1,49 @@
+name: Bump Version and Create PR
+
+on:
+  workflow_dispatch:
+
+jobs:
+  bump-version:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: dev
+
+      - name: Install yq
+        run: |
+          sudo wget -qO /usr/bin/yq https://github.com/mikefarah/yq/releases/download/v4.40.5/yq_linux_amd64
+          sudo chmod +x /usr/bin/yq
+
+      - name: Read and bump version
+        id: bump
+        run: |
+          current=$(yq '.version' cmd/modo/version.yaml)
+          new_version=$(echo $current | awk -F. -v OFS=. '{$NF += 1; print}')
+          yq eval ".version = \"$new_version\"" -i cmd/modo/version.yaml
+          echo "version=$new_version" >> $GITHUB_OUTPUT
+
+      - name: Commit and push
+        env:
+          GITHUB_TOKEN: ${{ secrets.GH_TOKEN2 }}
+        run: |
+          version=${{ steps.bump.outputs.version }}
+          branch=bump-to-$version
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git config --global push.default current
+          git checkout -b $branch
+          git add cmd/modo/version.yaml
+          git commit -m "Bump version to $version"
+          git push
+
+      - name: Create pull request
+        uses: repo-sync/pull-request@v2
+        with:
+          source_branch: bump-to-${{ steps.bump.outputs.version }}
+          destination_branch: dev
+          pr_title: Release version ${{ steps.bump.outputs.version }}
+          pr_label: release
+          github_token: ${{ secrets.GH_TOKEN2 }}
+

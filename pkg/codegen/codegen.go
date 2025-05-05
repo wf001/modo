@@ -470,7 +470,7 @@ func (ctx *Context) genBranch(
 
 func (ctx *Context) genCondition(node *mTypes.Node) {
 	// cond
-	condBlock := ctx.function.NewBlock(node.GetBlockName("if.cond", ctx.function.Blocks))
+	condBlock := ctx.NewBlock("if.cond", node)
 	ctx.block.NewBr(condBlock)
 	ctx.block = condBlock
 	cond := ctx.gen(node.Cond)
@@ -485,7 +485,7 @@ func (ctx *Context) genCondition(node *mTypes.Node) {
 
 	// exit
 	// NOTE: is it the type truly?
-	exitBlock := ctx.function.NewBlock(node.GetBlockName("if.exit", ctx.function.Blocks))
+	exitBlock := ctx.NewBlock("if.exit", node)
 
 	if retType.Equal(types.Void) {
 		exitBlock.NewRet(nil)
@@ -495,11 +495,11 @@ func (ctx *Context) genCondition(node *mTypes.Node) {
 	}
 
 	// then
-	thenBlock := ctx.function.NewBlock(node.GetBlockName("if.then", ctx.function.Blocks))
+	thenBlock := ctx.NewBlock("if.then", node)
 	ctx.genBranch(thenBlock, node.Then, node.CondRet, exitBlock)
 
 	// else
-	elseBlock := ctx.function.NewBlock(node.GetBlockName("if.else", ctx.function.Blocks))
+	elseBlock := ctx.NewBlock("if.else", node)
 	ctx.genBranch(elseBlock, node.Else, node.CondRet, exitBlock)
 
 	condBlock.NewCondBr(cond, thenBlock, elseBlock)

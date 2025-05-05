@@ -29,9 +29,9 @@ func CopyVector(
 	loopIndexPtr := ctx.block.NewAlloca(types.I64)
 	ctx.block.NewStore(mTypes.I64zero, loopIndexPtr)
 
-	loopBlock := ctx.function.NewBlock(n.GetBlockName("copy.loop", ctx.function.Blocks))
-	condBlock := ctx.function.NewBlock(n.GetBlockName("copy.cond", ctx.function.Blocks))
-	endBlock := ctx.function.NewBlock(n.GetBlockName("copy.end", ctx.function.Blocks))
+	loopBlock := ctx.NewBlock("copy.loop", n)
+	condBlock := ctx.NewBlock("copy.cond", n)
+	endBlock := ctx.NewBlock("copy.end", n)
 
 	ctx.block.NewBr(condBlock)
 

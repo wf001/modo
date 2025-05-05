@@ -43,21 +43,11 @@ func PreludeFilter(ctx *Context, n *mTypes.Node) value.Value {
 	countLoopIdxPtr := ctx.block.NewAlloca(types.I64)
 	ctx.block.NewStore(mTypes.I64zero, countLoopIdxPtr)
 
-	countCondBlock := ctx.function.NewBlock(
-		n.GetBlockName("filter.count.cond", ctx.function.Blocks),
-	)
-	countLoopBlock := ctx.function.NewBlock(
-		n.GetBlockName("filter.count.loop", ctx.function.Blocks),
-	)
-	countLoopIncCountBlock := ctx.function.NewBlock(
-		n.GetBlockName("filter.count.loop.inc.count", ctx.function.Blocks),
-	)
-	countLoopIncIdxBlock := ctx.function.NewBlock(
-		n.GetBlockName("filter.count.loop.inc.idx", ctx.function.Blocks),
-	)
-	countEndBlock := ctx.function.NewBlock(
-		n.GetBlockName("filter.count.end", ctx.function.Blocks),
-	)
+	countCondBlock := ctx.NewBlock("filter.count.cond", n)
+	countLoopBlock := ctx.NewBlock("filter.count.loop", n)
+	countLoopIncCountBlock := ctx.NewBlock("filter.count.loop.inc.count", n)
+	countLoopIncIdxBlock := ctx.NewBlock("filter.count.loop.inc.idx", n)
+	countEndBlock := ctx.NewBlock("filter.count.end", n)
 
 	ctx.block.NewBr(countCondBlock)
 
@@ -100,15 +90,11 @@ func PreludeFilter(ctx *Context, n *mTypes.Node) value.Value {
 	ctx.block.NewStore(mTypes.I64zero, conjLoopIdxPtr)
 	ctx.block.NewStore(mTypes.I64zero, newVecIdxPtr)
 
-	condBlock := ctx.function.NewBlock(n.GetBlockName("filter.new.vec.cond", ctx.function.Blocks))
-	loopBlock := ctx.function.NewBlock(n.GetBlockName("filter.new.vec.loop", ctx.function.Blocks))
-	loopConjBlock := ctx.function.NewBlock(
-		n.GetBlockName("filter.new.vec.loop.conj", ctx.function.Blocks),
-	)
-	loopIncBlock := ctx.function.NewBlock(
-		n.GetBlockName("filter.new.vec.loop.inc", ctx.function.Blocks),
-	)
-	endBlock := ctx.function.NewBlock(n.GetBlockName("filter.new.vec.end", ctx.function.Blocks))
+	condBlock := ctx.NewBlock("filter.new.vec.cond", n)
+	loopBlock := ctx.NewBlock("filter.new.vec.loop", n)
+	loopConjBlock := ctx.NewBlock("filter.new.vec.loop.conj", n)
+	loopIncBlock := ctx.NewBlock("filter.new.vec.loop.inc", n)
+	endBlock := ctx.NewBlock("filter.new.vec.end", n)
 
 	ctx.block.NewBr(condBlock)
 

@@ -46,9 +46,9 @@ func PreludeMap(ctx *Context, n *mTypes.Node) value.Value {
 	loopIndexPtr := ctx.block.NewAlloca(types.I64)
 	ctx.block.NewStore(mTypes.I64zero, loopIndexPtr)
 
-	loopBlock := ctx.function.NewBlock(n.GetBlockName("map.loop", ctx.function.Blocks))
-	condBlock := ctx.function.NewBlock(n.GetBlockName("map.cond", ctx.function.Blocks))
-	endBlock := ctx.function.NewBlock(n.GetBlockName("map.end", ctx.function.Blocks))
+	loopBlock := ctx.NewBlock("map.loop", n)
+	condBlock := ctx.NewBlock("map.cond", n)
+	endBlock := ctx.NewBlock("map.end", n)
 
 	ctx.block.NewBr(condBlock)
 

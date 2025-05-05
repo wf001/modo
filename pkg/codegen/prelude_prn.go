@@ -25,7 +25,7 @@ func genNilBlock(
 	)
 
 	// if value is null ptr
-	nullBlock := ctx.function.NewBlock(n.GetBlockName("prn.null", ctx.function.Blocks))
+	nullBlock := ctx.NewBlock("prn.null", n)
 	nullBlock.NewCall(
 		ctx.internal.Cstd.Printf,
 		ctx.internal.GlobalConst.FormatStr,
@@ -33,9 +33,9 @@ func genNilBlock(
 	)
 
 	// if value is not null ptr
-	nonNullBlock := ctx.function.NewBlock(n.GetBlockName("prn.non.null", ctx.function.Blocks))
+	nonNullBlock := ctx.NewBlock("prn.non.null", n)
 
-	endBlock := ctx.function.NewBlock(n.GetBlockName("prn.exit", ctx.function.Blocks))
+	endBlock := ctx.NewBlock("prn.exit", n)
 	nullBlock.NewBr(endBlock)
 	nonNullBlock.NewBr(endBlock)
 
@@ -117,9 +117,9 @@ func prnStructVector(
 	idx.SetName(n.GetVarName("prn.cur.idx", nonNullBlock.Insts))
 	nonNullBlock.NewStore(mTypes.I64zero, idx)
 
-	loopBlock := ctx.function.NewBlock(n.GetBlockName("prn.vec.loop.enter", ctx.function.Blocks))
-	continueBlock := ctx.function.NewBlock(n.GetBlockName("prn.vec.continue", ctx.function.Blocks))
-	loopEndBlock := ctx.function.NewBlock(n.GetBlockName("prn.vec.loop.exit", ctx.function.Blocks))
+	loopBlock := ctx.NewBlock("prn.vec.loop.enter", n)
+	continueBlock := ctx.NewBlock("prn.vec.continue", n)
+	loopEndBlock := ctx.NewBlock("prn.vec.loop.exit", n)
 
 	nonNullBlock.NewCall(
 		ctx.internal.Cstd.Printf,

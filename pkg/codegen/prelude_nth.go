@@ -34,11 +34,9 @@ func PreludeNth(ctx *Context, n *mTypes.Node) value.Value {
 	isIdxOutOfRange := ctx.block.NewICmp(enum.IPredSGT, idx, maxIdx)
 	isIdxOutOfRange.SetName(n.GetVarName("get.is.idx.out.of.range", ctx.block.Insts))
 
-	inRangeBlock := ctx.function.NewBlock(n.GetBlockName("get.idx.in.range", ctx.function.Blocks))
-	outOfRangeBlock := ctx.function.NewBlock(
-		n.GetBlockName("get.idx.out.of.range", ctx.function.Blocks),
-	)
-	mergeBlock := ctx.function.NewBlock(n.GetBlockName("get.idx.merge", ctx.function.Blocks))
+	inRangeBlock := ctx.NewBlock("get.idx.in.range", n)
+	outOfRangeBlock := ctx.NewBlock("get.idx.out.of.range", n)
+	mergeBlock := ctx.NewBlock("get.idx.merge", n)
 
 	ctx.block.NewCondBr(isIdxOutOfRange, outOfRangeBlock, inRangeBlock)
 

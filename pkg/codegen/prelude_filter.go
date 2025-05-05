@@ -31,9 +31,9 @@ func PreludeFilter(ctx *Context, n *mTypes.Node) value.Value {
 	structedVecType, elemType := mTypes.GetVectorTypeFromPtr(oldStructedVecPtr)
 
 	oldStructedVec := ctx.block.NewLoad(structedVecType, oldStructedVecPtr)
-	oldLen := ctx.block.NewExtractValue(oldStructedVec, 1)
 
 	oldVecPtr := ctx.block.NewExtractValue(oldStructedVec, 0)
+	oldLen := ctx.block.NewExtractValue(oldStructedVec, 1)
 
 	// get the number of elements for which the predicate returns true
 	// This step is necessary to allocate the correct number of bytes with malloc

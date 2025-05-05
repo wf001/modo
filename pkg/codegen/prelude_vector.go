@@ -39,8 +39,8 @@ func CopyVector(
 	isIdxLTOldLen := condBlock.NewICmp(enum.IPredULT, loopIdx, oldLen)
 	condBlock.NewCondBr(isIdxLTOldLen, loopBlock, endBlock)
 
-	oldArrElemPtr := loopBlock.NewGetElementPtr(elemType, oldVecPtr, loopIdx)
-	oldElem := loopBlock.NewLoad(elemType, oldArrElemPtr)
+	oldElemPtr := loopBlock.NewGetElementPtr(elemType, oldVecPtr, loopIdx)
+	oldElem := loopBlock.NewLoad(elemType, oldElemPtr)
 	newVecElemPtr := loopBlock.NewGetElementPtr(elemType, newVecPtr, loopIdx)
 	loopBlock.NewStore(oldElem, newVecElemPtr)
 

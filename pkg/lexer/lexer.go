@@ -36,7 +36,7 @@ func (tp *tokenPattern) matchTokenType(s string) (string, bool) {
 func newTokenPattern() *tokenPattern {
 	head := &tokenPattern{
 		Pattern:   mTypes.FRACTIONAL_REG_EXP,
-		TokenType: mTypes.TK_FLOAT,
+		TokenType: mTypes.TK_DOUBLE,
 	}
 	current := head
 
@@ -53,7 +53,7 @@ func newTokenPattern() *tokenPattern {
 	add(mTypes.SYMBOL_TYPE_ARROW, mTypes.TK_TYPE_ARROW)
 	add(mTypes.SYMBOL_TYPE_VECTOR, mTypes.TK_TYPE_VECTOR)
 	add(mTypes.SYMBOL_TYPE_INT, mTypes.TK_TYPE_INT)
-	add(mTypes.SYMBOL_TYPE_FLOAT, mTypes.TK_TYPE_FLOAT)
+	add(mTypes.SYMBOL_TYPE_DOUBLE, mTypes.TK_TYPE_DOUBLE)
 	add(mTypes.SYMBOL_TYPE_STR, mTypes.TK_TYPE_STR)
 	add(mTypes.SYMBOL_TYPE_NIL, mTypes.TK_TYPE_NIL)
 	add(mTypes.SYMBOL_TYPE_BOOL, mTypes.TK_TYPE_BOOL)

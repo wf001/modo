@@ -38,7 +38,7 @@ type ModoType string
 // Note: what for?
 const (
 	TY_INT32    = ModoType("ty.int32")
-	TY_FLOAT    = ModoType("ty.float")
+	TY_DOUBLE   = ModoType("ty.double")
 	TY_STR      = ModoType("ty.str")
 	TY_NIL      = ModoType("ty.nil")
 	TY_BOOL     = ModoType("ty.bool")
@@ -117,7 +117,7 @@ func (node *Node) IsScalar() bool {
 		return false
 	}
 	return node.IsType(TY_INT32) ||
-		node.IsType(TY_FLOAT) ||
+		node.IsType(TY_DOUBLE) ||
 		node.IsType(TY_BOOL) ||
 		node.IsType(TY_STR) ||
 		node.IsType(TY_NIL)
@@ -217,11 +217,11 @@ func GetLLVMTypeRec(
 	var scalarTy types.Type
 
 	var scalarTypeMap = map[ModoType]types.Type{
-		TY_INT32: types.I32,
-		TY_FLOAT: types.Float,
-		TY_BOOL:  types.I1,
-		TY_STR:   types.I8Ptr,
-		TY_NIL:   types.Void,
+		TY_INT32:  types.I32,
+		TY_DOUBLE: types.Double,
+		TY_BOOL:   types.I1,
+		TY_STR:    types.I8Ptr,
+		TY_NIL:    types.Void,
 	}
 
 	scalarTy, isRootScalar := scalarTypeMap[ndtype.Value]

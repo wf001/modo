@@ -23,7 +23,7 @@ const (
 	TK_TYPE_SIG      = SyntaxRole("tk.type.sig")
 	TK_TYPE_ARROW    = SyntaxRole("tk.type.arrow")
 	TK_TYPE_INT      = SyntaxRole("tk.type.int")
-	TK_TYPE_FLOAT    = SyntaxRole("tk.type.float")
+	TK_TYPE_DOUBLE   = SyntaxRole("tk.type.double")
 	TK_TYPE_STR      = SyntaxRole("tk.type.str")
 	TK_TYPE_BOOL     = SyntaxRole("tk.type.bool")
 	TK_TYPE_NIL      = SyntaxRole("tk.type.nil")
@@ -31,11 +31,11 @@ const (
 	TK_TYPE_STRUCT   = SyntaxRole("tk.type.struct")
 	TK_TYPE_EXTENDED = SyntaxRole("tk.type.extended")
 
-	TK_INT   = SyntaxRole("tk.int")
-	TK_FLOAT = SyntaxRole("tk.float")
-	TK_BOOL  = SyntaxRole("tk.bool")
-	TK_STR   = SyntaxRole("tk.str")
-	TK_NIL   = SyntaxRole("tk.nil")
+	TK_INT    = SyntaxRole("tk.int")
+	TK_DOUBLE = SyntaxRole("tk.double")
+	TK_BOOL   = SyntaxRole("tk.bool")
+	TK_STR    = SyntaxRole("tk.str")
+	TK_NIL    = SyntaxRole("tk.nil")
 )
 
 type TokenKind struct {
@@ -87,7 +87,7 @@ func (tok *Token) IsKind(kind SyntaxRole) bool {
 func (tok *Token) IsKindType() bool {
 	return tok.IsKind(TK_TYPE_ARROW) ||
 		tok.IsKind(TK_TYPE_INT) ||
-		tok.IsKind(TK_TYPE_FLOAT) ||
+		tok.IsKind(TK_TYPE_DOUBLE) ||
 		tok.IsKind(TK_TYPE_STR) ||
 		tok.IsKind(TK_TYPE_NIL) ||
 		tok.IsKind(TK_TYPE_BOOL) ||
@@ -102,7 +102,7 @@ func (tok *Token) IsKindType() bool {
 func GetModoType(tkkind *TokenKind) (*NodeType, bool) {
 	var scalarType = map[string]ModoType{
 		TK_TYPE_INT:      TY_INT32,
-		TK_TYPE_FLOAT:    TY_FLOAT,
+		TK_TYPE_DOUBLE:   TY_DOUBLE,
 		TK_TYPE_STR:      TY_STR,
 		TK_TYPE_NIL:      TY_NIL,
 		TK_TYPE_BOOL:     TY_BOOL,

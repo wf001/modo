@@ -13,8 +13,8 @@ func declareInternalConst(ir *ir.Module, internal *mTypes.Internal) {
 		"_format.digit",
 		constant.NewCharArrayFromString("%d\x00"),
 	)
-	globalConst.FormatFloat = ir.NewGlobalDef(
-		"_format.float",
+	globalConst.FormatDouble = ir.NewGlobalDef(
+		"_format.double",
 		constant.NewCharArrayFromString("%f\x00"),
 	)
 	globalConst.FormatDigit.Immutable = true

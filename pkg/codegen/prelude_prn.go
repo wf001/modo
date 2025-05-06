@@ -74,12 +74,7 @@ func prnScalar(
 
 			formatStr, _ = mTypes.GetPrintFormat(pointerElemTy.ElemType, ctx.internal)
 
-			ptr := nonNullBlock.NewLoad(pointerElemTy, value)
-			value = nonNullBlock.NewGetElementPtr(
-				pointerElemTy.ElemType,
-				ptr,
-				mTypes.I32zero,
-			)
+			value := nonNullBlock.NewLoad(pointerElemTy.ElemType, value)
 
 			nonNullBlock.NewCall(ctx.internal.Cstd.Printf, formatStr, value)
 

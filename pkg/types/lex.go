@@ -87,8 +87,9 @@ var (
 	PRELUDE_POP              = "pop"
 	PRELUDE_MAP              = "map"
 	PRELUDE_FILTER           = "filter"
+	PRELUDE_REDUCE           = "reduce"
 	PRELUDE_FUNCTION_REG_EXP = fmt.Sprintf(
-		"\\b(%s|%s|%s|%s|%s|%s|%s|%s)\\b",
+		"\\b(%s|%s|%s|%s|%s|%s|%s|%s|%s)\\b",
 		PRELUDE_PRN,
 		PRELUDE_GET,
 		PRELUDE_NTH,
@@ -97,6 +98,7 @@ var (
 		PRELUDE_POP,
 		PRELUDE_MAP,
 		PRELUDE_FILTER,
+		PRELUDE_REDUCE,
 	)
 
 	// Type signature

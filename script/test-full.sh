@@ -313,6 +313,12 @@ testexec(){
   assertexec '(def isThreeOne :: float => bool (fn [x] (= 3.1 x))) (def main :: int (fn [] (prn (filter isThreeOne [1.1 2.1 3.1]))))' "[3.100000]\\\n"
 
   echo "==================="
+  echo "== reduce ==="
+  echo "==================="
+  assertexec '(def f :: int => int => int (fn [x y] (+ x y))) (def main :: int (fn [] (prn (reduce f 0 [3 2 1 9]))))' "15\\\n"
+  assertexec '(def f :: float => float => float (fn [x y] (+ x y))) (def main :: int (fn [] (prn (reduce f 0.1 [1.2 2.2 8.1 3.2])))))' "14.799999\\\n"
+
+  echo "==================="
   echo "== nth ==="
   echo "==================="
   # nth

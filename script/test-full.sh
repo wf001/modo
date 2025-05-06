@@ -225,12 +225,14 @@ testexec(){
   # map
   echo "[map]"
   assertexec "(def inc :: int => int (fn [x] (+ x 1))) (def main :: int (fn [] (prn (map inc [32 13 99]))))" "[33, 14, 100]\\\n"
+  assertexec "(def inc :: float => float (fn [x] (+ x 1.3))) (def main :: int (fn [] (prn (map inc [4.2 1.8]))))" "[5.500000, 3.100000]\\\n"
   assertexec '(def str :: int => string (fn [x] "a")) (def main :: int (fn [] (prn (map str [32 13 99]))))' "[a, a, a]\\\n"
   assertexec '(def truely :: int => bool (fn [x] true)) (def main :: int (fn [] (prn (map truely [32 13 99]))))' "[true, true, true]\\\n"
   # filter
   echo "[filter]"
   assertexec '(def even :: int => bool (fn [x] (= 0 (mod x 2))))  (def main :: int (fn [] (prn (filter even [8 1 7 10 18 42 45]))))' "[8, 10, 18, 42]\\\n"
   assertexec '(def isThree :: int => bool (fn [x] (= 3 x))) (def main :: int (fn [] (prn (filter isThree [8 1 7 10 3 42 3]))))' "[3, 3]\\\n"
+  assertexec '(def isThreeOne :: float => bool (fn [x] (= 3.1 x))) (def main :: int (fn [] (prn (filter isThreeOne [1.1 2.1 3.1]))))' "[3.100000]\\\n"
 
   echo "[taking and returning]"
   # argument and return

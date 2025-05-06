@@ -15,7 +15,7 @@ func declareInternalConst(ir *ir.Module, internal *mTypes.Internal) {
 	)
 	globalConst.FormatDouble = ir.NewGlobalDef(
 		"_format.double",
-		constant.NewCharArrayFromString("%f\x00"),
+		constant.NewCharArrayFromString("%g\x00"),
 	)
 	globalConst.FormatDigit.Immutable = true
 

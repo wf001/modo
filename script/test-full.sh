@@ -12,7 +12,7 @@ testexec(){
   echo "==================="
   echo "== double value ==="
   echo "==================="
-  assertexec '(def main ::int (fn [] (prn 1.2))))' "1.200000\\\n"
+  assertexec '(def main ::int (fn [] (prn 1.2))))' "1.2\\\n"
 
   echo "==================="
   echo "== string type ==="
@@ -42,13 +42,13 @@ testexec(){
   assertexec '(def main ::int (fn [] (prn (+ (+ 1 2) (+ (+ 9 5) 4)))))' "21\\\n"
   assertexec '(def main ::int (fn [] (prn (+ 1 (+ (+ 4 5) 8)))))' "18\\\n"
   # double
-  assertexec '(def main ::int (fn [] (prn (+ 1.2 3.3))))' "4.500000\\\n"
+  assertexec '(def main ::int (fn [] (prn (+ 1.2 3.3))))' "4.5\\\n"
 
   # subtraction
   # int
   assertexec '(def main ::int (fn [] (prn (- 15 20))))' "-5\\\n"
   # double
-  assertexec '(def main ::int (fn [] (prn (- 3.1 2.3))))' "0.800000\\\n"
+  assertexec '(def main ::int (fn [] (prn (- 3.1 2.3))))' "0.8\\\n"
 
   # multiplication
   # int
@@ -57,7 +57,7 @@ testexec(){
   assertexec '(def main ::int (fn [] (prn (* 3 4))))' "12\\\n"
   assertexec '(def main ::int (fn [] (prn (* (+ 2 3) 5))))' "25\\\n"
   # double
-  assertexec '(def main ::int (fn [] (prn (* 3.1 2.3))))' "7.130000\\\n"
+  assertexec '(def main ::int (fn [] (prn (* 3.1 2.3))))' "7.13\\\n"
 
   # division
   # int
@@ -66,15 +66,16 @@ testexec(){
   assertexec '(def main ::int (fn [] (prn (/ 5 0))))' "0\\\n"
   assertexec '(def main ::int (fn [] (prn (/ 0 5))))' "0\\\n"
   # double
-  assertexec '(def main ::int (fn [] (prn (/ 3.1 2.3))))' "1.347826\\\n"
+  assertexec '(def main ::int (fn [] (prn (/ 3.1 2.3))))' "1.34783\\\n"
+  assertexec '(def main ::int (fn [] (prn (/ 1.0 10000000.0))))' "1e-07\\\n"
 
   # modulo
   # int
   assertexec '(def main ::int (fn [] (prn (mod 20 5))))' "0\\\n"
   assertexec '(def main ::int (fn [] (prn (mod 17 5))))' "2\\\n"
   # double
-  assertexec '(def main ::int (fn [] (prn (mod 3.3 1.2))))' "0.900000\\\n"
-  assertexec '(def main ::int (fn [] (prn (mod 3.2 1.6))))' "0.000000\\\n"
+  assertexec '(def main ::int (fn [] (prn (mod 3.3 1.2))))' "0.9\\\n"
+  assertexec '(def main ::int (fn [] (prn (mod 3.2 1.6))))' "0\\\n"
 
 
 
@@ -151,7 +152,7 @@ testexec(){
   assertexec '(def x ::int 1) (def y ::int 2) (def main ::int (fn [] (prn (= x y))))' "false\\\n"
 
   # double
-  assertexec '(def f :: double 1.32) (def main ::int (fn [] (prn f)))' "1.320000\\\n"
+  assertexec '(def f :: double 1.32) (def main ::int (fn [] (prn f)))' "1.32\\\n"
 
   # string
   assertexec '(def x ::string "hello") (def main ::int (fn [] (prn x)))' "hello\\\n"
@@ -165,8 +166,8 @@ testexec(){
   assertexec '(def main ::int (fn [] (let [x ::int 1] (let [y ::int (+ x 2)] (prn (+ x y))))))' "4\\\n"
   assertexec '(def main ::int (fn [] (let [x ::int 1] (let [y ::int (+ x 2)] (prn y)))))' "3\\\n"
   # double
-  assertexec '(def f :: double (fn [] (let [fl ::double 1.42] fl))) (def main ::int (fn [] (prn f)))' "1.420000\\\n"
-  assertexec '(def f :: double (fn [] (let [fl ::double 1.42 fm ::double (+ fl 3.2)] fm))) (def main ::int (fn [] (prn f)))' "4.620000\\\n"
+  assertexec '(def f :: double (fn [] (let [fl ::double 1.42] fl))) (def main ::int (fn [] (prn f)))' "1.42\\\n"
+  assertexec '(def f :: double (fn [] (let [fl ::double 1.42 fm ::double (+ fl 3.2)] fm))) (def main ::int (fn [] (prn f)))' "4.62\\\n"
   # string
   assertexec '(def main ::int (fn [] (let [s ::string "hello"] (prn s))))' "hello\\\n"
   assertexec '(def main ::int (fn [] (let [s ::string "hello" t ::string "world"] (prn s))))' "hello\\\n"
@@ -229,7 +230,7 @@ testexec(){
   assertexec '(def f :: int => nil (fn [a] (prn a))) (def main ::int (fn [] (f 4)))' "4\\\n"
   assertexec '(def f :: int => int => int (fn [a b] (+ a b))) (def main ::int (fn [] (prn (f 1 2))))' "3\\\n"
   # double
-  assertexec '(def f :: double => nil (fn [a] (prn a))) (def main ::int (fn [] (f 1.23)))' "1.230000\\\n"
+  assertexec '(def f :: double => nil (fn [a] (prn a))) (def main ::int (fn [] (f 1.23)))' "1.23\\\n"
   # string
   assertexec '(def f :: string => string (fn [a] a)) (def main ::int (fn [] (prn (f "hello"))))' "hello\\\n"
   assertexec '(def f :: string => string (fn [a] "modo")) (def main ::int (fn [] (prn (f "hello"))))' "modo\\\n"
@@ -255,7 +256,7 @@ testexec(){
   # local bool
   assertexec '(def main :: int (fn [] (let [vec :: [bool] [true, false, false, true]] (prn vec))))' "[true, false, false, true]\\\n"
   # local double
-  assertexec '(def main :: int (fn [] (let [vec :: [double] [3.3 9.3]] (prn vec))))' "[3.300000, 9.300000]\\\n"
+  assertexec '(def main :: int (fn [] (let [vec :: [double] [3.3 9.3]] (prn vec))))' "[3.3, 9.3]\\\n"
   # global int
   assertexec '(def v :: [int] [233, 842]) (def main :: int (fn [] (prn v)))' "[233, 842]\\\n"
   # global string
@@ -279,7 +280,7 @@ testexec(){
   echo "== struct ==="
   echo "==================="
   assertexec '(defschema Person {:name :: string :age :: int :isMale :: bool})(def main :: int (fn [] (let [node :: Person {:age 20 :name "richard" :isMale true}] (prn (get node :name)) (prn (get node :age)) (prn (get node :isMale)) (prn (get node :A)))))' "richard\\\n20\\\ntrue\\\nnil\\\n"
-  assertexec '(defschema Person {:name :: string :age :: int :isMale :: bool :height :: double})(def main :: int (fn [] (let [node :: Person {:age 20 :name "richard" :isMale true :height 5.8}] (prn (get node :name)) (prn (get node :age)) (prn (get node :isMale)) (prn (get node :height)) (prn (get node :A)))))'  "richard\\\n20\\\ntrue\\\n5.800000\\\nnil\\\n"
+  assertexec '(defschema Person {:name :: string :age :: int :isMale :: bool :height :: double})(def main :: int (fn [] (let [node :: Person {:age 20 :name "richard" :isMale true :height 5.8}] (prn (get node :name)) (prn (get node :age)) (prn (get node :isMale)) (prn (get node :height)) (prn (get node :A)))))'  "richard\\\n20\\\ntrue\\\n5.8\\\nnil\\\n"
   assertexec '(defschema Person {:name :: string :age :: int :isMale :: bool}) (def f :: Person (fn [] (let [node :: Person {:age 20 :name "richard" :isMale true}] node))) (def main :: int (fn [] (prn (get f :age))))' "20\\\n"
 
   #############
@@ -301,7 +302,7 @@ testexec(){
   echo "== map ==="
   echo "==================="
   assertexec "(def inc :: int => int (fn [x] (+ x 1))) (def main :: int (fn [] (prn (map inc [32 13 99]))))" "[33, 14, 100]\\\n"
-  assertexec "(def inc :: double => double (fn [x] (+ x 1.3))) (def main :: int (fn [] (prn (map inc [4.2 1.8]))))" "[5.500000, 3.100000]\\\n"
+  assertexec "(def inc :: double => double (fn [x] (+ x 1.3))) (def main :: int (fn [] (prn (map inc [4.2 1.8]))))" "[5.5, 3.1]\\\n"
   assertexec '(def str :: int => string (fn [x] "a")) (def main :: int (fn [] (prn (map str [32 13 99]))))' "[a, a, a]\\\n"
   assertexec '(def truely :: int => bool (fn [x] true)) (def main :: int (fn [] (prn (map truely [32 13 99]))))' "[true, true, true]\\\n"
 
@@ -310,13 +311,13 @@ testexec(){
   echo "==================="
   assertexec '(def even :: int => bool (fn [x] (= 0 (mod x 2))))  (def main :: int (fn [] (prn (filter even [8 1 7 10 18 42 45]))))' "[8, 10, 18, 42]\\\n"
   assertexec '(def isThree :: int => bool (fn [x] (= 3 x))) (def main :: int (fn [] (prn (filter isThree [8 1 7 10 3 42 3]))))' "[3, 3]\\\n"
-  assertexec '(def isThreeOne :: double => bool (fn [x] (= 3.1 x))) (def main :: int (fn [] (prn (filter isThreeOne [1.1 2.1 3.1]))))' "[3.100000]\\\n"
+  assertexec '(def isThreeOne :: double => bool (fn [x] (= 3.1 x))) (def main :: int (fn [] (prn (filter isThreeOne [1.1 2.1 3.1]))))' "[3.1]\\\n"
 
   echo "==================="
   echo "== reduce ==="
   echo "==================="
   assertexec '(def f :: int => int => int (fn [x y] (+ x y))) (def main :: int (fn [] (prn (reduce f 0 [3 2 1 9]))))' "15\\\n"
-  assertexec '(def f :: double => double => double (fn [x y] (+ x y))) (def main :: int (fn [] (prn (reduce f 0.1 [1.2 2.2 8.1 3.2])))))' "14.800000\\\n"
+  assertexec '(def f :: double => double => double (fn [x y] (+ x y))) (def main :: int (fn [] (prn (reduce f 0.1 [1.2 2.2 8.1 3.2])))))' "14.8\\\n"
 
   echo "==================="
   echo "== nth ==="

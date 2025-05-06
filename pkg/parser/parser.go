@@ -388,7 +388,7 @@ func parseDeclare(tok *mTypes.Token, parentKind mTypes.NodeKind) (*mTypes.Token,
 		return tok, rootNode
 
 	} else {
-		log.Panic("%s: unexpected character used, or missing essential signature to parse: have %+v", error.ERROR_SYNTAX_ERROR, tok)
+		log.Panic("%s: unexpected character used, or missing essential signature to parse: have %s", error.ERROR_SYNTAX_ERROR, tok.Val)
 	}
 
 	return tok, head

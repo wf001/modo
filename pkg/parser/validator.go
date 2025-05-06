@@ -33,11 +33,11 @@ func validateVarDeclare(n *mTypes.Node, root *mTypes.Node) {
 
 		} else if n.Type.Value != n.Child.Type.Value {
 			log.Panic(
-				"%s: cannot use %s (%s type) as %s",
+				"%s: cannot use %s type as %s (%s type)",
 				error.ERROR_SYNTAX_ERROR,
+				n.Child.Type.Value,
 				n.Val,
 				n.Type.Value,
-				n.Child.Type.Value,
 			)
 		}
 	}
@@ -75,7 +75,7 @@ func validateReference(n *mTypes.Node, root *mTypes.Node) {
 	if n.Kind == mTypes.ND_VAR_REFERENCE {
 		decl := findDeclare(root, n.Val)
 		if decl == nil {
-			log.Panic("%s: undefined variable: %s", error.ERROR_SYNTAX_ERROR, n.Val)
+			log.Panic("%s: undefined: %s", error.ERROR_SYNTAX_ERROR, n.Val)
 		}
 	}
 	validateReference(n.Next, root)

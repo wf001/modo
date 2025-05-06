@@ -37,14 +37,14 @@ type ModoType string
 
 // Note: what for?
 const (
-	TY_INT32    = ModoType("ty.int32")
-	TY_DOUBLE   = ModoType("ty.double")
-	TY_STR      = ModoType("ty.str")
-	TY_NIL      = ModoType("ty.nil")
-	TY_BOOL     = ModoType("ty.bool")
-	TY_VECTOR   = ModoType("ty.vector")
-	TY_STRUCT   = ModoType("ty.struct")
-	TY_EXTENDED = ModoType("ty.extended")
+	TY_INT32    = ModoType("int")
+	TY_DOUBLE   = ModoType("double")
+	TY_STR      = ModoType("string")
+	TY_NIL      = ModoType("nil")
+	TY_BOOL     = ModoType("bool")
+	TY_VECTOR   = ModoType("vector")
+	TY_STRUCT   = ModoType("struct")
+	TY_EXTENDED = ModoType("extended")
 )
 
 type NodeType struct {

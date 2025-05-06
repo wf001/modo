@@ -115,7 +115,7 @@ func Panic(format string, value ...interface{}) {
 	}
 
 	if logrus.GetLevel() == logrus.DebugLevel {
-		Error(format, value)
+		Error(format, value...)
 	}
 	panic(fmt.Sprintf(format, value...))
 }

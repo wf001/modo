@@ -185,7 +185,7 @@ func parseLambda(tok *mTypes.Token, head *mTypes.Node) (*mTypes.Token, *mTypes.N
 			)
 		}
 
-		argCur.Next = newNodeParent(mTypes.ND_VAR_REFERENCE, nil, tok.Val)
+		argCur.Next = newNodeParent(mTypes.ND_VAR_DECLARE, nil, tok.Val)
 		argCur = argCur.Next
 	}
 
@@ -251,6 +251,7 @@ func parseDeclare(tok *mTypes.Token, parentKind mTypes.NodeKind) (*mTypes.Token,
 				structElemType, _ := mTypes.GetModoType(tok.Kind)
 				// Note: Kind needed?
 				structTy := &mTypes.Node{
+					Kind: mTypes.ND_VAR_DECLARE,
 					Val:  structElmeName,
 					Type: structElemType,
 				}
@@ -387,7 +388,7 @@ func parseDeclare(tok *mTypes.Token, parentKind mTypes.NodeKind) (*mTypes.Token,
 		return tok, rootNode
 
 	} else {
-		log.Panic("%s: unexpected character used, or missing essential signature to parse: have %+v", error.ERROR_SYNTAX_ERROR, tok)
+		log.Panic("%s: unexpected character used, or missing essential signature to parse: have %s", error.ERROR_SYNTAX_ERROR, tok.Val)
 	}
 
 	return tok, head
@@ -427,6 +428,12 @@ func Parse(token *mTypes.Token) *mTypes.Program {
 	log.DebugMessage("code parsed")
 
 	prog.Debug(0)
+
+	log.DebugMessage("code validating")
+	validateReference(prog.Declare.Func, prog.Declare.Func)
+	validateVarDeclare(prog.Declare.Func, prog.Declare.Func)
+	validateExtendedTypeReference(prog.Declare.Func, prog.Declare.Func)
+	log.DebugMessage("code validated")
 
 	return prog
 }

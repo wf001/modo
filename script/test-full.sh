@@ -316,8 +316,8 @@ testexec(){
   echo "== nth ==="
   echo "==================="
   # nth
-  # assertexec '(def main :: int (fn [] (let [vec :: [int] [41, 28, 239]] (prn (nth vec 1)))))'  "28\\\n"
-  # assertexec '(def v :: [int] [233, 842]) (def main :: int (fn [] (prn (nth v 0))))' "233\\\n"
+  assertexec '(def main :: int (fn [] (let [vec :: [int] [41, 28, 239]] (prn (nth vec 1)))))'  "28\\\n"
+  assertexec '(def v :: [int] [233, 842]) (def main :: int (fn [] (prn (nth v 0))))' "233\\\n"
   assertexec '(def main :: int (fn [] (let [vec :: [int] [423, 83, 90]] (prn (nth vec -1)) (prn (nth vec 2)) (prn (nth vec 3)) )))' "nil\\\n90\\\nnil\\\n"
 
   echo "==================="
@@ -328,10 +328,16 @@ testexec(){
   assertexec "(def v :: [int] [233, 842]) (def f :: [int] (fn [] (conj v 39))) (def main :: int (fn [] (prn f)))" "[233, 842, 39]\\\n"
   assertexec '(def f::[int] => [int] (fn[v] (conj v 78))) (def main ::int (fn[] (let [v ::[int] [42, 64, 90]] (prn (f v)))))' "[42, 64, 90, 78]\\\n"
   assertexec "(def main :: int (fn [] (let [vec :: [[int]] [[12, 34, 5, 6], [7,8,9]]] (prn (nth (conj vec [11, 12]) 2)) (prn (nth vec 2)))))" "[11, 12]\\\nnil\\\n"
-  # assoc
+
+  # echo "==================="
+  # echo "== assoc ==="
+  # echo "==================="
   # assertexec '(def main :: int (fn [] (let [vec :: [int] [423, 83, 90]] (prn (assoc vec 1 27)) (prn vec))))' "[423, 27, 90]\\\n[423, 83, 90]\\\n"
   # assertexec '(def v :: [int] [233, 842]) (def main :: int (fn [] (prn (assoc v 1 388))))' "[233, 388]\\\n"
-  # pop
+
+  # echo "==================="
+  # echo "== pop ==="
+  # echo "==================="
   # assertexec '(def main :: int (fn [] (let [vec :: [int] [423, 83, 90]] (prn (pop vec)) (prn vec))))'  "[423, 83]\\\n[423, 83, 90]\\\n"
   # assertexec '(def v :: [int] [233, 842]) (def main :: int (fn [] (prn (pop v))))' "[233]\\\n"
   # map

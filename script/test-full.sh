@@ -354,6 +354,7 @@ testexec(){
   echo "==================="
   # error message
   assertexec '(def main ::int (fn [] (let [x ::int 1] (let [y ::int (+ x 2)] (prn z)))))' "level=error msg=\"syntax error: undefined variable: z\""
+  assertexec '(def main ::int (fn [] (let [x ::int "hello"] (prn x))))' "level=error msg=\"syntax error: cannot use x (ty.int32 type) as ty.str\""
 }
 
 build-compiler

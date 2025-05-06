@@ -279,8 +279,8 @@ testexec(){
   echo "==================="
   echo "== struct ==="
   echo "==================="
-  assertexec '(defschema Person {:name :: string :age :: int :isMale :: bool})(def main :: int (fn [] (let [node :: Person {:age 20 :name "richard" :isMale true}] (prn (get node :name)) (prn (get node :age)) (prn (get node :isMale)) (prn (get node :A)))))' "richard\\\n20\\\ntrue\\\nnil\\\n"
-  assertexec '(defschema Person {:name :: string :age :: int :isMale :: bool :height :: double})(def main :: int (fn [] (let [node :: Person {:age 20 :name "richard" :isMale true :height 5.8}] (prn (get node :name)) (prn (get node :age)) (prn (get node :isMale)) (prn (get node :height)) (prn (get node :A)))))'  "richard\\\n20\\\ntrue\\\n5.8\\\nnil\\\n"
+  assertexec '(defschema Person {:name :: string :age :: int :isMale :: bool})(def main :: int (fn [] (let [node :: Person {:age 20 :name "richard" :isMale true}] (prn (get node :name)) (prn (get node :age)) (prn (get node :isMale))))))' "richard\\\n20\\\ntrue\\\n"
+  assertexec '(defschema Person {:name :: string :age :: int :isMale :: bool :height :: double})(def main :: int (fn [] (let [node :: Person {:age 20 :name "richard" :isMale true :height 5.8}] (prn (get node :name)) (prn (get node :age)) (prn (get node :isMale)) (prn (get node :height))))))'  "richard\\\n20\\\ntrue\\\n5.8\\\n"
   assertexec '(defschema Person {:name :: string :age :: int :isMale :: bool}) (def f :: Person (fn [] (let [node :: Person {:age 20 :name "richard" :isMale true}] node))) (def main :: int (fn [] (prn (get f :age))))' "20\\\n"
 
   #############
@@ -349,6 +349,11 @@ testexec(){
   # assertexec '(def v :: [int] [233, 842]) (def main :: int (fn [] (prn (pop v))))' "[233]\\\n"
   # map
 
+  echo "==================="
+  echo "== internal ==="
+  echo "==================="
+  # error message
+  assertexec '(def main ::int (fn [] (let [x ::int 1] (let [y ::int (+ x 2)] (prn z)))))' "level=error msg=\"syntax error: undefined variable: z\""
 }
 
 build-compiler

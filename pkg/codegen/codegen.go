@@ -54,7 +54,7 @@ func newFloat(s string) *constant.Float {
 		log.Panic("%s: fail to newI32: %s", error.ERROR_SYNTAX_ERROR, err)
 	}
 
-	return constant.NewFloat(types.Float, i)
+	return constant.NewFloat(types.Double, i)
 }
 
 var nullPtr = constant.NewNull(types.NewPointer(types.I32))
@@ -549,7 +549,7 @@ func (ctx *Context) gen(node *mTypes.Node) value.Value {
 			} else if bind.IsType(mTypes.TY_STR) {
 				bind.IRValue = child
 
-			} else if bind.IsType(mTypes.TY_FLOAT) {
+			} else if bind.IsType(mTypes.TY_DOUBLE) {
 				bind.IRValue = child
 
 			} else if bind.IsType(mTypes.TY_BOOL) {
@@ -623,7 +623,7 @@ func (ctx *Context) gen(node *mTypes.Node) value.Value {
 		} else if node.IsType(mTypes.TY_BOOL) {
 			return newBool(node.Val)
 
-		} else if node.IsType(mTypes.TY_FLOAT) {
+		} else if node.IsType(mTypes.TY_DOUBLE) {
 			return newFloat(node.Val)
 
 		} else {

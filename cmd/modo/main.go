@@ -250,8 +250,14 @@ func (ctx *context) repl() {
 			line = fmt.Sprintf("(def main ::nil (fn [] (prn %s)))", line)
 		}
 
-		ctx.doRunLLI(line)
-
+		func() {
+			defer func() {
+				if r := recover(); r != nil {
+					log.Error("%s", r)
+				}
+			}()
+			ctx.doRunLLI(line)
+		}()
 	}
 
 }

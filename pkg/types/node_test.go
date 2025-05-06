@@ -44,12 +44,10 @@ func TestGetLastNode(t *testing.T) {
 }
 
 func TestGetNodeSize(t *testing.T) {
-	node := add(ND_COLLECTION, "")
 	childNode := add(ND_SCALAR, "")
-	node.Child = childNode
 	childNode.Next = add(ND_SCALAR, "")
 	childNode.Next.Next = add(ND_SCALAR, "")
 
 	want := uint64(3)
-	assert.Equal(t, want, node.GetNodeSize())
+	assert.Equal(t, want, childNode.GetNodeSize())
 }

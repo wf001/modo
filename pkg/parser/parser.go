@@ -431,6 +431,7 @@ func Parse(token *mTypes.Token) *mTypes.Program {
 
 	log.DebugMessage("code validating")
 	validateReference(prog.Declare.Func, prog.Declare.Func)
+	validateVarDeclare(prog.Declare.Func, prog.Declare.Func)
 	log.DebugMessage("code validated")
 
 	return prog

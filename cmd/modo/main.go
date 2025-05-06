@@ -28,7 +28,12 @@ var (
 		New("modo", "Compiler for the modo programming language.")
 
 	_ = app.Version(
-		fmt.Sprintf("modo version modo%s\n\nArch: %s\nIdentifier: %s", VERSION, ARCH, COMMIT),
+		fmt.Sprintf(
+			"modo version modo%s\n\nTarget triple: %s\nGit commit: %s",
+			VERSION,
+			ARCH,
+			COMMIT,
+		),
 	).VersionFlag.Short('V')
 
 	appVerboseEnabled = app.Flag("verbose", "Show verbose log").Bool()

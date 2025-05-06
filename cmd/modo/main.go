@@ -25,8 +25,12 @@ var (
 
 var (
 	app = kingpin.
-		New("modo", "Compiler for the modo programming language.").
-		Version(fmt.Sprintf("modo version modo%s\n\nArch: %s\nIdentifier: %s", VERSION, ARCH, COMMIT))
+		New("modo", "Compiler for the modo programming language.")
+
+	_ = app.Version(
+		fmt.Sprintf("modo version modo%s\n\nArch: %s\nIdentifier: %s", VERSION, ARCH, COMMIT),
+	).VersionFlag.Short('V')
+
 	appVerboseEnabled = app.Flag("verbose", "Show verbose log").Bool()
 	appDebugEnabled   = app.Flag("debug", "Show debug log (more detailed than verbose)").Bool()
 	appWorkEnabled    = app.Flag("work", "run the program by executable and do not delete temporary work directory when exiting").

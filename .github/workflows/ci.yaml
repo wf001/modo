@@ -51,6 +51,7 @@ jobs:
         run: |
           make test-compiler
 
-          #- name: Run Go unit tests
-          #  run: make test-go
+      - name: Run Go unit tests
+        run: |
+          make test-go
 

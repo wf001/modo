@@ -102,11 +102,11 @@ var (
 	// Type signature
 	SYMBOL_TYPE_SIG   = "::"
 	SYMBOL_TYPE_ARROW = "=>"
-	SYMBOL_TYPE_INT   = "int"
-	SYMBOL_TYPE_FLOAT = "float"
-	SYMBOL_TYPE_STR   = "string"
-	SYMBOL_TYPE_NIL   = "nil"
-	SYMBOL_TYPE_BOOL  = "bool"
+	SYMBOL_TYPE_INT   = "\\bint\\b"
+	SYMBOL_TYPE_FLOAT = "\\bfloat\\b"
+	SYMBOL_TYPE_STR   = "\\bstring\\b"
+	SYMBOL_TYPE_NIL   = "\\bnil\\b"
+	SYMBOL_TYPE_BOOL  = "\\bbool\\b"
 
 	SYMBOL_TYPE_SCALAR = fmt.Sprintf(
 		"(\\b(%s|%s|%s|%s|%s)\\b)",

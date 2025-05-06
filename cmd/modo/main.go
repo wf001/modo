@@ -277,7 +277,11 @@ func main() {
 			if !*appWorkEnabled {
 				err := os.RemoveAll(ctx.artifactDirectory)
 				if err != nil {
-					log.Error("%s: failed to remove temporary work directory: %v", err)
+					log.Error(
+						"%s: failed to remove temporary work directory: %v",
+						e.ERROR_RUNTINME,
+						err,
+					)
 				} else {
 					log.Info("successfully removed temporary work directory(%s)", ctx.artifactDirectory)
 				}

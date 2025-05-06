@@ -114,6 +114,39 @@ func TestLexOperationAddTakingAdd(t *testing.T) {
 
 	assert.EqualValues(t, want, Lex("(+ (+ 1 2) (+ 3 4))"))
 }
+func TestLexMatchSubstringOfTypeLiteralOnIdent(t *testing.T) {
+	tokens := []*mTypes.Token{
+		add(mTypes.TK_IDENT, "Point"),
+	}
+	want := buildToken(tokens)
+	assert.EqualValues(t, want, Lex("Point"))
+
+	tokens = []*mTypes.Token{
+		add(mTypes.TK_IDENT, "sstring"),
+	}
+	want = buildToken(tokens)
+	assert.EqualValues(t, want, Lex("sstring"))
+
+	tokens = []*mTypes.Token{
+		add(mTypes.TK_IDENT, "floating"),
+	}
+	want = buildToken(tokens)
+	assert.EqualValues(t, want, Lex("floating"))
+
+	tokens = []*mTypes.Token{
+		add(mTypes.TK_IDENT, "fbool"),
+	}
+	want = buildToken(tokens)
+	assert.EqualValues(t, want, Lex("fbool"))
+
+	tokens = []*mTypes.Token{
+		add(mTypes.TK_PAREN, "["),
+		add(mTypes.TK_IDENT, "Point"),
+		add(mTypes.TK_PAREN, "]"),
+	}
+	want = buildToken(tokens)
+	assert.EqualValues(t, want, Lex("[Point]"))
+}
 
 func TestNewTokenMap(t *testing.T) {
 	res := newTokenPattern()

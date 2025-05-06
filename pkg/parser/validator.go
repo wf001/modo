@@ -82,3 +82,31 @@ func validateReference(n *mTypes.Node, root *mTypes.Node) {
 	validateReference(n.Child, root)
 	validateReference(n.Bind, root)
 }
+
+func findTypeDeclare(n *mTypes.Node, targetType string) *mTypes.Node {
+	if n == nil {
+		return nil
+	}
+	if n.Kind == mTypes.ND_TYPE_DECLARE && n.Val == targetType {
+		return n
+	}
+	if result := findTypeDeclare(n.Child, targetType); result != nil {
+		return result
+	}
+	return nil
+}
+
+func validateExtendedTypeReference(n *mTypes.Node, root *mTypes.Node) {
+	if n == nil {
+		return
+	}
+	if n.Kind == mTypes.ND_VAR_DECLARE && n.Type.Value == mTypes.TY_EXTENDED {
+		decl := findTypeDeclare(root, n.Type.ExtendName)
+		if decl == nil {
+			log.Panic("%s: undefined type: %s", error.ERROR_SYNTAX_ERROR, n.Type.ExtendName)
+		}
+	}
+	validateExtendedTypeReference(n.Next, root)
+	validateExtendedTypeReference(n.Child, root)
+	validateExtendedTypeReference(n.Bind, root)
+}

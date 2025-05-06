@@ -355,6 +355,7 @@ testexec(){
   # error message
   assertexec '(def main ::int (fn [] (let [x ::int 1] (let [y ::int (+ x 2)] (prn z)))))' "level=error msg=\"syntax error: undefined variable: z\""
   assertexec '(def main ::int (fn [] (let [x ::int "hello"] (prn x))))' "level=error msg=\"syntax error: cannot use x (ty.int32 type) as ty.str\""
+  assertexec '(defschema Person {:name :: string :age :: int :isMale :: bool})(def main :: int (fn [] (let [node :: node {:age 20 :name "richard" :isMale true}] (prn (get node :name)) (prn (get node :age)) (prn (get node :isMale))))))' "level=error msg=\"syntax error: undefined type: node\""
 }
 
 build-compiler

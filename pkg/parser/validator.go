@@ -6,16 +6,29 @@ import (
 	mTypes "github.com/wf001/modo/pkg/types"
 )
 
-func validateVarDeclare(n *mTypes.Node, root *mTypes.Node) {
+func validateVarDeclare(n *mTypes.Node, root *mTypes.Node, used map[string]bool) {
+	// To check for duplicate variable and type declarations, a Set would be appropriate,
+	// but since Go doesn't include one in the standard library,
+	// implement provisionally using a map to avoid extra dependencies.
 	if n == nil {
 		return
 	}
 
 	if n.Kind == mTypes.ND_TYPE_DECLARE {
+		used[n.Val] = true
 		return
 	}
 
 	if n.Kind == mTypes.ND_VAR_DECLARE {
+		if used[n.Val] {
+			log.Panic(
+				"%s: cannot use %s, already used",
+				error.ERROR_SYNTAX_ERROR,
+				n.Val,
+			)
+		}
+		used[n.Val] = true
+
 		if n.Child == nil {
 			log.Panic(
 				"%s: the value of '%s' not defined",
@@ -25,11 +38,9 @@ func validateVarDeclare(n *mTypes.Node, root *mTypes.Node) {
 
 		} else if n.Child.Type == nil {
 			// skip validating
-			validateVarDeclare(n.Child, root)
 
 		} else if n.Child.Kind == mTypes.ND_FUNCCALL {
 			// skip validating
-			validateVarDeclare(n.Child, root)
 
 		} else if n.Type.Value != n.Child.Type.Value {
 			log.Panic(
@@ -41,9 +52,15 @@ func validateVarDeclare(n *mTypes.Node, root *mTypes.Node) {
 			)
 		}
 	}
-	validateVarDeclare(n.Next, root)
-	validateVarDeclare(n.Child, root)
-	validateVarDeclare(n.Bind, root)
+	if n.Next != nil {
+		validateVarDeclare(n.Next, root, used)
+	}
+	if n.Child != nil {
+		validateVarDeclare(n.Child, root, used)
+	}
+	if n.Bind != nil {
+		validateVarDeclare(n.Bind, root, used)
+	}
 }
 
 func findDeclare(n *mTypes.Node, targetVal string) *mTypes.Node {

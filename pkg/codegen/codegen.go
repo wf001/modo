@@ -199,9 +199,9 @@ func newStruct(
 	// bitcast i8* → %struct*
 	structPtr := ctx.block.NewBitCast(rawPtr, types.NewPointer(structCtx.Types))
 
-	for n := node.Child; n != nil; n = n.Next.Next {
+	for n := node.Child; n != nil; n = n.Next {
 		field := n
-		value := n.Next
+		value := n.Child
 
 		namePtr := ctx.block.NewGetElementPtr(
 			structCtx.Types,

@@ -367,14 +367,31 @@ func parseDeclare(tok *mTypes.Token, parentKind mTypes.NodeKind) (*mTypes.Token,
 
 		// means struct value
 	} else if tok.IsKindAndVal(mTypes.TK_PAREN, mTypes.BRACE_OPEN) {
-		tok, rootNode := parseBody(tok, mTypes.ND_COLLECTION, "")
+		var structRootNode *mTypes.Node
+		var structFieldsHead *mTypes.Node
+		var structFieldsTail **mTypes.Node = &structFieldsHead
+
+		tok = tok.Next
+
+		for !tok.IsKindAndVal(mTypes.TK_PAREN, mTypes.BRACE_CLOSE) {
+			tk, valueNode := parseDeclare(tok.Next, mTypes.ND_VAR_REFERENCE)
+			e := &mTypes.Node{
+				Val:   tok.Val,
+				Kind:  mTypes.ND_VAR_REFERENCE,
+				Child: valueNode,
+			}
+			*structFieldsTail = e
+			structFieldsTail = &e.Next
+			tok = tk
+		}
+		structRootNode = newNodeParent(mTypes.ND_COLLECTION, structFieldsHead, "")
 		// ExtendedName (equals to struct type name) is given by parent node,
-		rootNode.Type = &mTypes.NodeType{Value: mTypes.TY_EXTENDED}
+		structRootNode.Type = &mTypes.NodeType{Value: mTypes.TY_EXTENDED}
 		if !tok.IsKindAndVal(mTypes.TK_PAREN, mTypes.BRACE_CLOSE) {
 			log.Panic("%s: missing close brace for struct", error.ERROR_SYNTAX_ERROR)
 		}
 		tok = tok.Next
-		return tok, rootNode
+		return tok, structRootNode
 
 		// means vector value
 	} else if tok.IsKindAndVal(mTypes.TK_PAREN, mTypes.BRACKET_OPEN) {

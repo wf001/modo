@@ -464,9 +464,9 @@ func updateReferenceToFunccall(node *mTypes.Node, parent *mTypes.Node, root *mTy
 	if node == nil {
 		return
 	}
-	if node.Kind == mTypes.ND_VAR_REFERENCE {
+	if node.Kind == mTypes.ND_VAR_REFERENCE && !parent.IsHOFunc {
 		if decl := findVarDeclareNode(root, node); decl != nil {
-			if decl.Child != nil && decl.Child.IsKind(mTypes.ND_LAMBDA) && !parent.IsHOFunc {
+			if decl.Child != nil && decl.Child.IsKind(mTypes.ND_LAMBDA) {
 				node.Kind = mTypes.ND_FUNCCALL
 			} else {
 				node.Type = decl.Type

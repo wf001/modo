@@ -58,6 +58,7 @@ func parseBody(
 	nextToken, argHead := parseExprs(rootToken.Next, parentKind)
 	// Note: validate argument properties here?
 	rootNode := newNodeParent(parentKind, argHead, exprName)
+	rootNode.IsHOFunc = mTypes.IsHOLibFunc(rootNode.Val)
 	return nextToken, rootNode
 }
 
@@ -438,11 +439,53 @@ func parseProgram(tok *mTypes.Token) *mTypes.Program {
 	return p
 }
 
+func findVarDeclareNode(root *mTypes.Node, target *mTypes.Node) *mTypes.Node {
+	if root == nil {
+		return nil
+	}
+	if root != target &&
+		root.Kind == mTypes.ND_VAR_DECLARE &&
+		root.Val == target.Val {
+		return root
+	}
+	if res := findVarDeclareNode(root.Next, target); res != nil {
+		return res
+	}
+	if res := findVarDeclareNode(root.Child, target); res != nil {
+		return res
+	}
+	if res := findVarDeclareNode(root.Bind, target); res != nil {
+		return res
+	}
+	return nil
+}
+
+func updateReferenceToFunccall(node *mTypes.Node, parent *mTypes.Node, root *mTypes.Node) {
+	if node == nil {
+		return
+	}
+	if node.Kind == mTypes.ND_VAR_REFERENCE {
+		if decl := findVarDeclareNode(root, node); decl != nil {
+			if decl.Child != nil && decl.Child.IsKind(mTypes.ND_LAMBDA) && !parent.IsHOFunc {
+				node.Kind = mTypes.ND_FUNCCALL
+			} else {
+				node.Type = decl.Type
+			}
+		}
+	}
+	updateReferenceToFunccall(node.Next, parent, root)
+	updateReferenceToFunccall(node.Child, node, root)
+	updateReferenceToFunccall(node.Bind, parent, root)
+}
+
 // take Token object, return Program object
 func Parse(token *mTypes.Token) *mTypes.Program {
 	log.DebugMessage("code parsing")
 	prog := parseProgram(token)
 	log.DebugMessage("code parsed")
+	for d := prog.Declare.Func; d != nil; d = d.Next {
+		updateReferenceToFunccall(d.Child, d, prog.Declare.Func)
+	}
 
 	prog.Debug(0)
 

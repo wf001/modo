@@ -85,6 +85,7 @@ type Node struct {
 	Bind     *Node
 	Args     *Node
 	IsGlobal bool
+	IsHOFunc bool
 	FuncPtr  *ir.Func    // declared function, library function
 	IRValue  value.Value //
 }

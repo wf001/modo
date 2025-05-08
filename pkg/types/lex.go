@@ -150,3 +150,9 @@ var (
 		),
 	)
 )
+
+func IsHOLibFunc(f string) bool {
+	return f == PRELUDE_MAP ||
+		f == PRELUDE_FILTER ||
+		f == PRELUDE_REDUCE
+}

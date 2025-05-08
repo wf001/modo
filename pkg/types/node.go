@@ -84,9 +84,10 @@ type Node struct {
 	Len      uint64 // the number of bytes, used with string type
 	Bind     *Node
 	Args     *Node
-	IsGlobal bool
-	FuncPtr  *ir.Func    // declared function, library function
-	IRValue  value.Value //
+	IsGlobal bool        // a global variable or not, used with only string type
+	IsHOFunc bool        // a High-Order function or not
+	FuncPtr  *ir.Func    // a declared function pointer, or library function pointer
+	IRValue  value.Value // a llir/llvm value. this field is set by codegen.
 }
 
 func (n *Node) String() string {

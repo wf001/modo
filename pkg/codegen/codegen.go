@@ -395,6 +395,9 @@ func (ctx *Context) genVarReference(node *mTypes.Node) value.Value {
 	// find in global variable which is declared with def
 	for declare := ctx.prog.Declare.Func; declare != nil; declare = declare.Next {
 		if declare.Child.Val == node.Val {
+			if declare.Child.Child.Kind == mTypes.ND_LAMBDA {
+				return declare.Child.FuncPtr
+			}
 			return ctx.block.NewCall(declare.Child.FuncPtr)
 		}
 	}

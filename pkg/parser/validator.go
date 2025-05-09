@@ -14,12 +14,12 @@ func validateVarDeclare(n *mTypes.Node, root *mTypes.Node, used map[string]bool)
 		return
 	}
 
-	if n.Kind == mTypes.ND_TYPE_DECLARE {
+	if n.IsKind(mTypes.ND_TYPE_DECLARE) {
 		used[n.Val] = true
 		return
 	}
 
-	if n.Kind == mTypes.ND_VAR_DECLARE {
+	if n.IsKind(mTypes.ND_VAR_DECLARE) {
 		if used[n.Val] {
 			log.Panic(
 				"%s: cannot use %s, already used",
@@ -39,10 +39,10 @@ func validateVarDeclare(n *mTypes.Node, root *mTypes.Node, used map[string]bool)
 		} else if n.Child.Type == nil {
 			// skip validating
 
-		} else if n.Child.Kind == mTypes.ND_FUNCCALL {
+		} else if n.Child.IsKind(mTypes.ND_FUNCCALL) {
 			// skip validating
 
-		} else if n.Type.Value != n.Child.Type.Value {
+		} else if !n.IsType(n.Child.Type.Value) {
 			log.Panic(
 				"%s: cannot use %s type as %s (%s type)",
 				error.ERROR_SYNTAX_ERROR,
@@ -67,7 +67,7 @@ func findDeclare(n *mTypes.Node, targetVal string) *mTypes.Node {
 	if n == nil {
 		return nil
 	}
-	if n.Kind == mTypes.ND_VAR_DECLARE && n.Val == targetVal {
+	if n.IsKind(mTypes.ND_VAR_DECLARE) && n.Val == targetVal {
 		return n
 	}
 	if result := findDeclare(n.Next, targetVal); result != nil {
@@ -89,7 +89,7 @@ func validateReference(n *mTypes.Node, root *mTypes.Node) {
 	if n == nil {
 		return
 	}
-	if n.Kind == mTypes.ND_VAR_REFERENCE {
+	if n.IsKind(mTypes.ND_VAR_REFERENCE) {
 		decl := findDeclare(root, n.Val)
 		if decl == nil {
 			log.Panic("%s: undefined: %s", error.ERROR_SYNTAX_ERROR, n.Val)
@@ -104,7 +104,7 @@ func findTypeDeclare(n *mTypes.Node, targetType string) *mTypes.Node {
 	if n == nil {
 		return nil
 	}
-	if n.Kind == mTypes.ND_TYPE_DECLARE && n.Val == targetType {
+	if n.IsKind(mTypes.ND_TYPE_DECLARE) && n.Val == targetType {
 		return n
 	}
 	if result := findTypeDeclare(n.Child, targetType); result != nil {
@@ -117,7 +117,7 @@ func validateExtendedTypeReference(n *mTypes.Node, root *mTypes.Node) {
 	if n == nil {
 		return
 	}
-	if n.Kind == mTypes.ND_VAR_DECLARE && n.Type.Value == mTypes.TY_EXTENDED {
+	if n.IsKind(mTypes.ND_VAR_DECLARE) && n.IsType(mTypes.TY_EXTENDED) {
 		decl := findTypeDeclare(root, n.Type.ExtendName)
 		if decl == nil {
 			log.Panic("%s: undefined type: %s", error.ERROR_SYNTAX_ERROR, n.Type.ExtendName)
@@ -126,4 +126,11 @@ func validateExtendedTypeReference(n *mTypes.Node, root *mTypes.Node) {
 	validateExtendedTypeReference(n.Next, root)
 	validateExtendedTypeReference(n.Child, root)
 	validateExtendedTypeReference(n.Bind, root)
+}
+
+func validateNode(root *mTypes.Node) {
+	validateReference(root, root)
+	validateVarDeclare(root, root, map[string]bool{})
+	validateExtendedTypeReference(root, root)
+
 }

@@ -492,9 +492,7 @@ func Parse(token *mTypes.Token) *mTypes.Program {
 	prog.Debug(0)
 
 	log.DebugMessage("code validating")
-	validateReference(prog.Declare.Func, prog.Declare.Func)
-	validateVarDeclare(prog.Declare.Func, prog.Declare.Func, map[string]bool{})
-	validateExtendedTypeReference(prog.Declare.Func, prog.Declare.Func)
+	validateNode(prog.Declare.Func)
 	log.DebugMessage("code validated")
 
 	return prog

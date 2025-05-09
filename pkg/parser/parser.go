@@ -306,11 +306,6 @@ func parseDeclare(tok *mTypes.Token, parentKind mTypes.NodeKind) (*mTypes.Token,
 
 			return nextToken, bind
 
-		} else if tok.IsKind(mTypes.TK_LIBCALL) {
-			log.DebugValueColored("is Library :have %+v", tok)
-			v := tok.Val
-			tok, head = parseBody(tok, mTypes.ND_LIBCALL, v)
-
 		} else if tok.IsKind(mTypes.TK_IF) {
 			log.DebugValueColored("is IF :have %s", tok)
 			head.Kind = mTypes.ND_IF
@@ -328,6 +323,11 @@ func parseDeclare(tok *mTypes.Token, parentKind mTypes.NodeKind) (*mTypes.Token,
 		} else if tok.IsKind(mTypes.TK_IDENT) {
 			log.DebugValueColored("is calling function :have %+v", tok)
 			tok, head = parseBody(tok, mTypes.ND_FUNCCALL, tok.Val)
+
+		} else if tok.IsKind(mTypes.TK_LIBCALL) {
+			log.DebugValueColored("is Library :have %+v", tok)
+			v := tok.Val
+			tok, head = parseBody(tok, mTypes.ND_LIBCALL, v)
 		}
 
 		if !tok.IsKindAndVal(mTypes.TK_PAREN, mTypes.PARREN_CLOSE) {
@@ -366,8 +366,8 @@ func parseDeclare(tok *mTypes.Token, parentKind mTypes.NodeKind) (*mTypes.Token,
 		strNode.Len = uint64(len(tok.Val))
 		return tok.Next, strNode
 
-		// means struct value
 	} else if tok.IsKindAndVal(mTypes.TK_PAREN, mTypes.BRACE_OPEN) {
+		// means struct value
 		var structRootNode *mTypes.Node
 		var structFieldsHead *mTypes.Node
 		var structFieldsTail **mTypes.Node = &structFieldsHead
@@ -386,7 +386,6 @@ func parseDeclare(tok *mTypes.Token, parentKind mTypes.NodeKind) (*mTypes.Token,
 			tok = tk
 		}
 		structRootNode = newNodeParent(mTypes.ND_COLLECTION, structFieldsHead, "")
-		// ExtendedName (equals to struct type name) is given by parent node,
 		structRootNode.Type = &mTypes.NodeType{Value: mTypes.TY_EXTENDED}
 		if !tok.IsKindAndVal(mTypes.TK_PAREN, mTypes.BRACE_CLOSE) {
 			log.Panic("%s: missing close brace for struct", error.ERROR_SYNTAX_ERROR)
@@ -394,8 +393,8 @@ func parseDeclare(tok *mTypes.Token, parentKind mTypes.NodeKind) (*mTypes.Token,
 		tok = tok.Next
 		return tok, structRootNode
 
-		// means vector value
 	} else if tok.IsKindAndVal(mTypes.TK_PAREN, mTypes.BRACKET_OPEN) {
+		// means vector value
 		t, rootNode := parseBody(tok, mTypes.ND_COLLECTION, "")
 		rootNode.Type = &mTypes.NodeType{Value: mTypes.TY_VECTOR, Child: rootNode.Child.Type}
 		tok = t
@@ -443,11 +442,13 @@ func findVarDeclareNode(root *mTypes.Node, target *mTypes.Node) *mTypes.Node {
 	if root == nil {
 		return nil
 	}
+
 	if root != target &&
-		root.Kind == mTypes.ND_VAR_DECLARE &&
+		root.IsKind(mTypes.ND_VAR_DECLARE) &&
 		root.Val == target.Val {
 		return root
 	}
+
 	if res := findVarDeclareNode(root.Next, target); res != nil {
 		return res
 	}
@@ -460,11 +461,12 @@ func findVarDeclareNode(root *mTypes.Node, target *mTypes.Node) *mTypes.Node {
 	return nil
 }
 
+// update Node.Kind to ND_FUNCCALL when the node refer to lambda, except the args of high-order func
 func updateReferenceToFunccall(node *mTypes.Node, parent *mTypes.Node, root *mTypes.Node) {
 	if node == nil {
 		return
 	}
-	if node.Kind == mTypes.ND_VAR_REFERENCE && !parent.IsHOFunc {
+	if node.IsKind(mTypes.ND_VAR_REFERENCE) && !parent.IsHOFunc {
 		if decl := findVarDeclareNode(root, node); decl != nil {
 			if decl.Child != nil && decl.Child.IsKind(mTypes.ND_LAMBDA) {
 				node.Kind = mTypes.ND_FUNCCALL

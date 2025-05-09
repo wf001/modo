@@ -153,8 +153,21 @@ func GetBitWidth(t types.Type) uint64 {
 }
 
 func GetVectorTypeFromPtr(v value.Value) (*types.StructType, types.Type) {
-	structPtr := v.Type().(*types.PointerType)
-	structedVecType := structPtr.ElemType.(*types.StructType)
+	structPtr, ok := v.Type().(*types.PointerType)
+	if !ok {
+		return nil, nil
+	}
+
+	structedVecType, ok := structPtr.ElemType.(*types.StructType)
+	if !ok {
+		return nil, nil
+	}
+
+	vecTypeField := structedVecType.Fields
+	if len(vecTypeField) == 0 {
+		return nil, nil
+	}
+
 	elemType := structedVecType.Fields[0].(*types.PointerType).ElemType
 
 	return structedVecType, elemType

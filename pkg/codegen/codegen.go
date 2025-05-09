@@ -334,10 +334,14 @@ func (ctx *Context) genStructTypeDeclare(node *mTypes.Node) {
 	for n := node.Child; n != nil; n = n.Next {
 		// Note: is NOT TRUE
 		rootTy, _, _ := mTypes.GetLLVMTypeRec(ctx.mod, n.Type, ctx.prog.Prelude)
-		typsArr = append(typsArr, rootTy)
 		f := structField[n.Val]
 		f.Pos = pos
-		f.Type = rootTy
+		if _, ok := rootTy.(*types.StructType); ok {
+			f.Type = &types.PointerType{ElemType: rootTy}
+		} else {
+			f.Type = rootTy
+		}
+		typsArr = append(typsArr, f.Type)
 		structField[n.Val] = f
 		pos++
 	}

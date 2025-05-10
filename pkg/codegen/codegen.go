@@ -178,6 +178,9 @@ func newStruct(
 ) value.Value {
 
 	structCtx := mTypes.GetExtendedType(ctx.prog.Declare, node)
+	if structCtx == nil {
+		log.Panic("%s: not found type: have %+v", error.ERROR_UNDEFINE, node)
+	}
 
 	// null pointer to struct: %struct* null
 	nullStructPtr := constant.NewNull(types.NewPointer(structCtx.Types))
@@ -203,15 +206,20 @@ func newStruct(
 		field := n
 		value := n.Child
 
-		namePtr := ctx.block.NewGetElementPtr(
+		fieldPtr := ctx.block.NewGetElementPtr(
 			structCtx.Types,
 			structPtr,
 			mTypes.I32zero,
 			constant.NewInt(types.I32, int64(structCtx.Field[field.Val].Pos)), // name field
 		)
 		v := ctx.gen(value)
-		ctx.block.NewStore(v, namePtr)
 
+		if _, ok := v.(*ir.InstBitCast); ok {
+			ctx.block.NewStore(nullStructPtr, fieldPtr)
+			ctx.block.NewStore(v, fieldPtr)
+		} else {
+			ctx.block.NewStore(v, fieldPtr)
+		}
 	}
 	return structPtr
 
@@ -334,6 +342,10 @@ func (ctx *Context) genStructTypeDeclare(node *mTypes.Node) {
 	for n := node.Child; n != nil; n = n.Next {
 		// Note: is NOT TRUE
 		rootTy, _, _ := mTypes.GetLLVMTypeRec(ctx.mod, n.Type, ctx.prog.Prelude)
+		// need to check others struct
+		if rootTy == nil && n.IsType(mTypes.TY_EXTENDED) && n.Type.ExtendName == node.Val {
+			rootTy = structType
+		}
 		f := structField[n.Val]
 		f.Pos = pos
 		if _, ok := rootTy.(*types.StructType); ok {

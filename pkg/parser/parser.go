@@ -256,6 +256,9 @@ func parseDeclare(tok *mTypes.Token, parentKind mTypes.NodeKind) (*mTypes.Token,
 					Val:  structElmeName,
 					Type: structElemType,
 				}
+				if structTy.IsType(mTypes.TY_EXTENDED) {
+					structTy.Type.ExtendName = tok.Val
+				}
 				child.Next = structTy
 				child = child.Next
 				tok = tok.Next
@@ -488,6 +491,22 @@ func Parse(token *mTypes.Token) *mTypes.Program {
 	for d := prog.Declare.Func; d != nil; d = d.Next {
 		updateReferenceToFunccall(d.Child, d, prog.Declare.Func)
 	}
+
+	// add extendedName to the child node of var.reference that have TY_EXTENDED
+	walkNode(prog.Declare.Func, prog.Declare.Func, map[string]bool{},
+		func(n *mTypes.Node, root *mTypes.Node, used map[string]bool) bool {
+			if n.IsKind(mTypes.ND_VAR_REFERENCE) && n.IsType(mTypes.TY_EXTENDED) {
+				decl := findTypeDeclare(root, n.Type.ExtendName)
+				if decl == nil {
+					log.Panic("%s: undefined type: %s", error.ERROR_SYNTAX_ERROR, n.Type.ExtendName)
+				}
+				if n.Child != nil {
+					n.Child.Type.ExtendName = n.Type.ExtendName
+				}
+			}
+			return true
+		},
+	)
 
 	prog.Debug(0)
 

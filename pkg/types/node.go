@@ -110,7 +110,7 @@ func (node *Node) IsKind(kind NodeKind) bool {
 }
 
 func (node *Node) IsType(ty ModoType) bool {
-	return node.Type.Value == ty
+	return node.Type != nil && node.Type.Value == ty
 }
 
 func (node *Node) IsScalar() bool {

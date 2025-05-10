@@ -35,6 +35,9 @@ func findTypeDeclare(n *mTypes.Node, targetType string) *mTypes.Node {
 	if n.IsKind(mTypes.ND_TYPE_DECLARE) && n.Val == targetType {
 		return n
 	}
+	if result := findTypeDeclare(n.Next, targetType); result != nil {
+		return result
+	}
 	if result := findTypeDeclare(n.Child, targetType); result != nil {
 		return result
 	}

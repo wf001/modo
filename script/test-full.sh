@@ -284,6 +284,7 @@ testexec(){
   assertexec '(defschema Person {:name :: string :age :: int :isMale :: bool}) (def f :: Person (fn [] (let [node :: Person {:age 20 :name "richard" :isMale true}] node))) (def main :: int (fn [] (prn (get f :age))))' "20\\\n"
   assertexec '(defschema Person {:name :: string :age :: int :isMale :: bool :height :: double :v :: [int]}) (def main :: int (fn [] (let [node :: Person {:age 20 :name "richard" :isMale true :height 5.8 :v [4, 3, 2]}] (prn (get node :name)) (prn (get node :age)) (prn (get node :isMale)) (prn (get node :height)) (prn (get node :v)) )))' "richard\\\n20\\\ntrue\\\n5.8\\\n[4, 3, 2]\\\n"
   assertexec '(defschema Person {:name ::string :next ::Person})(def main ::int (fn [] (let [node ::Person {:name "richard" :next {:name "rebecca" :next {:name "andre" :next {:name "bob"}}}}] (prn (get node :name)) (prn (get (get node :next) :name)) (prn (get (get (get node :next) :next) :name)) (prn (get (get (get (get node :next) :next) :next) :name)))))' "richard\\\nrebecca\\\nandre\\\nbob\\\n"
+  assertexec '(defschema Country {:name ::string})(defschema Person {:name ::string :country ::Country})(def main ::int (fn [] (let [c ::Country {:name "deutsch"} person ::Person {:name "mike" :country c}] (prn (get (get person :country) :name)))))' "deutsch\\\n"
 
   #############
   # Prelude functions

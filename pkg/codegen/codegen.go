@@ -215,8 +215,11 @@ func newStruct(
 		v := ctx.gen(value)
 
 		if _, ok := v.(*ir.InstBitCast); ok {
-			ctx.block.NewStore(nullStructPtr, fieldPtr)
-			ctx.block.NewStore(v, fieldPtr)
+			if p, ok := structCtx.Field[field.Val].Type.(*types.PointerType); ok {
+				nullFieldPtr := constant.NewNull(p)
+				ctx.block.NewStore(nullFieldPtr, fieldPtr)
+				ctx.block.NewStore(v, fieldPtr)
+			}
 		} else {
 			ctx.block.NewStore(v, fieldPtr)
 		}
@@ -345,6 +348,8 @@ func (ctx *Context) genStructTypeDeclare(node *mTypes.Node) {
 		// need to check others struct
 		if rootTy == nil && n.IsType(mTypes.TY_EXTENDED) && n.Type.ExtendName == node.Val {
 			rootTy = structType
+		} else if rootTy == nil {
+			rootTy = mTypes.GetExtendedType(ctx.prog.Declare, n).Types
 		}
 		f := structField[n.Val]
 		f.Pos = pos

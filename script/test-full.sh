@@ -250,30 +250,30 @@ testexec(){
   echo "== vector ==="
   echo "==================="
   # local int
-  assertexec '(def main :: int (fn [] (let [vec :: [int] [41, 28, 239]] (prn vec))))'  "[41, 28, 239]\\\n"
+  assertexec '(def main :: int (fn [] (let [vec :: [int] [41 28 239]] (prn vec))))'  "[41 28 239]\\\n"
   # local string
-  assertexec '(def main :: int (fn [] (let [vec :: [string] ["Apple", "Banana"]] (prn vec))))' "[Apple, Banana]\\\n"
+  assertexec '(def main :: int (fn [] (let [vec :: [string] ["Apple" "Banana"]] (prn vec))))' "[Apple Banana]\\\n"
   # local bool
-  assertexec '(def main :: int (fn [] (let [vec :: [bool] [true, false, false, true]] (prn vec))))' "[true, false, false, true]\\\n"
+  assertexec '(def main :: int (fn [] (let [vec :: [bool] [true false false true]] (prn vec))))' "[true false false true]\\\n"
   # local double
-  assertexec '(def main :: int (fn [] (let [vec :: [double] [3.3 9.3]] (prn vec))))' "[3.3, 9.3]\\\n"
+  assertexec '(def main :: int (fn [] (let [vec :: [double] [3.3 9.3]] (prn vec))))' "[3.3 9.3]\\\n"
   # global int
-  assertexec '(def v :: [int] [233, 842]) (def main :: int (fn [] (prn v)))' "[233, 842]\\\n"
+  assertexec '(def v :: [int] [233 842]) (def main :: int (fn [] (prn v)))' "[233 842]\\\n"
   # global string
-  assertexec '(def v :: [string] ["Global", "Banana"]) (def main :: int (fn [] (prn v)))' "[Global, Banana]\\\n"
+  assertexec '(def v :: [string] ["Global" "Banana"]) (def main :: int (fn [] (prn v)))' "[Global Banana]\\\n"
   # global bool
-  assertexec '(def v :: [bool] [false, true, true]) (def main :: int (fn [] (prn v)))' "[false, true, true]\\\n"
+  assertexec '(def v :: [bool] [false true true]) (def main :: int (fn [] (prn v)))' "[false true true]\\\n"
 
   # taking args and returing
-  assertexec "(def f::[int] => nil (fn[v] (prn v))) (def main::int (fn[] (let[v::[int][42, 64, 90]] (f v))))" "[42, 64, 90]\\\n"
-  assertexec "(def f::[int] (fn[] (let[v::[int] [42, 64, 90, 84]]v))) (def main::int (fn[] (prn f)))" "[42, 64, 90, 84]\\\n"
-  assertexec "(def f :: [int] => [int] (fn [v] (conj v 81))) (def main :: int (fn [] (let [v :: [int] [42, 64, 90]] (prn (f v)))))" "[42, 64, 90, 81]\\\n"
+  assertexec "(def f::[int] => nil (fn[v] (prn v))) (def main::int (fn[] (let[v::[int][42 64 90]] (f v))))" "[42 64 90]\\\n"
+  assertexec "(def f::[int] (fn[] (let[v::[int] [42 64 90 84]]v))) (def main::int (fn[] (prn f)))" "[42 64 90 84]\\\n"
+  assertexec "(def f :: [int] => [int] (fn [v] (conj v 81))) (def main :: int (fn [] (let [v :: [int] [42 64 90]] (prn (f v)))))" "[42 64 90 81]\\\n"
 
   # 3-dimension
   assertexec "(def main :: int (fn [] (let [vec :: [[[int]]] [[[11 12 13] [14 15]] [[21 22 23] [24]] [[31 32] [33 34 35]] [[41 42] [43 44 45]]]] (prn (nth (nth (nth vec 1) 1) 0)) )))" "24\\\n"
 
   # reference
-  assertexec "(def main :: int (fn [] (let [vec1 :: [int] [42, 23] vec2 :: [int] vec1] (prn (conj vec2 1)) (prn (conj vec1 3)) (prn vec1) (prn vec2))))" "[42, 23, 1]\\\n[42, 23, 3]\\\n[42, 23]\\\n[42, 23]\\\n"
+  assertexec "(def main :: int (fn [] (let [vec1 :: [int] [42 23] vec2 :: [int] vec1] (prn (conj vec2 1)) (prn (conj vec1 3)) (prn vec1) (prn vec2))))" "[42 23 1]\\\n[42 23 3]\\\n[42 23]\\\n[42 23]\\\n"
 
 
   echo "==================="
@@ -282,7 +282,7 @@ testexec(){
   assertexec '(defschema Person {:name :: string :age :: int :isMale :: bool})(def main :: int (fn [] (let [node :: Person {:age 20 :name "richard" :isMale true}] (prn (get node :name)) (prn (get node :age)) (prn (get node :isMale))))))' "richard\\\n20\\\ntrue\\\n"
   assertexec '(defschema Person {:name :: string :age :: int :isMale :: bool :height :: double})(def main :: int (fn [] (let [node :: Person {:age 20 :name "richard" :isMale true :height 5.8}] (prn (get node :name)) (prn (get node :age)) (prn (get node :isMale)) (prn (get node :height))))))'  "richard\\\n20\\\ntrue\\\n5.8\\\n"
   assertexec '(defschema Person {:name :: string :age :: int :isMale :: bool}) (def f :: Person (fn [] (let [node :: Person {:age 20 :name "richard" :isMale true}] node))) (def main :: int (fn [] (prn (get f :age))))' "20\\\n"
-  assertexec '(defschema Person {:name :: string :age :: int :isMale :: bool :height :: double :v :: [int]}) (def main :: int (fn [] (let [node :: Person {:age 20 :name "richard" :isMale true :height 5.8 :v [4, 3, 2]}] (prn (get node :name)) (prn (get node :age)) (prn (get node :isMale)) (prn (get node :height)) (prn (get node :v)) )))' "richard\\\n20\\\ntrue\\\n5.8\\\n[4, 3, 2]\\\n"
+  assertexec '(defschema Person {:name :: string :age :: int :isMale :: bool :height :: double :v :: [int]}) (def main :: int (fn [] (let [node :: Person {:age 20 :name "richard" :isMale true :height 5.8 :v [4 3 2]}] (prn (get node :name)) (prn (get node :age)) (prn (get node :isMale)) (prn (get node :height)) (prn (get node :v)) )))' "richard\\\n20\\\ntrue\\\n5.8\\\n[4 3 2]\\\n"
   assertexec '(defschema Person {:name ::string :next ::Person})(def main ::int (fn [] (let [node ::Person {:name "richard" :next {:name "rebecca" :next {:name "andre" :next {:name "bob"}}}}] (prn (get node :name)) (prn (get (get node :next) :name)) (prn (get (get (get node :next) :next) :name)) (prn (get (get (get (get node :next) :next) :next) :name)))))' "richard\\\nrebecca\\\nandre\\\nbob\\\n"
   assertexec '(defschema Country {:name ::string})(defschema Person {:name ::string :country ::Country})(def main ::int (fn [] (let [c ::Country {:name "deutsch"} person ::Person {:name "mike" :country c}] (prn (get (get person :country) :name)))))' "deutsch\\\n"
 
@@ -304,16 +304,16 @@ testexec(){
   echo "==================="
   echo "== map ==="
   echo "==================="
-  assertexec "(def inc :: int => int (fn [x] (+ x 1))) (def main :: int (fn [] (prn (map inc [32 13 99]))))" "[33, 14, 100]\\\n"
-  assertexec "(def inc :: double => double (fn [x] (+ x 1.3))) (def main :: int (fn [] (prn (map inc [4.2 1.8]))))" "[5.5, 3.1]\\\n"
-  assertexec '(def str :: int => string (fn [x] "a")) (def main :: int (fn [] (prn (map str [32 13 99]))))' "[a, a, a]\\\n"
-  assertexec '(def truely :: int => bool (fn [x] true)) (def main :: int (fn [] (prn (map truely [32 13 99]))))' "[true, true, true]\\\n"
+  assertexec "(def inc :: int => int (fn [x] (+ x 1))) (def main :: int (fn [] (prn (map inc [32 13 99]))))" "[33 14 100]\\\n"
+  assertexec "(def inc :: double => double (fn [x] (+ x 1.3))) (def main :: int (fn [] (prn (map inc [4.2 1.8]))))" "[5.5 3.1]\\\n"
+  assertexec '(def str :: int => string (fn [x] "a")) (def main :: int (fn [] (prn (map str [32 13 99]))))' "[a a a]\\\n"
+  assertexec '(def truely :: int => bool (fn [x] true)) (def main :: int (fn [] (prn (map truely [32 13 99]))))' "[true true true]\\\n"
 
   echo "==================="
   echo "== filter ==="
   echo "==================="
-  assertexec '(def even :: int => bool (fn [x] (= 0 (mod x 2))))  (def main :: int (fn [] (prn (filter even [8 1 7 10 18 42 45]))))' "[8, 10, 18, 42]\\\n"
-  assertexec '(def isThree :: int => bool (fn [x] (= 3 x))) (def main :: int (fn [] (prn (filter isThree [8 1 7 10 3 42 3]))))' "[3, 3]\\\n"
+  assertexec '(def even :: int => bool (fn [x] (= 0 (mod x 2))))  (def main :: int (fn [] (prn (filter even [8 1 7 10 18 42 45]))))' "[8 10 18 42]\\\n"
+  assertexec '(def isThree :: int => bool (fn [x] (= 3 x))) (def main :: int (fn [] (prn (filter isThree [8 1 7 10 3 42 3]))))' "[3 3]\\\n"
   assertexec '(def isThreeOne :: double => bool (fn [x] (= 3.1 x))) (def main :: int (fn [] (prn (filter isThreeOne [1.1 2.1 3.1]))))' "[3.1]\\\n"
 
   echo "==================="
@@ -326,18 +326,18 @@ testexec(){
   echo "== nth ==="
   echo "==================="
   # nth
-  assertexec '(def main :: int (fn [] (let [vec :: [int] [41, 28, 239]] (prn (nth vec 1)))))'  "28\\\n"
-  assertexec '(def v :: [int] [233, 842]) (def main :: int (fn [] (prn (nth v 0))))' "233\\\n"
-  assertexec '(def main :: int (fn [] (let [vec :: [int] [423, 83, 90]] (prn (nth vec -1)) (prn (nth vec 2)) (prn (nth vec 3)) )))' "nil\\\n90\\\nnil\\\n"
+  assertexec '(def main :: int (fn [] (let [vec :: [int] [41 28 239]] (prn (nth vec 1)))))'  "28\\\n"
+  assertexec '(def v :: [int] [233 842]) (def main :: int (fn [] (prn (nth v 0))))' "233\\\n"
+  assertexec '(def main :: int (fn [] (let [vec :: [int] [423 83 90]] (prn (nth vec -1)) (prn (nth vec 2)) (prn (nth vec 3)) )))' "nil\\\n90\\\nnil\\\n"
 
   echo "==================="
   echo "== conj ==="
   echo "==================="
-  assertexec '(def main :: int (fn [] (let [vec :: [int] [423, 83, 90]] (prn (conj vec 27)) (prn vec))))' "[423, 83, 90, 27]\\\n[423, 83, 90]\\\n"
-  assertexec '(def v :: [int] [233, 842]) (def main :: int (fn [] (prn (conj v 569))))' "[233, 842, 569]\\\n"
-  assertexec "(def v :: [int] [233, 842]) (def f :: [int] (fn [] (conj v 39))) (def main :: int (fn [] (prn f)))" "[233, 842, 39]\\\n"
-  assertexec '(def f::[int] => [int] (fn[v] (conj v 78))) (def main ::int (fn[] (let [v ::[int] [42, 64, 90]] (prn (f v)))))' "[42, 64, 90, 78]\\\n"
-  assertexec "(def main :: int (fn [] (let [vec :: [[int]] [[12, 34, 5, 6], [7,8,9]]] (prn (nth (conj vec [11, 12]) 2)) (prn (nth vec 2)))))" "[11, 12]\\\nnil\\\n"
+  assertexec '(def main :: int (fn [] (let [vec :: [int] [423 83 90]] (prn (conj vec 27)) (prn vec))))' "[423 83 90 27]\\\n[423 83 90]\\\n"
+  assertexec '(def v :: [int] [233 842]) (def main :: int (fn [] (prn (conj v 569))))' "[233 842 569]\\\n"
+  assertexec "(def v :: [int] [233 842]) (def f :: [int] (fn [] (conj v 39))) (def main :: int (fn [] (prn f)))" "[233 842 39]\\\n"
+  assertexec '(def f::[int] => [int] (fn[v] (conj v 78))) (def main ::int (fn[] (let [v ::[int] [42 64 90]] (prn (f v)))))' "[42 64 90 78]\\\n"
+  assertexec "(def main :: int (fn [] (let [vec :: [[int]] [[12 34 5 6] [789]]] (prn (nth (conj vec [11 12]) 2)) (prn (nth vec 2)))))" "[11 12]\\\nnil\\\n"
 
   # echo "==================="
   # echo "== assoc ==="

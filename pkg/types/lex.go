@@ -101,6 +101,8 @@ var (
 		PRELUDE_REDUCE,
 	)
 
+	SYMBOL_COMMA = ","
+
 	// Type signature
 	SYMBOL_TYPE_SIG    = "::"
 	SYMBOL_TYPE_ARROW  = "=>"
@@ -144,6 +146,7 @@ var (
 				OPERATORS_REG_EXP,
 				BRACKETS_REG_EXP,
 				PRELUDE_PRN,
+				SYMBOL_COMMA,
 				SYMBOL_UNDEFINED_REG_EXP,
 			},
 			"|",

@@ -1,11 +1,11 @@
 
-(def vi :: [int] [233, 842])
-(def vs :: [string] ["Global", "Banana"])
+(def vi :: [int] [233 842])
+(def vs :: [string] ["Global" "Banana"])
 
 (def main :: int
   (fn []
-    (let [veci :: [int] [42, 23]
-          vecs :: [string] ["Local", "Apple"]]
+    (let [veci :: [int] [42 23]
+          vecs :: [string] ["Local" "Apple"]]
       (prn vi)
       (prn vs)
       (prn veci)

@@ -144,10 +144,6 @@ func prnStructVector(
 
 	condBlock.NewCall(
 		ctx.internal.Cstd.Printf,
-		ctx.internal.GlobalConst.StringComma,
-	)
-	condBlock.NewCall(
-		ctx.internal.Cstd.Printf,
 		ctx.internal.GlobalConst.StringSpace,
 	)
 	condBlock.NewBr(loopBlock)

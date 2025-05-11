@@ -14,11 +14,11 @@ testfile(){
   echo "== fizzbuzz.modo ==="
   assertfile "fizzbuzz.modo" "1\\\n2\\\nFizz\\\n4\\\nBuzz\\\nFizz\\\n7\\\n8\\\nFizz\\\nBuzz\\\n11\\\nFizz\\\n13\\\n14\\\nFizzBuzz\\\n16\\\n17\\\nFizz\\\n19\\\n"
   echo "== vector_declare.modo ==="
-  assertfile "vector_declare.modo" "[233, 842]\\\n[Global, Banana]\\\n[42, 23]\\\n[Local, Apple]\\\n"
+  assertfile "vector_declare.modo" "[233 842]\\\n[Global Banana]\\\n[42 23]\\\n[Local Apple]\\\n"
   echo "== vector_operation.modo ==="
-  assertfile "vector_operation.modo" "54\\\n[423, 83, 90]\\\n"
+  assertfile "vector_operation.modo" "54\\\n[423 83 90]\\\n"
   echo "== vector_2d_li.modo ==="
-  assertfile "vector_2d_li.modo" "[7, 8, 9]\\\nnil\\\n"
+  assertfile "vector_2d_li.modo" "[789]\\\nnil\\\n"
 
 
 }

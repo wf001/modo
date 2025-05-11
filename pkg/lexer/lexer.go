@@ -4,6 +4,7 @@ import (
 	"regexp"
 	"strings"
 
+	"github.com/wf001/modo/pkg/error"
 	"github.com/wf001/modo/pkg/log"
 	mTypes "github.com/wf001/modo/pkg/types"
 )
@@ -182,6 +183,9 @@ func doLexicalAnalyse(splittedString []string) *mTypes.Token {
 			}
 
 		} else {
+			if p == mTypes.SYMBOL_COMMA {
+				log.Panic("%s: can not use ',' as a symbol", error.ERROR_SYNTAX_ERROR)
+			}
 			log.Debug("regard '%+v' as variable declaration or reference symbol", p)
 			prev = newToken(mTypes.TK_IDENT, prev, p)
 		}

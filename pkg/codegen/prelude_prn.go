@@ -67,7 +67,9 @@ func prnScalar(
 	} else if pointerElemTy, isPtr := rootTy.(*types.PointerType); isPtr {
 
 		if isStr := rootTy.Equal(types.I8Ptr); isStr {
-			ctx.block.NewCall(ctx.internal.Cstd.Printf, formatStr, value)
+			_, nonNullBlock, endBlock := genNilBlock(ctx, types.NewPointer(pointerElemTy), n, value)
+			nonNullBlock.NewCall(ctx.internal.Cstd.Printf, formatStr, value)
+			ctx.block = endBlock
 
 		} else {
 			_, nonNullBlock, endBlock := genNilBlock(ctx, types.NewPointer(pointerElemTy), n, value)

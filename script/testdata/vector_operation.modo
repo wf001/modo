@@ -1,6 +1,6 @@
 (def main :: int
   (fn []
-    (let [vec :: [int] [423, 83, 90]]
+    (let [vec :: [int] [423 83 90]]
       (prn (nth 
              (conj vec 54)
              3))

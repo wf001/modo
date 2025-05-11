@@ -345,10 +345,11 @@ func (ctx *Context) genStructTypeDeclare(node *mTypes.Node) {
 	for n := node.Child; n != nil; n = n.Next {
 		// Note: is NOT TRUE
 		rootTy, _, _ := mTypes.GetLLVMTypeRec(ctx.mod, n.Type, ctx.prog.Prelude)
-		// need to check others struct
 		if rootTy == nil && n.IsType(mTypes.TY_EXTENDED) && n.Type.ExtendName == node.Val {
+			// check a self-reference
 			rootTy = structType
 		} else if rootTy == nil {
+			// check the reference to other struct
 			rootTy = mTypes.GetExtendedType(ctx.prog.Declare, n).Types
 		}
 		f := structField[n.Val]

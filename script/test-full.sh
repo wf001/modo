@@ -291,6 +291,7 @@ testexec(){
   assertexec '(defschema Person {:name :: string :age :: int :isMale :: bool :height :: double :v :: [int]}) (def main :: int (fn [] (let [node :: Person {:age 20 :name "richard" :height 5.8 :v [4 3 2]}] (prn (get node :isMale)))))' "false\\\n"
   assertexec '(defschema Person {:name :: string :age :: int :isMale :: bool :height :: double :v :: [int]}) (def main :: int (fn [] (let [node :: Person {:age 20 :name "richard" :isMale true :v [4 3 2]}] (prn (get node :height)))))' "0\\\n"
   assertexec '(defschema Person {:name :: string :age :: int :isMale :: bool :height :: double :v :: [int]}) (def main :: int (fn [] (let [node :: Person {:age 20 :name "richard" :isMale true :height 5.8 }] (prn (get node :v)))))' "nil\\\n"
+  assertexec '(defschema Country {:name ::string}) (defschema Person {:name ::string :country ::Country}) (def main ::int (fn [] (let [co ::Country {:name "deutsch"} person ::Person {:name "jimmy"}] (prn (get (get person :country) :name)))))' "nil\\\n"
 
   #############
   # Prelude functions

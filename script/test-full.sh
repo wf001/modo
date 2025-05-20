@@ -346,6 +346,12 @@ testexec(){
   assertexec '(def f::[int] => [int] (fn[v] (conj v 78))) (def main ::int (fn[] (let [v ::[int] [42 64 90]] (prn (f v)))))' "[42 64 90 78]\\\n"
   assertexec "(def main :: int (fn [] (let [vec :: [[int]] [[12 34 5 6] [789]]] (prn (nth (conj vec [11 12]) 2)) (prn (nth vec 2)))))" "[11 12]\\\nnil\\\n"
 
+  echo "==================="
+  echo "== assoc ==="
+  echo "==================="
+  assertexec '(defschema Person {:name :: string :age :: int :isMale :: bool}) (def main :: int (fn [] (let [node :: Person {:age 20 :isMale true}] (prn (get node :name)) (prn (get (assoc node :name "fendder") :name)) (prn (get node :name)))))' "nil\\\nfendder\\\nnil\\\n"
+  assertexec '(defschema Country {:name :: string}) (defschema Person {:name :: string :country :: Country}) (def main :: int (fn [] (let [co :: Country {:name "deutsch"} person :: Person {:name "jimmy"}] (prn (get (get person :country) :name)) (prn (get (get (assoc person :country co) :country) :name)) (prn (get (get person :country) :name)) )))' "nil\\\ndeutsch\\\nnil\\\n"
+
   # echo "==================="
   # echo "== assoc ==="
   # echo "==================="
